@@ -13,6 +13,15 @@
   "author": "Roman Krivtsov",
   "license": "MIT",
   "dependencies": {
-    "json-schema-ref-parser": "^3.1.2"
+    "graphql": "^0.7.1",
+    "json-schema-ref-parser": "^3.1.2",
+    "lodash": "^4.16.4",
+    "node-request-by-swagger": "^1.0.0",
+    "request": "^2.75.0",
+    "request-promise": "^4.1.1"
+  },
+  "devDependencies": {
+    "express": "^4.14.0",
+    "express-graphql": "^0.5.4"
   }
 }
