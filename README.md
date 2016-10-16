@@ -1,3 +1,9 @@
+# Swagger2GraphQL
+
+Swagger2GraphQL wraps your existing Swagger schema to GraphQL types where resolvers perform HTTP requests to certain real endpoints.
+It allows you to move your API to GraphQL with nearly zero afford and maintain both: REST and GraphQL APIs.
+
+```js
 const express = require('express');
 const app = express();
 var graphqlHTTP = require('express-graphql');
@@ -21,3 +27,4 @@ graphQLSchema('./test/fixtures/petstore.json').then(schema => {
 }).catch(e => {
   throw e;
 });
+```
