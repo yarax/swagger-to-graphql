@@ -19,5 +19,5 @@ graphQLSchema('./test/fixtures/petstore.json').then(schema => {
     console.info(`http://localhost:3009/graphql`);
   });
 }).catch(e => {
-  throw e;
+  console.log(e);
 });
