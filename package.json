@@ -22,6 +22,10 @@
     "request-promise": "^4.1.1"
   },
   "devDependencies": {
+    "babel-eslint": "^6.1.2",
+    "eslint": "^3.9.1",
+    "eslint-config-airbnb-es5": "^1.1.0",
+    "eslint-plugin-react": "^6.5.0",
     "express": "^4.14.0",
     "express-graphql": "^0.5.4",
     "flow-bin": "^0.33.0",
