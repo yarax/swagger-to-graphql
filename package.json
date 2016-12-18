@@ -1,6 +1,6 @@
 {
   "name": "swagger-to-graphql",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "",
   "main": "lib/index.js",
   "scripts": {
@@ -14,10 +14,10 @@
   "author": "Roman Krivtsov",
   "license": "MIT",
   "dependencies": {
-    "graphql": "^0.7.1",
+    "graphql": "^0.8.2",
     "json-schema-ref-parser": "^3.1.2",
     "lodash": "^4.16.4",
-    "node-request-by-swagger": "^1.0.0",
+    "node-request-by-swagger": "^1.0.5",
     "request": "^2.75.0",
     "request-promise": "^4.1.1"
   },
