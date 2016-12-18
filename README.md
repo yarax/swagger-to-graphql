@@ -5,14 +5,17 @@ It allows you to move your API to GraphQL with nearly zero afford and maintain b
 
 [More about REST, GraphQL and this library](https://medium.com/@raxwunter/moving-existing-api-from-rest-to-graphql-205bab22c184)
 
+
+## Usage
+
 ```js
 const express = require('express');
 const app = express();
 var graphqlHTTP = require('express-graphql');
 var graphql = require('graphql');
-var graphQLSchema = require('./lib');
+var graphQLSchema = require('swagger-to-graphql');
 
-graphQLSchema('./test/fixtures/petstore.json').then(schema => {
+graphQLSchema('./petstore.json').then(schema => {
   app.use('/graphql', graphqlHTTP(() => {
     return {
       schema,
