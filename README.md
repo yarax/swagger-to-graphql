@@ -25,7 +25,7 @@ graphQLSchema('./petstore.json').then(schema => {
   }));
 
   app.listen(3009, 'localhost', () => {
-    console.info(`http://localhost:3009/graphql`);
+    console.info(`API is here localhost:3009/graphql`);
   });
 }).catch(e => {
   throw e;
