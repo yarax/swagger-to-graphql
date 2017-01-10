@@ -18,7 +18,7 @@ graphQLSchema('./petstore.json').then(schema => {
     return {
       schema,
       context: {
-        GQLProxyBaseUrl: 'http://petstore.swagger.io/v2'
+        GQLProxyBaseUrl: API_BASE_URL
       },
       graphiql: true
     };
