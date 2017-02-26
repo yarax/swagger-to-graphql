@@ -3,6 +3,8 @@ const app = express();
 var graphqlHTTP = require('express-graphql');
 var graphql = require('graphql');
 var graphQLSchema = require('./lib');
+let host = 'localhost'
+let port = 3009
 
 graphQLSchema('./test/fixtures/petstore.json').then(schema => {
   app.use('/graphql', graphqlHTTP(() => {
@@ -15,8 +17,8 @@ graphQLSchema('./test/fixtures/petstore.json').then(schema => {
     };
   }));
 
-  app.listen(3009, 'localhost', () => {
-    console.info(`http://localhost:3009/graphql`);
+  app.listen(port, host, () => {
+    console.info(`http://${host}:${port}/graphql`);
   });
 }).catch(e => {
   console.log(e);
