@@ -1,11 +1,10 @@
-'use strict';
+// @flow
+import rp from 'request-promise';
+import { GraphQLSchema, GraphQLObjectType } from 'graphql';
+import { getAllEndPoints, loadSchema } from './swagger';
+import { createGQLObject, mapParametersToFields } from './typeMap';
 
-const rp = require('request-promise');
-const {GraphQLSchema, GraphQLObjectType} = require('graphql');
-const {getAllEndPoints, loadSchema} = require('./swagger');
-const {createGQLObject, mapParametersToFields} = require('./type_map');
-
-const schemaFromEndpoints = (endpoints) => {
+export const schemaFromEndpoints = (endpoints) => {
   const rootType = new GraphQLObjectType({
     name: 'Query',
     fields: () => ({
@@ -40,29 +39,16 @@ const schemaFromEndpoints = (endpoints) => {
   return new GraphQLSchema(graphQLSchema);
 };
 
-const build = (swaggerPath) => {
-  return loadSchema(swaggerPath).then(swaggerSchema => {
-    const endpoints = getAllEndPoints(swaggerSchema);
-    return schemaFromEndpoints(endpoints);
-  });
-};
-
-build.schemaFromEndpoints = schemaFromEndpoints;
-
-function resolver(endpoint) {
-  return (_, args, opts) => {
+const resolver = (endpoint) =>
+  async (_, args, opts) => {
     const req = endpoint.request(args, {
       baseUrl: opts.GQLProxyBaseUrl
     });
-    return rp(req).then(res => {
-      return JSON.parse(res);
-    }).catch(e => {
-      throw e;
-    });
+    const res = await rp(req);
+    return JSON.parse(res);
   };
-}
 
-function getQueriesFields(endpoints, isMutation) {
+const getQueriesFields = (endpoints, isMutation) => {
   return Object.keys(endpoints).filter((typeName) => {
     return !!endpoints[typeName].mutation === !!isMutation;
   }).reduce((result, typeName) => {
@@ -76,6 +62,12 @@ function getQueriesFields(endpoints, isMutation) {
     };
     return result;
   }, {});
-}
+};
 
-module.exports = build;
+const build = async (swaggerPath) => {
+  const swaggerSchema = await loadSchema(swaggerPath);
+  const endpoints = getAllEndPoints(swaggerSchema);
+  return schemaFromEndpoints(endpoints);
+};
+
+export default build;

@@ -1,10 +1,11 @@
+require('babel-polyfill');
 const express = require('express');
 const app = express();
 var graphqlHTTP = require('express-graphql');
 var graphql = require('graphql');
-var graphQLSchema = require('./lib');
+var graphQLSchema = require('swagger-to-graphql').default;
 
-graphQLSchema('./test/fixtures/petstore.json').then(schema => {
+graphQLSchema('../test/fixtures/petstore.json').then(schema => {
   app.use('/graphql', graphqlHTTP(() => {
     return {
       schema,

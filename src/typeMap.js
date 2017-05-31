@@ -1,8 +1,8 @@
-'use strict';
+// @flow
 
-const _ = require('lodash');
-const graphql = require('graphql');
-const swagger = require('./swagger');
+import _ from 'lodash';
+import * as graphql from 'graphql';
+import swagger from './swagger';
 
 const __allTypes = {};
 const primitiveTypes = {
@@ -13,16 +13,15 @@ const primitiveTypes = {
   boolean: graphql.GraphQLBoolean
 };
 
-function isObjectType(jsonSchema) {
-  return jsonSchema.properties || jsonSchema.type === 'object' || jsonSchema.type === "array" || jsonSchema.schema;
-}
+const isObjectType = (jsonSchema) =>
+  jsonSchema.properties || jsonSchema.type === 'object' || jsonSchema.type === "array" || jsonSchema.schema;
 
-function getTypeNameFromRef(ref) {
+const getTypeNameFromRef = (ref) => {
   const cutRef = ref.replace('#/definitions/', '');
   return cutRef.replace(/\//, '_');
-}
+};
 
-function getExistingType(ref, isInputType) {
+const getExistingType = (ref, isInputType) => {
   const typeName = getTypeNameFromRef(ref);
   const allSchema = swagger.getSchema();
   if (!__allTypes[typeName]) {
@@ -33,13 +32,13 @@ function getExistingType(ref, isInputType) {
     __allTypes[typeName] = createGQLObject(schema, typeName, ref, isInputType);
   }
   return __allTypes[typeName];
-}
+};
 
-function getRefProp(jsonSchema) {
+const getRefProp = (jsonSchema) => {
   return jsonSchema.$ref || (jsonSchema.schema && jsonSchema.schema.$ref);
-}
+};
 
-function createGQLObject(jsonSchema, title, isInputType) {
+export const createGQLObject = (jsonSchema, title, isInputType) => {
   if (!jsonSchema) {
     jsonSchema = {
       type: 'object',
@@ -70,9 +69,9 @@ function createGQLObject(jsonSchema, title, isInputType) {
     description: jsonSchema.description,
     fields: getTypeFields(jsonSchema, title, isInputType)
   });
-}
+};
 
-function getTypeFields(jsonSchema, title, isInputType) {
+export const getTypeFields = (jsonSchema, title, isInputType) => {
   const fields = _.mapValues(jsonSchema.properties || {}, (propertySchema, propertyName) => {
     return {
       description: propertySchema.description,
@@ -87,9 +86,9 @@ function getTypeFields(jsonSchema, title, isInputType) {
     }
   }
   return fields;
-}
+};
 
-function jsonSchemaTypeToGraphQL(title, jsonSchema, schemaName, isInputType) {
+const jsonSchemaTypeToGraphQL = (title, jsonSchema, schemaName, isInputType) => {
   if (isObjectType(jsonSchema)) {
     return createGQLObject(jsonSchema, title + '_' + schemaName, isInputType);
   } else if (jsonSchema.type) {
@@ -97,9 +96,9 @@ function jsonSchemaTypeToGraphQL(title, jsonSchema, schemaName, isInputType) {
   } else {
     throw new Error("Don't know how to handle schema " + JSON.stringify(jsonSchema) + " without type and schema");
   }
-}
+};
 
-function getPrimitiveTypes(jsonSchema) {
+const getPrimitiveTypes = (jsonSchema) => {
   let jsonType = jsonSchema.type;
   const format = jsonSchema.format;
   if (format === 'int64') {
@@ -110,9 +109,9 @@ function getPrimitiveTypes(jsonSchema) {
     throw new Error(`Cannot build primitive type "${jsonType}"`);
   }
   return type;
-}
+};
 
-function mapParametersToFields(parameters, endpointLocation, typeName) {
+export const mapParametersToFields = (parameters, endpointLocation, typeName) => {
   return parameters.reduce((res, param) => {
     const type = jsonSchemaTypeToGraphQL('param_' + typeName, param.jsonSchema, param.name, true);
     res[param.name] = {
@@ -120,11 +119,4 @@ function mapParametersToFields(parameters, endpointLocation, typeName) {
     };
     return res;
   }, {});
-}
-
-
-module.exports = {
-  createGQLObject,
-  mapParametersToFields,
-  getTypeFields
 };
