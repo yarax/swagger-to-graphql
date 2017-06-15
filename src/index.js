@@ -1,10 +1,11 @@
 // @flow
+require('babel-polyfill');
 import rp from 'request-promise';
-import { GraphQLSchema, GraphQLObjectType } from 'graphql';
+import { GraphQLSchema, GraphQLObjectType, printSchema } from 'graphql';
 import { getAllEndPoints, loadSchema } from './swagger';
 import { createGQLObject, mapParametersToFields } from './typeMap';
 
-export const schemaFromEndpoints = (endpoints) => {
+const schemaFromEndpoints = (endpoints) => {
   const rootType = new GraphQLObjectType({
     name: 'Query',
     fields: () => ({
@@ -67,7 +68,8 @@ const getQueriesFields = (endpoints, isMutation) => {
 const build = async (swaggerPath) => {
   const swaggerSchema = await loadSchema(swaggerPath);
   const endpoints = getAllEndPoints(swaggerSchema);
-  return schemaFromEndpoints(endpoints);
+  const schema = schemaFromEndpoints(endpoints);
+  console.log(printSchema(schema));
 };
 
 export default build;

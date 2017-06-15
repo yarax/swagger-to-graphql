@@ -81,7 +81,7 @@ export const getTypeFields = (jsonSchema, title, isInputType) => {
 
   if (!Object.keys(fields).length) {
     fields.empty = {
-      description: 'This object is empty actually',
+      description: 'default field',
       type: graphql.GraphQLString
     }
   }

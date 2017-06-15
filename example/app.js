@@ -1,11 +1,10 @@
 require('babel-polyfill');
 const express = require('express');
 const app = express();
-var graphqlHTTP = require('express-graphql');
-var graphql = require('graphql');
-var graphQLSchema = require('swagger-to-graphql').default;
+const graphqlHTTP = require('express-graphql');
+const graphQLSchema = require('../lib');
 
-graphQLSchema('../test/fixtures/petstore.json').then(schema => {
+graphQLSchema(`${__dirname}/../test/fixtures/petstore.yaml`).then(schema => {
   app.use('/graphql', graphqlHTTP(() => {
     return {
       schema,
@@ -17,7 +16,7 @@ graphQLSchema('../test/fixtures/petstore.json').then(schema => {
   }));
 
   app.listen(3009, 'localhost', () => {
-    console.info(`http://localhost:3009/graphql`);
+    console.info('http://localhost:3009/graphql');
   });
 }).catch(e => {
   console.log(e);
