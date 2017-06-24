@@ -45,6 +45,9 @@ const resolver = (endpoint) =>
     const req = endpoint.request(args, {
       baseUrl: opts.GQLProxyBaseUrl
     });
+    if (opts.BearerToken) {
+      req.headers.Authorization = opts.BearerToken;
+    }
     const res = await rp(req);
     return JSON.parse(res);
   };
@@ -69,7 +72,7 @@ const build = async (swaggerPath) => {
   const swaggerSchema = await loadSchema(swaggerPath);
   const endpoints = getAllEndPoints(swaggerSchema);
   const schema = schemaFromEndpoints(endpoints);
-  console.log(printSchema(schema));
+  return schema;
 };
 
 export default build;
