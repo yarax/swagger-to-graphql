@@ -1,0 +1,16 @@
+#!/usr/bin/env node
+var argv = require('yargs').argv;
+var build = require('../lib');
+var graphql = require('graphql');
+
+if (argv.help) {
+  console.log('\nUsage: swagger2graphql --swagger=/path/to/schema.json');
+}
+
+if (!argv.swagger) {
+  console.log('\nPlease provide path to swagger schema. \n--help for usage example');
+}
+
+build(argv.swagger).then(schema => {
+  console.log(graphql.printSchema(schema));
+});

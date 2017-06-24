@@ -1,22 +1,22 @@
-'use strict';
+// @flow
 
-const refParser = require('json-schema-ref-parser');
-const getRequestOptions = require('node-request-by-swagger');
+import refParser from 'json-schema-ref-parser';
+import getRequestOptions from 'node-request-by-swagger';
 let __schema;
 
-function getSchema() {
+export const getSchema = () => {
   if (!__schema || !Object.keys(__schema).length) {
     throw new Error('Schema was not loaded');
   }
   return __schema;
-}
+};
 
-function getGQLTypeNameFromURL(method, url) {
+const getGQLTypeNameFromURL = (method, url) => {
   const fromUrl = url.replace(/[\{\}]+/g, '').replace(/[^a-zA-Z0-9_]+/g, '_');
   return `${method}${fromUrl}`;
-}
+};
 
-function getSuccessResponse(responses) {
+const getSuccessResponse = (responses) => {
   let resp;
 
   if (!responses) return null;
@@ -27,23 +27,21 @@ function getSuccessResponse(responses) {
   });
 
   return resp && resp.schema;
-}
+};
 
-function loadSchema(pathToSchema) {
+export const loadSchema = (pathToSchema) => {
   const schema = refParser.dereference(pathToSchema);
   __schema = schema;
   return schema;
-}
+};
 
-function replaceOddChars(str) {
-  return str.replace(/[^_a-zA-Z0-9]/g, '_');
-}
+const replaceOddChars = (str) => str.replace(/[^_a-zA-Z0-9]/g, '_');
 
 /**
  * Going throw schema and grab routes
  * @returns Promise<T>
  */
-function getAllEndPoints(schema) {
+export const getAllEndPoints = (schema) => {
   const allTypes = {};
   Object.keys(schema.paths).forEach(path => {
     const route = schema.paths[path];
@@ -72,10 +70,4 @@ function getAllEndPoints(schema) {
     });
   });
   return allTypes;
-}
-
-module.exports = {
-  getAllEndPoints,
-  loadSchema,
-  getSchema
-}
+};
