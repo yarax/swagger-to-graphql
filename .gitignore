@@ -24,7 +24,6 @@ npm-debug.log
 dump.rdb
 bundle.js
 
-lib
 coverage
 .nyc_output
 flow-coverage
