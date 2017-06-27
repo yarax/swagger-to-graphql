@@ -5,7 +5,9 @@ It allows you to move your API to GraphQL with nearly zero afford and maintain b
 
 <a href="https://medium.com/@raxwunter/moving-existing-api-from-rest-to-graphql-205bab22c184">Why?</a>
 
-## Usage
+# Usage
+
+## Basic server
 
 ```js
 const express = require('express');
@@ -32,3 +34,22 @@ graphQLSchema('./petstore.json').then(schema => {
   throw e;
 });
 ```
+
+## CLI convertion
+
+```
+npm i -g swagger-to-graphql
+swagger-to-graphql --swagger=/path/to/swagger_schema.json > ./types.graphql
+```
+## Authorization
+
+```
+ ...
+  context: {
+    GQLProxyBaseUrl: API_BASE_URL,
+    BearerToken: req.get('authorization')
+  },
+ ...
+```
+
+<a href="https://github.com/yarax/swagger-to-graphql/blob/master/src/types.js#L3"> All context options </a>

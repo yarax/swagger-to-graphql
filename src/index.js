@@ -1,6 +1,6 @@
 // @flow
 require('babel-polyfill');
-import type {GraphQLParameters, Endpoint, GraphQLType} from './types';
+import type {GraphQLParameters, Endpoint, GraphQLType, RootGraphQLSchema, SwaggerToGraphQLOptions} from './types';
 import rp from 'request-promise';
 import { GraphQLSchema, GraphQLObjectType } from 'graphql';
 import { getAllEndPoints, loadSchema } from './swagger';
@@ -28,7 +28,7 @@ const schemaFromEndpoints = (endpoints: Endpoints) => {
     })
   });
 
-  const graphQLSchema = {
+  const graphQLSchema: RootGraphQLSchema = {
     query: rootType
   };
 
@@ -44,7 +44,7 @@ const schemaFromEndpoints = (endpoints: Endpoints) => {
 };
 
 const resolver = (endpoint: Endpoint) =>
-  async (_, args: GraphQLParameters, opts) => {
+  async (_, args: GraphQLParameters, opts: SwaggerToGraphQLOptions) => {
     const req = endpoint.request(args, opts.GQLProxyBaseUrl);
     if (opts.BearerToken) {
       req.headers.Authorization = opts.BearerToken;
@@ -58,7 +58,7 @@ const getQueriesFields = (endpoints: Endpoints, isMutation: boolean): {[string]:
     return !!endpoints[typeName].mutation === !!isMutation;
   }).reduce((result, typeName) => {
     const endpoint = endpoints[typeName];
-    const type = createGQLObject(endpoint.response, typeName, endpoint.location);
+    const type = createGQLObject(endpoint.response, typeName, false);
     const gType: GraphQLType = {
       type,
       description: endpoint.description,

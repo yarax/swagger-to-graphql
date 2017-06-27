@@ -1,4 +1,9 @@
-import type {GraphQLOutputType, GraphQLInputType} from 'flow/type/definition.js.flow';
+import type {GraphQLOutputType, GraphQLInputType, GraphQLObjectType} from 'graphql/type/definition.js.flow';
+
+export type SwaggerToGraphQLOptions = {
+  GQLProxyBaseUrl: string,
+  BearerToken?: string
+}
 
 type Param = {
   type: string,
@@ -11,6 +16,11 @@ type EndpointParam = {
   jsonSchema: string
 }
 
+export type RootGraphQLSchema = {
+  query: GraphQLObjectType,
+  mutation?: GraphQLObjectType
+}
+
 export type GraphQLParameters = {[string]: any};
 
 export type Endpoint = {
@@ -20,6 +30,7 @@ export type Endpoint = {
   request: (args:GraphQLParameters, url: string) => Object,
   mutation: boolean
 }
+
 
 export type GraphQLType = GraphQLOutputType | GraphQLInputType;
 
@@ -33,7 +44,9 @@ export type JSONSchemaType = {
   $ref?: string,
   schema?: JSONSchemaType,
   type?: string,
-  properties?: Array<string>
+  properties?: Array<string>,
+  title?: string,
+  description?: string
 }
 
 export type SwaggerSchema = {
