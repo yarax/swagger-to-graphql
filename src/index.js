@@ -1,11 +1,14 @@
 // @flow
 require('babel-polyfill');
+import type {GraphQLParameters, Endpoint, GraphQLType} from './types';
 import rp from 'request-promise';
-import { GraphQLSchema, GraphQLObjectType, printSchema } from 'graphql';
+import { GraphQLSchema, GraphQLObjectType } from 'graphql';
 import { getAllEndPoints, loadSchema } from './swagger';
 import { createGQLObject, mapParametersToFields } from './typeMap';
 
-const schemaFromEndpoints = (endpoints) => {
+type Endpoints ={[string]: Endpoint};
+
+const schemaFromEndpoints = (endpoints: Endpoints) => {
   const rootType = new GraphQLObjectType({
     name: 'Query',
     fields: () => ({
@@ -40,11 +43,9 @@ const schemaFromEndpoints = (endpoints) => {
   return new GraphQLSchema(graphQLSchema);
 };
 
-const resolver = (endpoint) =>
-  async (_, args, opts) => {
-    const req = endpoint.request(args, {
-      baseUrl: opts.GQLProxyBaseUrl
-    });
+const resolver = (endpoint: Endpoint) =>
+  async (_, args: GraphQLParameters, opts) => {
+    const req = endpoint.request(args, opts.GQLProxyBaseUrl);
     if (opts.BearerToken) {
       req.headers.Authorization = opts.BearerToken;
     }
@@ -52,23 +53,24 @@ const resolver = (endpoint) =>
     return JSON.parse(res);
   };
 
-const getQueriesFields = (endpoints, isMutation) => {
-  return Object.keys(endpoints).filter((typeName) => {
+const getQueriesFields = (endpoints: Endpoints, isMutation: boolean): {[string]: GraphQLType} => {
+  return Object.keys(endpoints).filter((typeName: string) => {
     return !!endpoints[typeName].mutation === !!isMutation;
   }).reduce((result, typeName) => {
     const endpoint = endpoints[typeName];
     const type = createGQLObject(endpoint.response, typeName, endpoint.location);
-    result[typeName] = {
+    const gType: GraphQLType = {
       type,
       description: endpoint.description,
-      args: mapParametersToFields(endpoint.parameters, endpoint.location, typeName),
+      args: mapParametersToFields(endpoint.parameters, typeName),
       resolve: resolver(endpoint)
     };
+    result[typeName] = gType;
     return result;
   }, {});
 };
 
-const build = async (swaggerPath) => {
+const build = async (swaggerPath: string) => {
   const swaggerSchema = await loadSchema(swaggerPath);
   const endpoints = getAllEndPoints(swaggerSchema);
   const schema = schemaFromEndpoints(endpoints);

@@ -1,5 +1,5 @@
 // @flow
-
+import type {GraphQLType, JSONSchemaType, EndpointParam} from './types';
 import _ from 'lodash';
 import * as graphql from 'graphql';
 import swagger from './swagger';
@@ -14,14 +14,14 @@ const primitiveTypes = {
 };
 
 const isObjectType = (jsonSchema) =>
-  jsonSchema.properties || jsonSchema.type === 'object' || jsonSchema.type === "array" || jsonSchema.schema;
+  jsonSchema.properties || jsonSchema.type === 'object' || jsonSchema.type === 'array' || jsonSchema.schema;
 
-const getTypeNameFromRef = (ref) => {
+const getTypeNameFromRef = (ref: string) => {
   const cutRef = ref.replace('#/definitions/', '');
   return cutRef.replace(/\//, '_');
 };
 
-const getExistingType = (ref, isInputType) => {
+const getExistingType = (ref: string, isInputType: boolean) => {
   const typeName = getTypeNameFromRef(ref);
   const allSchema = swagger.getSchema();
   if (!__allTypes[typeName]) {
@@ -34,16 +34,16 @@ const getExistingType = (ref, isInputType) => {
   return __allTypes[typeName];
 };
 
-const getRefProp = (jsonSchema) => {
+const getRefProp = (jsonSchema: JSONSchemaType) => {
   return jsonSchema.$ref || (jsonSchema.schema && jsonSchema.schema.$ref);
 };
 
-export const createGQLObject = (jsonSchema, title, isInputType) => {
+export const createGQLObject = (jsonSchema: JSONSchemaType, title: string, isInputType: boolean): GraphQLType => {
   if (!jsonSchema) {
-    jsonSchema = {
+    jsonSchema = { // eslint-disable-line no-param-reassign
       type: 'object',
       properties: {}
-    }
+    };
   }
 
   const reference = getRefProp(jsonSchema);
@@ -55,12 +55,11 @@ export const createGQLObject = (jsonSchema, title, isInputType) => {
   if (jsonSchema.type === 'array') {
     if (isObjectType(jsonSchema.items)) {
       return new graphql.GraphQLList(createGQLObject(jsonSchema.items, title + '_items', isInputType));
-    } else {
-      return new graphql.GraphQLList(getPrimitiveTypes(jsonSchema.items));
     }
+    return new graphql.GraphQLList(getPrimitiveTypes(jsonSchema.items));
   }
 
-  title = title ||  jsonSchema.title;
+  title = title ||  jsonSchema.title;  // eslint-disable-line no-param-reassign
 
   const objectType = isInputType ? 'GraphQLInputObjectType' : 'GraphQLObjectType';
 
@@ -71,7 +70,7 @@ export const createGQLObject = (jsonSchema, title, isInputType) => {
   });
 };
 
-export const getTypeFields = (jsonSchema, title, isInputType) => {
+export const getTypeFields = (jsonSchema: JSONSchemaType, title: string, isInputType: boolean) => {
   const fields = _.mapValues(jsonSchema.properties || {}, (propertySchema, propertyName) => {
     return {
       description: propertySchema.description,
@@ -83,22 +82,21 @@ export const getTypeFields = (jsonSchema, title, isInputType) => {
     fields.empty = {
       description: 'default field',
       type: graphql.GraphQLString
-    }
+    };
   }
   return fields;
 };
 
-const jsonSchemaTypeToGraphQL = (title, jsonSchema, schemaName, isInputType) => {
+const jsonSchemaTypeToGraphQL = (title: string, jsonSchema: JSONSchemaType, schemaName: string, isInputType: boolean) => {
   if (isObjectType(jsonSchema)) {
     return createGQLObject(jsonSchema, title + '_' + schemaName, isInputType);
   } else if (jsonSchema.type) {
     return getPrimitiveTypes(jsonSchema);
-  } else {
-    throw new Error("Don't know how to handle schema " + JSON.stringify(jsonSchema) + " without type and schema");
   }
+  throw new Error("Don't know how to handle schema " + JSON.stringify(jsonSchema) + ' without type and schema');
 };
 
-const getPrimitiveTypes = (jsonSchema) => {
+const getPrimitiveTypes = (jsonSchema: JSONSchemaType): string => {
   let jsonType = jsonSchema.type;
   const format = jsonSchema.format;
   if (format === 'int64') {
@@ -111,7 +109,7 @@ const getPrimitiveTypes = (jsonSchema) => {
   return type;
 };
 
-export const mapParametersToFields = (parameters, endpointLocation, typeName) => {
+export const mapParametersToFields = (parameters: Array<EndpointParam>, typeName: string) => {
   return parameters.reduce((res, param) => {
     const type = jsonSchemaTypeToGraphQL('param_' + typeName, param.jsonSchema, param.name, true);
     res[param.name] = {

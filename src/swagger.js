@@ -1,6 +1,7 @@
 // @flow
-
+import type {SwaggerSchema, Endpoint, Responses} from './types';
 import refParser from 'json-schema-ref-parser';
+import type {GraphQLParameters} from './types';
 import getRequestOptions from 'node-request-by-swagger';
 let __schema;
 
@@ -11,12 +12,12 @@ export const getSchema = () => {
   return __schema;
 };
 
-const getGQLTypeNameFromURL = (method, url) => {
+const getGQLTypeNameFromURL = (method: string, url: string) => {
   const fromUrl = url.replace(/[\{\}]+/g, '').replace(/[^a-zA-Z0-9_]+/g, '_');
   return `${method}${fromUrl}`;
 };
 
-const getSuccessResponse = (responses) => {
+const getSuccessResponse = (responses: Responses) => {
   let resp;
 
   if (!responses) return null;
@@ -29,7 +30,7 @@ const getSuccessResponse = (responses) => {
   return resp && resp.schema;
 };
 
-export const loadSchema = (pathToSchema) => {
+export const loadSchema = (pathToSchema: string) => {
   const schema = refParser.dereference(pathToSchema);
   __schema = schema;
   return schema;
@@ -39,9 +40,8 @@ const replaceOddChars = (str) => str.replace(/[^_a-zA-Z0-9]/g, '_');
 
 /**
  * Going throw schema and grab routes
- * @returns Promise<T>
  */
-export const getAllEndPoints = (schema) => {
+export const getAllEndPoints = (schema: SwaggerSchema): {[string]: Endpoint} => {
   const allTypes = {};
   Object.keys(schema.paths).forEach(path => {
     const route = schema.paths[path];
@@ -53,20 +53,21 @@ export const getAllEndPoints = (schema) => {
         const type = param.type;
         return {name: replaceOddChars(param.name), type, jsonSchema: param};
       }) : [];
-      allTypes[typeName] = {
+      const endpoint: Endpoint = {
         parameters,
         description: obj.description,
         response: getSuccessResponse(obj.responses),
-        request: (args, server) => {
-          const url = `${server.baseUrl}${path}`;
+        request: (args: GraphQLParameters, baseUrl: string) => {
+          const url = `${baseUrl}${path}`;
           return getRequestOptions(obj, {
             request: args,
             url,
             method: method
-          }, '')
+          }, '');
         },
         mutation: isMutation
-      }
+      };
+      allTypes[typeName] = endpoint;
     });
   });
   return allTypes;
