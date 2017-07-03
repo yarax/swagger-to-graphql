@@ -1,5 +1,4 @@
 // @flow
-require('babel-polyfill');
 import type {GraphQLParameters, Endpoint, GraphQLType, RootGraphQLSchema, SwaggerToGraphQLOptions} from './types';
 import rp from 'request-promise';
 import { GraphQLSchema, GraphQLObjectType } from 'graphql';
