@@ -13,4 +13,4 @@ if (!argv.swagger) {
 
 build(argv.swagger).then(schema => {
   console.log(graphql.printSchema(schema));
-});
+}).catch(console.log);

@@ -1,9 +1,10 @@
 {
   "name": "swagger-to-graphql",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "author": "Roman Krivtsov",
   "bin": "./bin/swagger2graphql",
   "dependencies": {
+    "babel-runtime": "^6.25.0",
     "graphql": "^0.10.1",
     "isomorphic-fetch": "^2.2.1",
     "js-yaml": "^3.8.4",
