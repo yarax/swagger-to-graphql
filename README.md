@@ -13,7 +13,6 @@ It allows you to move your API to GraphQL with nearly zero afford and maintain b
 const express = require('express');
 const app = express();
 const graphqlHTTP = require('express-graphql');
-const graphql = require('graphql');
 const graphQLSchema = require('swagger-to-graphql');
 
 graphQLSchema('./petstore.json').then(schema => {
