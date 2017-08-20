@@ -1,6 +1,6 @@
-# Swagger2graphQL
+# Swagger2GraphQL
 
-Swagger2graphQL converts your existing Swagger schema to GraphQL types where resolvers perform HTTP calls to certain real endpoints.
+Swagger2GraphQL converts your existing Swagger schema to GraphQL types where resolvers perform HTTP calls to certain real endpoints.
 It allows you to move your API to GraphQL with nearly zero afford and maintain both: REST and GraphQL APIs.
 
 <a href="https://medium.com/@raxwunter/moving-existing-api-from-rest-to-graphql-205bab22c184">Why?</a>
