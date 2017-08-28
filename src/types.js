@@ -5,6 +5,12 @@ export type SwaggerToGraphQLOptions = {
   BearerToken?: string
 }
 
+export type Resolver = (endpoint: Endpoint) => (object: Object, args: GraphQLParameters, opts: SwaggerToGraphQLOptions) => Promise<any>
+
+export type ConstructorOptions = {
+  resolver?: Resolver
+}
+
 type Param = {
   type: string,
   name: string

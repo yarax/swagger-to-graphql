@@ -1,5 +1,5 @@
 // @flow
-import type {GraphQLParameters, Endpoint, GraphQLType, RootGraphQLSchema, SwaggerToGraphQLOptions} from './types';
+import type {ConstructorOptions, GraphQLParameters, Endpoint, GraphQLType, RootGraphQLSchema, SwaggerToGraphQLOptions, Resolver} from './types';
 import rp from 'request-promise';
 import { GraphQLSchema, GraphQLObjectType } from 'graphql';
 import { getAllEndPoints, loadSchema } from './swagger';
@@ -7,7 +7,7 @@ import { createGQLObject, mapParametersToFields } from './typeMap';
 
 type Endpoints ={[string]: Endpoint};
 
-const schemaFromEndpoints = (endpoints: Endpoints) => {
+const schemaFromEndpoints = (endpoints: Endpoints, resolver?: Resolver) => {
   const rootType = new GraphQLObjectType({
     name: 'Query',
     fields: () => ({
@@ -15,14 +15,14 @@ const schemaFromEndpoints = (endpoints: Endpoints) => {
         type: new GraphQLObjectType({
           name: 'viewer',
           fields: () => {
-            const queryFields = getQueriesFields(endpoints, false);
+            const queryFields = getQueriesFields(endpoints, false, resolver);
             if (!Object.keys(queryFields).length) {
               throw new Error('Did not find any GET endpoints');
             }
             return queryFields;
           }
         }),
-        resolve: () => 'Without this resolver graphql does not resolve further'
+        resolve: () => 'The very first resolver'
       }
     })
   });
@@ -42,7 +42,7 @@ const schemaFromEndpoints = (endpoints: Endpoints) => {
   return new GraphQLSchema(graphQLSchema);
 };
 
-const resolver = (endpoint: Endpoint) =>
+const defaultResolver = (endpoint: Endpoint) =>
   async (_, args: GraphQLParameters, opts: SwaggerToGraphQLOptions) => {
     const req = endpoint.request(args, opts.GQLProxyBaseUrl);
     if (opts.BearerToken) {
@@ -52,7 +52,8 @@ const resolver = (endpoint: Endpoint) =>
     return JSON.parse(res);
   };
 
-const getQueriesFields = (endpoints: Endpoints, isMutation: boolean): {[string]: GraphQLType} => {
+const getQueriesFields =
+(endpoints: Endpoints, isMutation: boolean, resolver?: Resolver): {[string]: GraphQLType} => {
   return Object.keys(endpoints).filter((typeName: string) => {
     return !!endpoints[typeName].mutation === !!isMutation;
   }).reduce((result, typeName) => {
@@ -62,17 +63,17 @@ const getQueriesFields = (endpoints: Endpoints, isMutation: boolean): {[string]:
       type,
       description: endpoint.description,
       args: mapParametersToFields(endpoint.parameters, typeName),
-      resolve: resolver(endpoint)
+      resolve: resolver ? resolver(endpoint) : defaultResolver(endpoint)
     };
     result[typeName] = gType;
     return result;
   }, {});
 };
 
-const build = async (swaggerPath: string) => {
+const build = async (swaggerPath: string, opts: ConstructorOptions = {}) => {
   const swaggerSchema = await loadSchema(swaggerPath);
   const endpoints = getAllEndPoints(swaggerSchema);
-  const schema = schemaFromEndpoints(endpoints);
+  const schema = schemaFromEndpoints(endpoints, opts.resolver);
   return schema;
 };
 
