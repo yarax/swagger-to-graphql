@@ -23,19 +23,28 @@ const getTypeNameFromRef = (ref: string) => {
 };
 
 const getExistingType = (ref: string, isInputType: boolean) => {
-  const typeName = getTypeNameFromRef(ref);
-  const allSchema = getSchema();
+  var typeName = getTypeNameFromRef(ref);
+  const schemaTypeName = typeName;
+  isInputType && (typeName += 'Input');
+  const allSchema = (0, getSchema)();
   if (!__allTypes[typeName]) {
-    const schema = allSchema.definitions[typeName];
+    const schema = allSchema.definitions[schemaTypeName];
     if (!schema) {
-      throw new Error(`Definition ${typeName} was not found in schema`);
+      throw new Error(`Definition ${schemaTypeName} was not found in schema`);
     }
-    __allTypes[typeName] = createGQLObject(schema, typeName, isInputType);
+    __allTypes[typeName] = createGQLObjectEx(schema, typeName, isInputType);
   }
   return __allTypes[typeName];
 };
 
 const getRefProp = (jsonSchema: JSONSchemaType) => {
+  var typeSchema = jsonSchema.schema || jsonSchema;
+  const allSchema = (0, getSchema)();
+  for(var definitionName in allSchema.definitions){
+    if(allSchema.definitions[definitionName] === typeSchema){
+      return definitionName;
+    }
+  }
   return jsonSchema.$ref || (jsonSchema.schema && jsonSchema.schema.$ref);
 };
 
@@ -55,6 +64,9 @@ export const createGQLObject = (jsonSchema: JSONSchemaType, title: string, isInp
     return getExistingType(reference, isInputType);
   }
 
+  return createGQLObjectEx(jsonSchema, title, isInputType);
+};
+const createGQLObjectEx = (jsonSchema: JSONSchemaType, title: string, isInputType: boolean): GraphQLType => {
   if (jsonSchema.type === 'array') {
     if (isObjectType(jsonSchema.items)) {
       return new graphql.GraphQLList(createGQLObject(jsonSchema.items, title + '_items', isInputType));

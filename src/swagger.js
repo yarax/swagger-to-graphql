@@ -43,6 +43,7 @@ const replaceOddChars = (str) => str.replace(/[^_a-zA-Z0-9]/g, '_');
  */
 export const getAllEndPoints = (schema: SwaggerSchema): {[string]: Endpoint} => {
   const allTypes = {};
+  __schema = schema;
   Object.keys(schema.paths).forEach(path => {
     const route = schema.paths[path];
     Object.keys(route).forEach(method => {
