@@ -1,8 +1,10 @@
 {
-  "name": "swagger-to-graphql",
-  "version": "1.1.7",
-  "author": "Roman Krivtsov",
-  "bin": "./bin/swagger2graphql",
+  "author": {
+    "name": "Roman Krivtsov"
+  },
+  "bin": {
+    "swagger-to-graphql": "./bin/swagger2graphql"
+  },
   "dependencies": {
     "babel-runtime": "^6.25.0",
     "graphql": "^0.10.1",
@@ -15,6 +17,7 @@
     "request-promise": "^4.1.1",
     "yargs": "^8.0.2"
   },
+  "description": "Swagger2graphQL converts your existing Swagger schema to GraphQL types where resolvers perform HTTP calls to certain real endpoints. It allows you to move your API to GraphQL with nearly zero afford and maintain both: REST and GraphQL APIs.",
   "devDependencies": {
     "babel-cli": "^6.24.1",
     "babel-core": "^6.24.1",
@@ -39,11 +42,13 @@
   ],
   "license": "MIT",
   "main": "lib/index.js",
+  "name": "swagger-to-graphql",
   "scripts": {
     "build": "babel src -d lib",
     "lint": "eslint src/",
     "prepublish": "npm run build",
     "start": "node example/app.js",
     "test": "mocha"
-  }
+  },
+  "version": "1.1.7"
 }
