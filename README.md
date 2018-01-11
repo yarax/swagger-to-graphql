@@ -42,11 +42,29 @@ swagger-to-graphql --swagger=/path/to/swagger_schema.json > ./types.graphql
 ```
 ## Authorization
 
-```
+Basic Auth example:
+```js
  ...
   context: {
     GQLProxyBaseUrl: API_BASE_URL,
+    headers: {
+      Authorization: 'Basic YWRkOmJhc2ljQXV0aA==',
+      "X-Custom": 'customValue'
+    }
     BearerToken: req.get('authorization')
+  },
+ ...
+```
+
+Bearer Token example:
+```js
+ ...
+  context: {
+    GQLProxyBaseUrl: API_BASE_URL,
+    headers: {
+      Authorization: req.get('authorization'),
+      "X-Custom": 'customValue'
+    }
   },
  ...
 ```
