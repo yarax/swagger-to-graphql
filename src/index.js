@@ -45,8 +45,8 @@ const schemaFromEndpoints = (endpoints: Endpoints) => {
 const resolver = (endpoint: Endpoint) =>
   async (_, args: GraphQLParameters, opts: SwaggerToGraphQLOptions) => {
     const req = endpoint.request(args, opts.GQLProxyBaseUrl);
-    if (opts.BearerToken) {
-      req.headers.Authorization = opts.BearerToken;
+    if (opts.headers) {
+      req.headers = Object.assign({}, req.headers, opts.headers);
     }
     const res = await rp(req);
     return JSON.parse(res);
