@@ -7,7 +7,7 @@ import { createGQLObject, mapParametersToFields } from './typeMap';
 
 type Endpoints ={[string]: Endpoint};
 
-const schemaFromEndpoints = (endpoints: Endpoints) => {
+const schemaFromEndpoints = (endpoints: Endpoints, proxyUrl: ?(Function | string) = null) => {
   const rootType = new GraphQLObjectType({
     name: 'Query',
     fields: () => ({
@@ -15,7 +15,7 @@ const schemaFromEndpoints = (endpoints: Endpoints) => {
         type: new GraphQLObjectType({
           name: 'viewer',
           fields: () => {
-            const queryFields = getQueriesFields(endpoints, false);
+            const queryFields = getQueriesFields(endpoints, false, proxyUrl);
             if (!Object.keys(queryFields).length) {
               throw new Error('Did not find any GET endpoints');
             }
@@ -31,7 +31,7 @@ const schemaFromEndpoints = (endpoints: Endpoints) => {
     query: rootType
   };
 
-  const mutationFields = getQueriesFields(endpoints, true);
+  const mutationFields = getQueriesFields(endpoints, true, proxyUrl);
   if (Object.keys(mutationFields).length) {
     graphQLSchema.mutation = new GraphQLObjectType({
       name: 'Mutation',
@@ -42,9 +42,10 @@ const schemaFromEndpoints = (endpoints: Endpoints) => {
   return new GraphQLSchema(graphQLSchema);
 };
 
-const resolver = (endpoint: Endpoint) =>
+const resolver = (endpoint: Endpoint, proxyUrl: ?(Function | string)) =>
   async (_, args: GraphQLParameters, opts: SwaggerToGraphQLOptions) => {
-    const req = endpoint.request(args, opts.GQLProxyBaseUrl);
+    const proxy = !proxyUrl ? opts.GQLProxyBaseUrl : typeof proxyUrl === 'function' ? proxyUrl(opts) : proxyUrl
+    const req = endpoint.request(args, proxy);
     if (opts.headers) {
       req.headers = Object.assign({}, req.headers, opts.headers);
     }
@@ -52,7 +53,7 @@ const resolver = (endpoint: Endpoint) =>
     return JSON.parse(res);
   };
 
-const getQueriesFields = (endpoints: Endpoints, isMutation: boolean): {[string]: GraphQLType} => {
+const getQueriesFields = (endpoints: Endpoints, isMutation: boolean, proxyUrl: ?(Function | string)): {[string]: GraphQLType} => {
   return Object.keys(endpoints).filter((typeName: string) => {
     return !!endpoints[typeName].mutation === !!isMutation;
   }).reduce((result, typeName) => {
@@ -62,17 +63,17 @@ const getQueriesFields = (endpoints: Endpoints, isMutation: boolean): {[string]:
       type,
       description: endpoint.description,
       args: mapParametersToFields(endpoint.parameters, typeName),
-      resolve: resolver(endpoint)
+      resolve: resolver(endpoint, proxyUrl)
     };
     result[typeName] = gType;
     return result;
   }, {});
 };
 
-const build = async (swaggerPath: string) => {
+const build = async (swaggerPath: string, proxyUrl: ?(Function | string) = null) => {
   const swaggerSchema = await loadSchema(swaggerPath);
   const endpoints = getAllEndPoints(swaggerSchema);
-  const schema = schemaFromEndpoints(endpoints);
+  const schema = schemaFromEndpoints(endpoints, proxyUrl);
   return schema;
 };
 
