@@ -1,6 +1,6 @@
 {
   "name": "swagger-to-graphql",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "author": "Roman Krivtsov",
   "bin": "./bin/swagger2graphql",
   "dependencies": {
