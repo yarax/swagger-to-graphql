@@ -31,15 +31,18 @@ const getSuccessResponse = (responses: Responses) => {
 };
 
 export const loadSchema = (pathToSchema: string) => {
-  const schema = refParser.dereference(pathToSchema);
-  __schema = schema;
-  return schema;
+  const schemaPromise = refParser.bundle(pathToSchema)
+    .then((schema) => {
+      __schema = schema;
+      return schema;
+    });
+  return schemaPromise;
 };
 
 const replaceOddChars = (str) => str.replace(/[^_a-zA-Z0-9]/g, '_');
 
 /**
- * Going throw schema and grab routes
+ * Go through schema and grab routes
  */
 export const getAllEndPoints = (schema: SwaggerSchema): {[string]: Endpoint} => {
   const allTypes = {};

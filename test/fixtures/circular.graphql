@@ -1,0 +1,13 @@
+type Circular {
+  name: String
+  reference: Circular
+}
+
+type Query {
+  viewer: viewer
+}
+
+type viewer {
+  """A retrieves a circular structure"""
+  get_swagger_graphql_circular: [Circular]
+}
