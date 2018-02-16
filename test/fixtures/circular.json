@@ -33,6 +33,30 @@
                         }
                     }
                 }
+            },
+            "patch": {
+                "description": "Updates a circular structure",
+                "parameters": [{
+                    "in": "body",
+                    "name": "body",
+                    "schema": {
+                        "$ref": "#/definitions/Circular"
+                    }
+                }],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": null,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Circular"
+                            }
+                        }
+                    }
+                }
             }
         }
     },
