@@ -3,7 +3,7 @@ type addPet {
   empty: String
 }
 
-input Category {
+input CategoryInput {
   id: String
   name: String
 }
@@ -54,11 +54,11 @@ type logoutUser {
 }
 
 type Mutation {
-  addPet(body: Pet): addPet
-  updatePet(body: Pet): updatePet
+  addPet(body: PetInput): addPet
+  updatePet(body: PetInput): updatePet
   updatePetWithForm(petId: String, name: String, status: String): updatePetWithForm
   deletePet(api_key: String, petId: String): deletePet
-  placeOrder(body: Order): Order
+  placeOrder(body: OrderInput): Order
 
   """
   For valid response try integer IDs with positive integer value. Negative or non-integer values will generate API errors
@@ -66,12 +66,12 @@ type Mutation {
   deleteOrder(orderId: String): deleteOrder
 
   """This can only be done by the logged in user."""
-  createUser(body: User): createUser
-  createUsersWithArrayInput(body: param_createUsersWithArrayInput_body): createUsersWithArrayInput
-  createUsersWithListInput(body: param_createUsersWithListInput_body): createUsersWithListInput
+  createUser(body: UserInput): createUser
+  createUsersWithArrayInput(body: param_createUsersWithArrayInput_bodyInput): createUsersWithArrayInput
+  createUsersWithListInput(body: param_createUsersWithListInput_bodyInput): createUsersWithListInput
 
   """This can only be done by the logged in user."""
-  updateUser(username: String, body: User): updateUser
+  updateUser(username: String, body: UserInput): updateUser
 
   """This can only be done by the logged in user."""
   deleteUser(username: String): deleteUser
@@ -88,24 +88,35 @@ type Order {
   complete: Boolean
 }
 
-"""List of user object"""
-input param_createUsersWithArrayInput_body {
-  """default field"""
-  empty: String
-}
-
-"""List of user object"""
-input param_createUsersWithListInput_body {
-  """default field"""
-  empty: String
-}
-
-input Pet {
+input OrderInput {
   id: String
-  category: Category
+  petId: String
+  quantity: Int
+  shipDate: String
+
+  """Order Status"""
+  status: String
+  complete: Boolean
+}
+
+"""List of user object"""
+input param_createUsersWithArrayInput_bodyInput {
+  """default field"""
+  empty: String
+}
+
+"""List of user object"""
+input param_createUsersWithListInput_bodyInput {
+  """default field"""
+  empty: String
+}
+
+input PetInput {
+  id: String
+  category: CategoryInput
   name: String
   photoUrls: [String]
-  tags: [Tag]
+  tags: [TagInput]
 
   """pet status in the store"""
   status: String
@@ -115,7 +126,7 @@ type Query {
   viewer: viewer
 }
 
-input Tag {
+input TagInput {
   id: String
   name: String
 }
@@ -135,7 +146,7 @@ type updateUser {
   empty: String
 }
 
-input User {
+input UserInput {
   id: String
   username: String
   firstName: String
@@ -150,15 +161,15 @@ input User {
 
 type viewer {
   """Multiple status values can be provided with comma separated strings"""
-  findPetsByStatus(status: [String]): [Pet]
+  findPetsByStatus(status: [String]): [PetInput]
 
   """
   Muliple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
   """
-  findPetsByTags(tags: [String]): [Pet]
+  findPetsByTags(tags: [String]): [PetInput]
 
   """Returns a single pet"""
-  getPetById(petId: String): Pet
+  getPetById(petId: String): PetInput
 
   """Returns a map of status codes to quantities"""
   getInventory: getInventory
@@ -169,5 +180,5 @@ type viewer {
   getOrderById(orderId: String): Order
   loginUser(username: String, password: String): loginUser
   logoutUser: logoutUser
-  getUserByName(username: String): User
+  getUserByName(username: String): UserInput
 }

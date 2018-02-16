@@ -22,14 +22,18 @@ const getTypeNameFromRef = (ref: string) => {
 };
 
 const getExistingType = (ref: string, isInputType: boolean, gqlTypes: GraphQLTypeMap) => {
-  const typeName = getTypeNameFromRef(ref);
+  const refTypeName = getTypeNameFromRef(ref);
+  let typeName = refTypeName;
+  if (isInputType && !typeName.endsWith('Input')) {
+    typeName = typeName + 'Input';
+  }
   const allSchema = getSchema();
   if (!gqlTypes[typeName]) {
-    const schema = allSchema.definitions[typeName];
+    const schema = allSchema.definitions[refTypeName];
     if (!schema) {
-      throw new Error(`Definition ${typeName} was not found in schema`);
+      throw new Error(`Definition ${refTypeName} was not found in schema`);
     }
-    return createGQLObject(schema, typeName, isInputType, gqlTypes);
+    return createGQLObject(schema, refTypeName, isInputType, gqlTypes);
   }
   return gqlTypes[typeName];
 };
@@ -39,7 +43,12 @@ const getRefProp = (jsonSchema: JSONSchemaType) => {
 };
 
 export const createGQLObject = (jsonSchema: JSONSchemaType, title: string, isInputType: boolean, gqlTypes: GraphQLTypeMap): GraphQLType => {
-  title = (jsonSchema && jsonSchema.title) || title;  // eslint-disable-line no-param-reassign
+  title = (jsonSchema && jsonSchema.title) || title || '';  // eslint-disable-line no-param-reassign
+
+  if (isInputType && !title.endsWith('Input')) {
+    title = title + 'Input'; // eslint-disable-line no-param-reassign
+  }
+
   if (title in gqlTypes) {
     return gqlTypes[title];
   }
@@ -49,7 +58,7 @@ export const createGQLObject = (jsonSchema: JSONSchemaType, title: string, isInp
       type: 'object',
       properties: {},
       description: '',
-      title: title || ''
+      title: title
     };
   } else if (!jsonSchema.title) {
     jsonSchema.title = title;

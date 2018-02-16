@@ -12,7 +12,7 @@ describe('Test Cases', () => {
           .then((schema) => {
             const graphqlfile = directory + (file.replace('.json', '.graphql'));
             const graphschema = graphql.printSchema(schema);
-            const expected = fs.readFileSync(graphqlfile, "utf8");
+            const expected = fs.readFileSync(graphqlfile, 'utf8');
 
             expect(graphschema).to.equal(expected);
           });
