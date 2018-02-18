@@ -41,11 +41,32 @@ export const loadSchema = (pathToSchema: string) => {
 
 const replaceOddChars = (str) => str.replace(/[^_a-zA-Z0-9]/g, '_');
 
+const getServerPath = (schema) => {
+  let server = schema.servers && Array.isArray(schema.servers) ? schema.servers[0] : schema.servers;
+  if (!server) {
+    return undefined;
+  } else if (typeof server === 'string') {
+    return server;
+  }
+  let url = server.url;
+  if (server.variables) {
+    Object.keys(server.variables).forEach(function(variable) {
+      let value = server.variables[variable];
+      if (typeof (value) === 'object') {
+        value = value.default || value.enum[0];
+      }
+      url = url.replace('{' + variable + '}', value);
+    });
+  }
+  return url;
+};
+
 /**
  * Go through schema and grab routes
  */
 export const getAllEndPoints = (schema: SwaggerSchema): {[string]: Endpoint} => {
   const allTypes = {};
+  const serverPath = getServerPath(schema);
   Object.keys(schema.paths).forEach(path => {
     const route = schema.paths[path];
     Object.keys(route).forEach(method => {
@@ -61,6 +82,7 @@ export const getAllEndPoints = (schema: SwaggerSchema): {[string]: Endpoint} => 
         description: obj.description,
         response: getSuccessResponse(obj.responses),
         request: (args: GraphQLParameters, baseUrl: string) => {
+          baseUrl = baseUrl || serverPath;  // eslint-disable-line no-param-reassign
           const url = `${baseUrl}${path}`;
           return getRequestOptions(obj, {
             request: args,

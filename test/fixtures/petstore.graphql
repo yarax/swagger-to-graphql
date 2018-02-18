@@ -3,6 +3,11 @@ type addPet {
   empty: String
 }
 
+type Category {
+  id: String
+  name: String
+}
+
 input CategoryInput {
   id: String
   name: String
@@ -111,6 +116,17 @@ input param_createUsersWithListInput_bodyInput {
   empty: String
 }
 
+type Pet {
+  id: String
+  category: Category
+  name: String
+  photoUrls: [String]
+  tags: [Tag]
+
+  """pet status in the store"""
+  status: String
+}
+
 input PetInput {
   id: String
   category: CategoryInput
@@ -124,6 +140,11 @@ input PetInput {
 
 type Query {
   viewer: viewer
+}
+
+type Tag {
+  id: String
+  name: String
 }
 
 input TagInput {
@@ -146,6 +167,19 @@ type updateUser {
   empty: String
 }
 
+type User {
+  id: String
+  username: String
+  firstName: String
+  lastName: String
+  email: String
+  password: String
+  phone: String
+
+  """User Status"""
+  userStatus: Int
+}
+
 input UserInput {
   id: String
   username: String
@@ -161,15 +195,15 @@ input UserInput {
 
 type viewer {
   """Multiple status values can be provided with comma separated strings"""
-  findPetsByStatus(status: [String]): [PetInput]
+  findPetsByStatus(status: [String]): [Pet]
 
   """
   Muliple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
   """
-  findPetsByTags(tags: [String]): [PetInput]
+  findPetsByTags(tags: [String]): [Pet]
 
   """Returns a single pet"""
-  getPetById(petId: String): PetInput
+  getPetById(petId: String): Pet
 
   """Returns a map of status codes to quantities"""
   getInventory: getInventory
@@ -180,5 +214,5 @@ type viewer {
   getOrderById(orderId: String): Order
   loginUser(username: String, password: String): loginUser
   logoutUser: logoutUser
-  getUserByName(username: String): UserInput
+  getUserByName(username: String): User
 }

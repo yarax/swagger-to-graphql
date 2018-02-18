@@ -47,6 +47,7 @@ export const createGQLObject = (jsonSchema: JSONSchemaType, title: string, isInp
 
   if (isInputType && !title.endsWith('Input')) {
     title = title + 'Input'; // eslint-disable-line no-param-reassign
+    jsonSchema = _.clone(jsonSchema);  // eslint-disable-line no-param-reassign
   }
 
   if (title in gqlTypes) {
