@@ -50,7 +50,7 @@ const getServerPath = (schema) => {
   }
   let url = server.url;
   if (server.variables) {
-    Object.keys(server.variables).forEach(function(variable) {
+    Object.keys(server.variables).forEach((variable) => {
       let value = server.variables[variable];
       if (typeof (value) === 'object') {
         value = value.default || value.enum[0];
@@ -81,8 +81,11 @@ export const getAllEndPoints = (schema: SwaggerSchema): {[string]: Endpoint} => 
         parameters,
         description: obj.description,
         response: getSuccessResponse(obj.responses),
-        request: (args: GraphQLParameters, baseUrl: string) => {
-          baseUrl = baseUrl || serverPath;  // eslint-disable-line no-param-reassign
+        request: (args: GraphQLParameters, optBaseUrl: string) => {
+          const baseUrl = optBaseUrl || serverPath;  // eslint-disable-line no-param-reassign
+          if (!baseUrl) {
+            throw new Error('Could not get the base url for endpoints. Check that either your schema has baseUrl or you provided it to constructor');
+          }
           const url = `${baseUrl}${path}`;
           return getRequestOptions(obj, {
             request: args,

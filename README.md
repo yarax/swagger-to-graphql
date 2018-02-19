@@ -17,8 +17,11 @@ const graphQLSchema = require('swagger-to-graphql');
 
 const proxyUrl = 'http://petstore.swagger.io/v2';
 const pathToSwaggerSchema = './petstore.json';
+const customHeaders = {
+  // Authorization: 'Basic YWRkOmJhc2ljQXV0aA=='
+}
 
-graphQLSchema(pathToSwaggerSchema, proxyUrl).then(schema => {
+graphQLSchema(pathToSwaggerSchema, proxyUrl, customHeaders).then(schema => {
   app.use('/graphql', graphqlHTTP(() => {
     return {
       schema,
@@ -34,39 +37,16 @@ graphQLSchema(pathToSwaggerSchema, proxyUrl).then(schema => {
 });
 ```
 
-## CLI convertion
+Constructor (graphQLSchema) arguments:
+* `pathToSwaggerSchema` (string) is a path to your local swagger schema file. *required*
+* `proxyUrl` (string) base URL which will be used to hit your HTTP API. Can be taken either from Swagger schema `baseUrl` configuration or from this parameter.
+* `customHeaders` (object) key value object of custom headers, which should be included to the HTTP request. Can be used for example for authorization (look at the example above)
+
+## CLI usage
+
+You can use the library just to convert schemas without actually running server
 
 ```
 npm i -g swagger-to-graphql
 swagger-to-graphql --swagger=/path/to/swagger_schema.json > ./types.graphql
 ```
-## Authorization
-
-Basic auth example:
-```js
- ...
-  context: {
-    GQLProxyBaseUrl: API_BASE_URL,
-    headers: {
-      Authorization: 'Basic YWRkOmJhc2ljQXV0aA==',
-      "X-Custom": 'customValue'
-    }
-    BearerToken: req.get('authorization')
-  },
- ...
-```
-
-Bearer Token example:
-```js
- ...
-  context: {
-    GQLProxyBaseUrl: API_BASE_URL,
-    headers: {
-      Authorization: req.get('authorization'),
-      "X-Custom": 'customValue'
-    }
-  },
- ...
-```
-
-<a href="https://github.com/yarax/swagger-to-graphql/blob/master/src/types.js#L3"> All context options </a>
