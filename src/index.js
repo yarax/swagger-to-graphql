@@ -9,24 +9,13 @@ type Endpoints = {[string]: Endpoint};
 
 const schemaFromEndpoints = (endpoints: Endpoints, proxyUrl, headers) => {
   const gqlTypes = {};
-
+  const queryFields = getFields(endpoints, false, gqlTypes, proxyUrl, headers);
+  if (!Object.keys(queryFields).length) {
+    throw new Error('Did not find any GET endpoints');
+  }
   const rootType = new GraphQLObjectType({
     name: 'Query',
-    fields: () => ({
-      viewer: {
-        type: new GraphQLObjectType({
-          name: 'viewer',
-          fields: () => {
-            const queryFields = getFields(endpoints, false, gqlTypes, proxyUrl, headers);
-            if (!Object.keys(queryFields).length) {
-              throw new Error('Did not find any GET endpoints');
-            }
-            return queryFields;
-          }
-        }),
-        resolve: () => 'Without this resolver graphql does not resolve further'
-      }
-    })
+    fields: queryFields
   });
 
   const graphQLSchema: RootGraphQLSchema = {
