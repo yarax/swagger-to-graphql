@@ -14,10 +14,6 @@ type Mutation {
 }
 
 type Query {
-  viewer: viewer
-}
-
-type viewer {
   """A retrieves a circular structure"""
   get_swagger_graphql_circular: [Circular]
 }
