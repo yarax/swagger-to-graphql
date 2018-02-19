@@ -23,6 +23,8 @@ export type RootGraphQLSchema = {
 
 export type GraphQLParameters = {[string]: any};
 
+export type GraphQLTypeMap = {[string]: GraphQLType};
+
 export type Endpoint = {
   parameters: Array<EndpointParam>,
   description?: string,

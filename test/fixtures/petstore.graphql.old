@@ -1,0 +1,257 @@
+type addPet {
+  """default field"""
+  empty: String
+}
+
+type createUser {
+  """default field"""
+  empty: String
+}
+
+type createUsersWithArrayInput {
+  """default field"""
+  empty: String
+}
+
+type createUsersWithListInput {
+  """default field"""
+  empty: String
+}
+
+type deleteOrder {
+  """default field"""
+  empty: String
+}
+
+type deletePet {
+  """default field"""
+  empty: String
+}
+
+type deleteUser {
+  """default field"""
+  empty: String
+}
+
+type findPetsByStatus_items {
+  id: String
+  category: findPetsByStatus_items_category
+  name: String
+  photoUrls: [String]
+  tags: [findPetsByStatus_items_tags_items]
+
+  """pet status in the store"""
+  status: String
+}
+
+type findPetsByStatus_items_category {
+  id: String
+  name: String
+}
+
+type findPetsByStatus_items_tags_items {
+  id: String
+  name: String
+}
+
+type findPetsByTags_items {
+  id: String
+  category: findPetsByTags_items_category
+  name: String
+  photoUrls: [String]
+  tags: [findPetsByTags_items_tags_items]
+
+  """pet status in the store"""
+  status: String
+}
+
+type findPetsByTags_items_category {
+  id: String
+  name: String
+}
+
+type findPetsByTags_items_tags_items {
+  id: String
+  name: String
+}
+
+type getInventory {
+  """default field"""
+  empty: String
+}
+
+type getOrderById {
+  id: String
+  petId: String
+  quantity: Int
+  shipDate: String
+
+  """Order Status"""
+  status: String
+  complete: Boolean
+}
+
+type getPetById {
+  id: String
+  category: getPetById_category
+  name: String
+  photoUrls: [String]
+  tags: [getPetById_tags_items]
+
+  """pet status in the store"""
+  status: String
+}
+
+type getPetById_category {
+  id: String
+  name: String
+}
+
+type getPetById_tags_items {
+  id: String
+  name: String
+}
+
+type getUserByName {
+  id: String
+  username: String
+  firstName: String
+  lastName: String
+  email: String
+  password: String
+  phone: String
+
+  """User Status"""
+  userStatus: Int
+}
+
+type loginUser {
+  """default field"""
+  empty: String
+}
+
+type logoutUser {
+  """default field"""
+  empty: String
+}
+
+type Mutation {
+  addPet(body: param_addPet_body): addPet
+  updatePet(body: param_updatePet_body): updatePet
+  updatePetWithForm(petId: String, name: String, status: String): updatePetWithForm
+  deletePet(api_key: String, petId: String): deletePet
+  placeOrder(body: param_placeOrder_body): placeOrder
+
+  """
+  For valid response try integer IDs with positive integer value. Negative or non-integer values will generate API errors
+  """
+  deleteOrder(orderId: String): deleteOrder
+
+  """This can only be done by the logged in user."""
+  createUser(body: param_createUser_body): createUser
+  createUsersWithArrayInput(body: param_createUsersWithArrayInput_body): createUsersWithArrayInput
+  createUsersWithListInput(body: param_createUsersWithListInput_body): createUsersWithListInput
+
+  """This can only be done by the logged in user."""
+  updateUser(username: String, body: param_updateUser_body): updateUser
+
+  """This can only be done by the logged in user."""
+  deleteUser(username: String): deleteUser
+}
+
+"""Pet object that needs to be added to the store"""
+input param_addPet_body {
+  """default field"""
+  empty: String
+}
+
+"""Created user object"""
+input param_createUser_body {
+  """default field"""
+  empty: String
+}
+
+"""List of user object"""
+input param_createUsersWithArrayInput_body {
+  """default field"""
+  empty: String
+}
+
+"""List of user object"""
+input param_createUsersWithListInput_body {
+  """default field"""
+  empty: String
+}
+
+"""order placed for purchasing the pet"""
+input param_placeOrder_body {
+  """default field"""
+  empty: String
+}
+
+"""Pet object that needs to be added to the store"""
+input param_updatePet_body {
+  """default field"""
+  empty: String
+}
+
+"""Updated user object"""
+input param_updateUser_body {
+  """default field"""
+  empty: String
+}
+
+type placeOrder {
+  id: String
+  petId: String
+  quantity: Int
+  shipDate: String
+
+  """Order Status"""
+  status: String
+  complete: Boolean
+}
+
+type Query {
+  viewer: viewer
+}
+
+type updatePet {
+  """default field"""
+  empty: String
+}
+
+type updatePetWithForm {
+  """default field"""
+  empty: String
+}
+
+type updateUser {
+  """default field"""
+  empty: String
+}
+
+type viewer {
+  """Multiple status values can be provided with comma separated strings"""
+  findPetsByStatus(status: [String]): [findPetsByStatus_items]
+
+  """
+  Muliple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
+  """
+  findPetsByTags(tags: [String]): [findPetsByTags_items]
+
+  """Returns a single pet"""
+  getPetById(petId: String): getPetById
+
+  """Returns a map of status codes to quantities"""
+  getInventory: getInventory
+
+  """
+  For valid response try integer IDs with value >= 1 and <= 10. Other values will generated exceptions
+  """
+  getOrderById(orderId: String): getOrderById
+  loginUser(username: String, password: String): loginUser
+  logoutUser: logoutUser
+  getUserByName(username: String): getUserByName
+}
+

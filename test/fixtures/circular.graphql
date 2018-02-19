@@ -1,0 +1,23 @@
+type Circular {
+  name: String
+  reference: Circular
+}
+
+input CircularInput {
+  name: String
+  reference: CircularInput
+}
+
+type Mutation {
+  """Updates a circular structure"""
+  patch_swagger_graphql_circular(body: CircularInput): [Circular]
+}
+
+type Query {
+  viewer: viewer
+}
+
+type viewer {
+  """A retrieves a circular structure"""
+  get_swagger_graphql_circular: [Circular]
+}
