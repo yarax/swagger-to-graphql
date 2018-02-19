@@ -15,22 +15,22 @@ const app = express();
 const graphqlHTTP = require('express-graphql');
 const graphQLSchema = require('swagger-to-graphql');
 
-graphQLSchema('./petstore.json').then(schema => {
+const proxyUrl = 'http://petstore.swagger.io/v2';
+const pathToSwaggerSchema = './petstore.json';
+
+graphQLSchema(pathToSwaggerSchema, proxyUrl).then(schema => {
   app.use('/graphql', graphqlHTTP(() => {
     return {
       schema,
-      context: {
-        GQLProxyBaseUrl: API_BASE_URL
-      },
       graphiql: true
     };
   }));
 
   app.listen(3009, 'localhost', () => {
-    console.info(`API is here localhost:3009/graphql`);
+    console.info('http://localhost:3009/graphql');
   });
 }).catch(e => {
-  throw e;
+  console.log(e);
 });
 ```
 
