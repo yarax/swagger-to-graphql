@@ -472,11 +472,7 @@ paths:
       - application/xml
       - application/json
       parameters:
-      - name: username
-        in: path
-        description: 'The name that needs to be fetched. Use user1 for testing. '
-        required: true
-        type: string
+      - $ref: '#/parameters/username'
       responses:
         '200':
           description: successful operation
@@ -544,6 +540,13 @@ securityDefinitions:
     type: apiKey
     name: api_key
     in: header
+parameters:
+  username:
+    name: username
+    in: path
+    description: 'The name that needs to be fetched. Use user1 for testing.'
+    required: true
+    type: string
 definitions:
   Order:
     type: object

@@ -2,7 +2,7 @@
 import type {GraphQLParameters, Endpoint, GraphQLType, RootGraphQLSchema, SwaggerToGraphQLOptions, GraphQLTypeMap} from './types';
 import rp from 'request-promise';
 import { GraphQLSchema, GraphQLObjectType } from 'graphql';
-import { getAllEndPoints, loadSchema } from './swagger';
+import { getAllEndPoints, loadSchema, loadRefs } from './swagger';
 import { createGQLObject, mapParametersToFields } from './typeMap';
 
 type Endpoints = {[string]: Endpoint};
@@ -63,7 +63,8 @@ const getFields = (endpoints, isMutation, gqlTypes, proxyUrl, headers): GraphQLT
 
 const build = async (swaggerPath: string, proxyUrl: ?(Function | string) = null, headers: ?{[string]: string}) => {
   const swaggerSchema = await loadSchema(swaggerPath);
-  const endpoints = getAllEndPoints(swaggerSchema);
+  const refs = await loadRefs(swaggerPath);
+  const endpoints = getAllEndPoints(swaggerSchema, refs);
   const schema = schemaFromEndpoints(endpoints, proxyUrl, headers);
   return schema;
 };
