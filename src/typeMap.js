@@ -9,7 +9,7 @@ const primitiveTypes = {
   string: graphql.GraphQLString,
   date: graphql.GraphQLString,
   integer: graphql.GraphQLInt,
-  number: graphql.GraphQLInt,
+  number: graphql.GraphQLFloat,
   boolean: graphql.GraphQLBoolean
 };
 
