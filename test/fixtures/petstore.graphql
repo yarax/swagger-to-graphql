@@ -91,6 +91,7 @@ type Order {
   """Order Status"""
   status: String
   complete: Boolean
+  price: Float
 }
 
 input OrderInput {
@@ -102,6 +103,7 @@ input OrderInput {
   """Order Status"""
   status: String
   complete: Boolean
+  price: Float
 }
 
 """List of user object"""

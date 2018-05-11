@@ -1,9 +1,9 @@
 // @flow
-import type {GraphQLType, JSONSchemaType, EndpointParam, GraphQLTypeMap} from './types';
-import type {GraphQLScalarType} from 'graphql/type/definition.js.flow';
+import type { GraphQLType, JSONSchemaType, EndpointParam, GraphQLTypeMap } from './types';
+import type { GraphQLScalarType } from 'graphql/type/definition.js.flow';
 import _ from 'lodash';
 import * as graphql from 'graphql';
-import {getSchema} from './swagger';
+import { getSchema } from './swagger';
 
 const primitiveTypes = {
   string: graphql.GraphQLString,
@@ -135,6 +135,9 @@ const getPrimitiveTypes = (jsonSchema: JSONSchemaType): GraphQLScalarType => {
   const format = jsonSchema.format;
   if (format === 'int64') {
     jsonType = 'string';
+  }
+  if (format === 'double') {
+    return graphql.GraphQLFloat;
   }
   const type = primitiveTypes[jsonType];
   if (!type) {
