@@ -9,8 +9,9 @@ if (argv.help) {
 
 if (!argv.swagger) {
   console.log('\nPlease provide path to swagger schema. \n--help for usage example');
+} else {
+  build(argv.swagger).then(schema => {
+    console.log(graphql.printSchema(schema));
+  }).catch(console.log);
 }
 
-build(argv.swagger).then(schema => {
-  console.log(graphql.printSchema(schema));
-}).catch(console.log);

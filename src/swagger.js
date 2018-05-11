@@ -1,5 +1,5 @@
 // @flow
-import type {SwaggerSchema, Endpoint, Responses} from './types';
+import type {SwaggerSchema, Endpoint, Responses, RefType} from './types';
 import refParser from 'json-schema-ref-parser';
 import type {GraphQLParameters} from './types';
 import getRequestOptions from 'node-request-by-swagger';
@@ -30,13 +30,13 @@ const getSuccessResponse = (responses: Responses) => {
   return resp && resp.schema;
 };
 
-export const loadSchema = (pathToSchema: string) => {
-  const schemaPromise = refParser.bundle(pathToSchema)
-    .then((schema) => {
-      __schema = schema;
-      return schema;
-    });
-  return schemaPromise;
+export const loadSchema = async (pathToSchema: string) => {
+  __schema = await refParser.bundle(pathToSchema);
+  return __schema;
+};
+
+export const loadRefs = async (pathToSchema: string) => {
+  return await refParser.resolve(pathToSchema);
 };
 
 const replaceOddChars = (str) => str.replace(/[^_a-zA-Z0-9]/g, '_');
@@ -61,10 +61,22 @@ const getServerPath = (schema) => {
   return url;
 };
 
+const getParamDetails = (param, schema, refResolver) => {
+  let _param = param;
+  if (param.$ref) {
+    _param = refResolver.get(param.$ref);
+  }
+  const name = _param.name;
+  const type = _param.type;
+  const jsonSchema = _param;
+
+  return {name, type, jsonSchema};
+};
+
 /**
  * Go through schema and grab routes
  */
-export const getAllEndPoints = (schema: SwaggerSchema): {[string]: Endpoint} => {
+export const getAllEndPoints = (schema: SwaggerSchema, refs: RefType): {[string]: Endpoint} => {
   const allTypes = {};
   const serverPath = getServerPath(schema);
   Object.keys(schema.paths).forEach(path => {
@@ -73,10 +85,7 @@ export const getAllEndPoints = (schema: SwaggerSchema): {[string]: Endpoint} => 
       const obj = route[method];
       const isMutation = ['post', 'put', 'patch', 'delete'].indexOf(method) !== -1;
       const typeName = obj.operationId || getGQLTypeNameFromURL(method, path);
-      const parameters = obj.parameters ? obj.parameters.map(param => {
-        const type = param.type;
-        return {name: replaceOddChars(param.name), type, jsonSchema: param};
-      }) : [];
+      const parameters = obj.parameters ? obj.parameters.map(param => getParamDetails(param, schema, refs)) : [];
       const endpoint: Endpoint = {
         parameters,
         description: obj.description,

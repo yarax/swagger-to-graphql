@@ -61,3 +61,7 @@ export type SwaggerSchema = {
     }
   }
 }
+
+export type RefType = {
+  $Ref: SwaggerSchema
+}
