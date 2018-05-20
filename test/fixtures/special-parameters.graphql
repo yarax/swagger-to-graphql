@@ -1,8 +1,7 @@
-type get_path_dashed_path_param {
-  """default field"""
-  empty: String
+type Query {
+  get_path_dashed_path_param(dashed_request_header: String, dashed_query_param: String, dashed_path_param: String): Response
 }
 
-type Query {
-  get_path_dashed_path_param(dashed_request_header: String, dashed_query_param: String, dashed_path_param: String): get_path_dashed_path_param
+type Response {
+  result: String
 }

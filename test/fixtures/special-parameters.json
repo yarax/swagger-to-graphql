@@ -1,3 +1,4 @@
+
 {
   "info": {
     "version": "1.0.0",
@@ -10,7 +11,7 @@
           "200": {
             "description": "successful operation",
             "schema": {
-              "type": "string"
+              "$ref": "#/definitions/Response"
             }
           }
         },
@@ -42,6 +43,16 @@
   "schemes": [
     "http"
   ],
+  "definitions": {
+    "Response": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "string"
+        }
+      }
+    }
+  },
   "basePath": "/v2",
   "swagger": "2.0"
 }
