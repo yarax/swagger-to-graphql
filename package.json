@@ -10,7 +10,7 @@
     "js-yaml": "^3.8.4",
     "json-schema-ref-parser": "^3.1.2",
     "lodash": "^4.16.4",
-    "node-request-by-swagger": "^1.0.7",
+    "node-request-by-swagger": "1.1.0",
     "request": "^2.75.0",
     "request-promise": "^4.1.1",
     "yargs": "^8.0.2"
