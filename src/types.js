@@ -48,7 +48,8 @@ export type JSONSchemaType = {
   type?: string,
   properties?: Array<string>,
   title?: string,
-  description?: string
+  description?: string,
+  required?: boolean | Array<string>
 }
 
 export type SwaggerSchema = {
