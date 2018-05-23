@@ -5,6 +5,8 @@ It allows you to move your API to GraphQL with nearly zero effort and maintain b
 
 <a href="https://medium.com/@raxwunter/moving-existing-api-from-rest-to-graphql-205bab22c184">Why?</a>
 
+Looking for contributors!
+
 # Usage
 
 ## Basic server
