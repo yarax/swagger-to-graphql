@@ -10,7 +10,11 @@ const customHeaders = {
   Authorization: 'Basic YWRkOmJhc2ljQXV0aA=='
 };
 
-graphQLSchema(pathToSwaggerSchema, proxyUrl, customHeaders).then(schema => {
+const requestOptions = {
+  gzip: true
+};
+
+graphQLSchema(pathToSwaggerSchema, proxyUrl, customHeaders, requestOptions).then(schema => {
   app.use('/graphql', graphqlHTTP(() => {
     return {
       schema,
