@@ -66,11 +66,22 @@ const getParamDetails = (param, schema, refResolver) => {
   if (param.$ref) {
     _param = refResolver.get(param.$ref);
   }
-  const name = _param.name;
+  const name = replaceOddChars(_param.name);
   const type = _param.type;
   const jsonSchema = _param;
 
   return {name, type, jsonSchema};
+};
+
+const renameGraphqlParametersToSwaggerParameters = (graphqlParameters, parameterDetails) => {
+  const result = {};
+  Object.keys(graphqlParameters).forEach(inputGraphqlName => {
+    const { jsonSchema: { name: swaggerName } } = parameterDetails.find(
+      ({ name: graphqlName }) => graphqlName === inputGraphqlName
+    );
+    result[swaggerName] = graphqlParameters[inputGraphqlName];
+  });
+  return result;
 };
 
 /**
@@ -85,19 +96,20 @@ export const getAllEndPoints = (schema: SwaggerSchema, refs: RefType): {[string]
       const obj = route[method];
       const isMutation = ['post', 'put', 'patch', 'delete'].indexOf(method) !== -1;
       const typeName = obj.operationId || getGQLTypeNameFromURL(method, path);
-      const parameters = obj.parameters ? obj.parameters.map(param => getParamDetails(param, schema, refs)) : [];
+      const parameterDetails = obj.parameters ? obj.parameters.map(param => getParamDetails(param, schema, refs)) : [];
       const endpoint: Endpoint = {
-        parameters,
+        parameters: parameterDetails,
         description: obj.description,
         response: getSuccessResponse(obj.responses),
-        request: (args: GraphQLParameters, optBaseUrl: string) => {
+        request: (graphqlParameters: GraphQLParameters, optBaseUrl: string) => {
           const baseUrl = optBaseUrl || serverPath;  // eslint-disable-line no-param-reassign
           if (!baseUrl) {
             throw new Error('Could not get the base url for endpoints. Check that either your schema has baseUrl or you provided it to constructor');
           }
           const url = `${baseUrl}${path}`;
+          const request = renameGraphqlParametersToSwaggerParameters(graphqlParameters, parameterDetails);
           return getRequestOptions(obj, {
-            request: args,
+            request,
             url,
             method: method
           }, '');

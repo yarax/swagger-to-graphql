@@ -1,0 +1,7 @@
+type Query {
+  get_path_dashed_path_param(dashed_request_header: String, dashed_query_param: String, dashed_path_param: String): Response
+}
+
+type Response {
+  result: String
+}

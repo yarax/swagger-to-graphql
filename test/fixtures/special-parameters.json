@@ -1,0 +1,58 @@
+
+{
+  "info": {
+    "version": "1.0.0",
+    "title": "Api with headers"
+  },
+  "paths": {
+    "/path/{dashed-path-param}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Response"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "header",
+            "type": "string",
+            "description": "dashed-request-header",
+            "name": "dashed-request-header"
+          },
+          {
+            "in": "query",
+            "type": "string",
+            "description": "dashed-query-param",
+            "name": "dashed-query-param"
+          },
+          {
+            "required": true,
+            "type": "string",
+            "description": "dashed-query-param",
+            "in": "path",
+            "name": "dashed-path-param"
+          }
+        ]
+      }
+    }
+  },
+  "host": "mock.api.com",
+  "schemes": [
+    "http"
+  ],
+  "definitions": {
+    "Response": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "basePath": "/v2",
+  "swagger": "2.0"
+}
