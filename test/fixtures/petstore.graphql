@@ -59,27 +59,27 @@ type logoutUser {
 }
 
 type Mutation {
-  addPet(body: PetInput): addPet
-  updatePet(body: PetInput): updatePet
-  updatePetWithForm(petId: String, name: String, status: String): updatePetWithForm
-  deletePet(api_key: String, petId: String): deletePet
-  placeOrder(body: OrderInput): Order
+  addPet(body: PetInput!): addPet
+  updatePet(body: PetInput!): updatePet
+  updatePetWithForm(petId: String!, name: String, status: String): updatePetWithForm
+  deletePet(api_key: String, petId: String!): deletePet
+  placeOrder(body: OrderInput!): Order
 
   """
   For valid response try integer IDs with positive integer value. Negative or non-integer values will generate API errors
   """
-  deleteOrder(orderId: String): deleteOrder
+  deleteOrder(orderId: String!): deleteOrder
 
   """This can only be done by the logged in user."""
-  createUser(body: UserInput): createUser
-  createUsersWithArrayInput(body: param_createUsersWithArrayInput_bodyInput): createUsersWithArrayInput
-  createUsersWithListInput(body: param_createUsersWithListInput_bodyInput): createUsersWithListInput
+  createUser(body: UserInput!): createUser
+  createUsersWithArrayInput(body: param_createUsersWithArrayInput_bodyInput!): createUsersWithArrayInput
+  createUsersWithListInput(body: param_createUsersWithListInput_bodyInput!): createUsersWithListInput
 
   """This can only be done by the logged in user."""
-  updateUser(username: String, body: UserInput): updateUser
+  updateUser(username: String!, body: UserInput!): updateUser
 
   """This can only be done by the logged in user."""
-  deleteUser(username: String): deleteUser
+  deleteUser(username: String!): deleteUser
 }
 
 type Order {
@@ -119,8 +119,8 @@ input param_createUsersWithListInput_bodyInput {
 type Pet {
   id: String
   category: Category
-  name: String
-  photoUrls: [String]
+  name: String!
+  photoUrls: [String]!
   tags: [Tag]
 
   """pet status in the store"""
@@ -130,8 +130,8 @@ type Pet {
 input PetInput {
   id: String
   category: CategoryInput
-  name: String
-  photoUrls: [String]
+  name: String!
+  photoUrls: [String]!
   tags: [TagInput]
 
   """pet status in the store"""
@@ -140,15 +140,15 @@ input PetInput {
 
 type Query {
   """Multiple status values can be provided with comma separated strings"""
-  findPetsByStatus(status: [String]): [Pet]
+  findPetsByStatus(status: [String]!): [Pet]
 
   """
   Muliple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
   """
-  findPetsByTags(tags: [String]): [Pet]
+  findPetsByTags(tags: [String]!): [Pet]
 
   """Returns a single pet"""
-  getPetById(petId: String): Pet
+  getPetById(petId: String!): Pet
 
   """Returns a map of status codes to quantities"""
   getInventory: getInventory
@@ -156,10 +156,10 @@ type Query {
   """
   For valid response try integer IDs with value >= 1 and <= 10. Other values will generated exceptions
   """
-  getOrderById(orderId: String): Order
-  loginUser(username: String, password: String): loginUser
+  getOrderById(orderId: String!): Order
+  loginUser(username: String!, password: String!): loginUser
   logoutUser: logoutUser
-  getUserByName(username: String): User
+  getUserByName(username: String!): User
 }
 
 type Tag {

@@ -112,22 +112,27 @@ export const getTypeFields = (jsonSchema: JSONSchemaType, title: string, isInput
   }
   return () =>
     _.mapValues(jsonSchema.properties || {}, (propertySchema, propertyName) => {
+      const baseType = jsonSchemaTypeToGraphQL(title, propertySchema, propertyName, isInputType, gqlTypes);
+      const type = jsonSchema.required && jsonSchema.required.includes(propertyName) ? graphql.GraphQLNonNull(baseType) : baseType;
       return {
         description: propertySchema.description,
-        type: jsonSchemaTypeToGraphQL(title, propertySchema, propertyName, isInputType, gqlTypes)
+        type
       };
     });
 };
 
 const jsonSchemaTypeToGraphQL = (title: string, jsonSchema: JSONSchemaType, schemaName: string, isInputType: boolean, gqlTypes: GraphQLTypeMap) => {
-  if (jsonSchema.$ref) {
-    return getExistingType(jsonSchema.$ref, isInputType, gqlTypes);
-  } else if (isObjectType(jsonSchema)) {
-    return createGQLObject(jsonSchema, title + '_' + schemaName, isInputType, gqlTypes);
-  } else if (jsonSchema.type) {
-    return getPrimitiveTypes(jsonSchema);
-  }
-  throw new Error("Don't know how to handle schema " + JSON.stringify(jsonSchema) + ' without type and schema');
+  const baseType = (() => {
+    if (jsonSchema.$ref) {
+      return getExistingType(jsonSchema.$ref, isInputType, gqlTypes);
+    } else if (isObjectType(jsonSchema)) {
+      return createGQLObject(jsonSchema, title + '_' + schemaName, isInputType, gqlTypes);
+    } else if (jsonSchema.type) {
+      return getPrimitiveTypes(jsonSchema);
+    }
+    throw new Error("Don't know how to handle schema " + JSON.stringify(jsonSchema) + ' without type and schema');
+  })();
+  return jsonSchema.required ? graphql.GraphQLNonNull(baseType) : baseType;
 };
 
 const getPrimitiveTypes = (jsonSchema: JSONSchemaType): GraphQLScalarType => {
