@@ -52,3 +52,6 @@ You can use the library just to convert schemas without actually running server
 npm i -g swagger-to-graphql
 swagger-to-graphql --swagger=/path/to/swagger_schema.json > ./types.graphql
 ```
+
+
+![Build Status](https://travis-ci.org/yarax/swagger-to-graphql.svg?branch=master)
