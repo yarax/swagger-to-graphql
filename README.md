@@ -54,4 +54,4 @@ swagger-to-graphql --swagger=/path/to/swagger_schema.json > ./types.graphql
 ```
 
 
-[![Build Status](https://travis-ci.org/yarax/swagger-to-graphql.svg?branch=master)
+![Build Status](https://travis-ci.org/yarax/swagger-to-graphql.svg?branch=master)
