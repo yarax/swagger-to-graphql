@@ -4,7 +4,7 @@
   "license": "MIT",
   "main": "index.js",
   "scripts": {
-    "start": "node example.js"
+    "start": "node app.js"
   },
   "dependencies": {
     "babel-polyfill": "^6.23.0",
