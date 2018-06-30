@@ -5,7 +5,6 @@
   "bin": "./bin/swagger2graphql",
   "dependencies": {
     "babel-runtime": "^6.25.0",
-    "graphql": "^0.12.3",
     "isomorphic-fetch": "^2.2.1",
     "js-yaml": "^3.8.4",
     "json-schema-ref-parser": "^3.1.2",
@@ -35,6 +34,9 @@
     "mocha": "^3.1.2",
     "nock": "^9.2.6",
     "supertest": "^3.1.0"
+  },
+  "peerDependencies": {
+    "graphql": "^0.12.3"
   },
   "keywords": [
     "graphql",
