@@ -52,7 +52,7 @@
   "scripts": {
     "build": "babel src -d lib",
     "lint": "eslint src/",
-    "prepublish": "npm run build",
+    "prepare": "npm run build",
     "start": "node example/app.js",
     "test": "mocha"
   }
