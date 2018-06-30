@@ -35,7 +35,7 @@ const schemaFromEndpoints = (endpoints: Endpoints, proxyUrl, headers) => {
 
 const resolver = (endpoint: Endpoint, proxyUrl: ?(Function | string), customHeaders = {}) =>
   async (_, args: GraphQLParameters, opts: SwaggerToGraphQLOptions) => {
-    const proxy = !proxyUrl ? opts.GQLProxyBaseUrl : (typeof proxyUrl === 'function' ? proxyUrl(opts) : proxyUrl);
+    const proxy = !proxyUrl ? opts.GQLProxyBaseUrl : (typeof proxyUrl === 'function' ? proxyUrl(opts) : proxyUrl); // eslint-disable-line no-nested-ternary
     const req = endpoint.request(args, proxy);
     if (opts.headers) {
       const { host, ...otherHeaders } = opts.headers;

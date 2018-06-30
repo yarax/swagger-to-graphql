@@ -113,7 +113,7 @@ export const getTypeFields = (jsonSchema: JSONSchemaType, title: string, isInput
   return () =>
     _.mapValues(jsonSchema.properties || {}, (propertySchema, propertyName) => {
       const baseType = jsonSchemaTypeToGraphQL(title, propertySchema, propertyName, isInputType, gqlTypes);
-      const type = jsonSchema.required && jsonSchema.required.includes(propertyName) ? graphql.GraphQLNonNull(baseType) : baseType;
+      const type = jsonSchema.required && jsonSchema.required.includes(propertyName) ? graphql.GraphQLNonNull(baseType) : baseType; // eslint-disable-line new-cap
       return {
         description: propertySchema.description,
         type
@@ -132,7 +132,7 @@ const jsonSchemaTypeToGraphQL = (title: string, jsonSchema: JSONSchemaType, sche
     }
     throw new Error("Don't know how to handle schema " + JSON.stringify(jsonSchema) + ' without type and schema');
   })();
-  return jsonSchema.required ? graphql.GraphQLNonNull(baseType) : baseType;
+  return jsonSchema.required ? graphql.GraphQLNonNull(baseType) : baseType; // eslint-disable-line new-cap
 };
 
 const getPrimitiveTypes = (jsonSchema: JSONSchemaType): GraphQLScalarType => {

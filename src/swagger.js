@@ -44,7 +44,7 @@ const replaceOddChars = (str) => str.replace(/[^_a-zA-Z0-9]/g, '_');
 const getServerPath = (schema) => {
   let server = schema.servers && Array.isArray(schema.servers) ? schema.servers[0] : schema.servers;
   if (!server) {
-    return undefined;
+    return undefined; // eslint-disable-line no-undefined
   } else if (typeof server === 'string') {
     return server;
   }

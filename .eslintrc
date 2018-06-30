@@ -2,6 +2,12 @@
     "extends": "eslint-config-airbnb-es5",
     "rules": {
         "eol-last": 0,
-        "valid-jsdoc": 0
+        "valid-jsdoc": 0,
+        "no-unused-vars": [
+              2,
+              {
+                "ignoreRestSiblings": true
+              }
+            ]
     }
 }
