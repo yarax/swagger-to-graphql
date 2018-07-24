@@ -97,13 +97,23 @@ export const getAllEndPoints = (schema: SwaggerSchema, refs: RefType): {[string]
       const isMutation = ['post', 'put', 'patch', 'delete'].indexOf(method) !== -1;
       const typeName = obj.operationId || getGQLTypeNameFromURL(method, path);
       let parameterDetails;
+      
+      // [FIX] for when parameters is a child of route and not route[method]
+      if (route.parameters) {
+        if (obj.parameters) {
+          obj.parameters = route.parameters.concat(obj.parameters)
+        } else {
+          obj.parameters = route.parameters
+        }
+      }
+      //
+      
       if (obj.parameters) {
         parameterDetails = obj.parameters.map(param => getParamDetails(param, schema, refs));
-      } else if (route.parameters) { // Fix for when parameters is a child of route and not route[method]
-        parameterDetails = route.parameters.map(param => getParamDetails(param, schema, refs));
       } else {
         parameterDetails = [];
       }
+      
       const endpoint: Endpoint = {
         parameters: parameterDetails,
         description: obj.description,
