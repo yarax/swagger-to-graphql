@@ -113,7 +113,7 @@ export const getTypeFields = (jsonSchema: JSONSchemaType, title: string, isInput
   return () =>
     _.mapValues(jsonSchema.properties || {}, (propertySchema, propertyName) => {
       const baseType = jsonSchemaTypeToGraphQL(title, propertySchema, propertyName, isInputType, gqlTypes);
-      const type = jsonSchema.required && jsonSchema.required.includes(propertyName) ? graphql.GraphQLNonNull(baseType) : baseType;
+      const type = jsonSchema.required && jsonSchema.required.includes(propertyName) && !isObjectType(jsonSchema.properties[propertyName]) ? graphql.GraphQLNonNull(baseType) : baseType;
       return {
         description: propertySchema.description,
         type
