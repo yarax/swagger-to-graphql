@@ -1,5 +1,5 @@
 {
-  "name": "@ateamlunchbox/swagger-to-graphql",
+  "name": "swagger-to-graphql",
   "version": "1.4.1",
   "author": "Roman Krivtsov",
   "repository": {
