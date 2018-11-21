@@ -14,6 +14,7 @@ describe('Fixture', () => {
             .then((schema) => {
               const graphqlfile = directory + graphqlFile;
               const graphschema = graphql.printSchema(schema);
+              console.log(graphschema);
               const expected = fs.readFileSync(graphqlfile, 'utf8');
               expect(graphschema).to.equal(expected);
             });

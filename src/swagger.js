@@ -1,6 +1,7 @@
 // @flow
-import type {SwaggerSchema, Endpoint, Responses, RefType} from './types';
+import type {SwaggerSchema, Endpoint, Responses} from './types';
 import refParser from 'json-schema-ref-parser';
+import deref from 'json-schema-deref-sync';
 import type {GraphQLParameters} from './types';
 import getRequestOptions from 'node-request-by-swagger';
 let __schema;
@@ -36,7 +37,7 @@ export const loadSchema = async (pathToSchema: string) => {
 };
 
 export const loadRefs = async (pathToSchema: string) => {
-  return await refParser.resolve(pathToSchema);
+  return deref(pathToSchema);
 };
 
 const replaceOddChars = (str) => str.replace(/[^_a-zA-Z0-9]/g, '_');
@@ -61,15 +62,10 @@ const getServerPath = (schema) => {
   return url;
 };
 
-const getParamDetails = (param, schema, refResolver) => {
-  let _param = param;
-  if (param.$ref) {
-    _param = refResolver.get(param.$ref);
-  }
-  const name = replaceOddChars(_param.name);
-  const type = _param.type;
-  const jsonSchema = _param;
-
+const getParamDetails = (param) => {
+  const name = replaceOddChars(param.name);
+  const type = param.type;
+  const jsonSchema = param.schema || param;
   return {name, type, jsonSchema};
 };
 
@@ -87,7 +83,7 @@ const renameGraphqlParametersToSwaggerParameters = (graphqlParameters, parameter
 /**
  * Go through schema and grab routes
  */
-export const getAllEndPoints = (schema: SwaggerSchema, refs: RefType): {[string]: Endpoint} => {
+export const getAllEndPoints = (schema: SwaggerSchema): {[string]: Endpoint} => {
   const allTypes = {};
   const serverPath = getServerPath(schema);
   Object.keys(schema.paths).forEach(path => {
@@ -96,7 +92,7 @@ export const getAllEndPoints = (schema: SwaggerSchema, refs: RefType): {[string]
       const obj = route[method];
       const isMutation = ['post', 'put', 'patch', 'delete'].indexOf(method) !== -1;
       const typeName = obj.operationId || getGQLTypeNameFromURL(method, path);
-      const parameterDetails = obj.parameters ? obj.parameters.map(param => getParamDetails(param, schema, refs)) : [];
+      const parameterDetails = obj.parameters ? obj.parameters.map(param => getParamDetails(param, schema)) : [];
       const endpoint: Endpoint = {
         parameters: parameterDetails,
         description: obj.description,

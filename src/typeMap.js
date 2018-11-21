@@ -24,6 +24,7 @@ const getTypeNameFromRef = (ref: string) => {
 const getExistingType = (ref: string, isInputType: boolean, gqlTypes: GraphQLTypeMap) => {
   const refTypeName = getTypeNameFromRef(ref);
   let typeName = refTypeName;
+  console.log('TN', typeName);
   if (isInputType && !typeName.endsWith('Input')) {
     typeName = typeName + 'Input';
   }

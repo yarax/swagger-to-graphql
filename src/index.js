@@ -63,9 +63,9 @@ const getFields = (endpoints, isMutation, gqlTypes, proxyUrl, headers): GraphQLT
 };
 
 const build = async (swaggerPath: string, proxyUrl: ?(Function | string) = null, headers: ?{[string]: string}) => {
-  const swaggerSchema = await loadSchema(swaggerPath);
-  const refs = await loadRefs(swaggerPath);
-  const endpoints = getAllEndPoints(swaggerSchema, refs);
+  let swaggerSchema = await loadSchema(swaggerPath);
+  swaggerSchema = await loadRefs(swaggerSchema);
+  const endpoints = getAllEndPoints(swaggerSchema);
   const schema = schemaFromEndpoints(endpoints, proxyUrl, headers);
   return schema;
 };
