@@ -39,7 +39,7 @@ const resolver = (endpoint: Endpoint, proxyUrl: ?(Function | string), customHead
     const req = endpoint.request(args, proxy);
     if (opts.headers) {
       const { host, ...otherHeaders } = opts.headers;
-      req.headers = Object.assign(customHeaders, req.headers, otherHeaders);
+      req.headers = Object.assign(req.headers, otherHeaders, customHeaders);
     }
     const res = await rp(req);
     return JSON.parse(res);
