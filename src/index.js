@@ -40,6 +40,8 @@ const resolver = (endpoint: Endpoint, proxyUrl: ?(Function | string), customHead
     if (opts.headers) {
       const { host, ...otherHeaders } = opts.headers;
       req.headers = Object.assign(req.headers, otherHeaders, customHeaders);
+    } else {
+      req.headers = Object.assign(req.headers, customHeaders);
     }
     const res = await rp(req);
     return JSON.parse(res);
