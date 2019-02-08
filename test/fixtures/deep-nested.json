@@ -1,0 +1,73 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "DeepNest",
+    "description": "For testing required nested object types",
+    "version": "1.0.0"
+  },
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/test": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/DeepStructure"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "DeepStructure": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "object",
+              "properties": {
+                "protocol": {
+                  "type": "string"
+                },
+                "baseURL": {
+                  "type": "string"
+                }
+              }
+            },
+            "images": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "version": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "url",
+            "images",
+            "version"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "body"
+      ]
+    }
+  }
+}
