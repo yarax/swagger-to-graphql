@@ -48,6 +48,10 @@ Constructor (graphQLSchema) arguments:
 
 You can use the library just to convert schemas without actually running server
 
+## Video from O.J. Sousa Rodrigues at Vienna.JS
+[![Video from O.J. Sousa Rodrigues at Vienna.JS](https://s3.eu-central-1.amazonaws.com/yarax-public-assets/2019-02-13_13-01-45.png)](https://youtu.be/T-D1KVIuvjA)
+
+https://youtu.be/551gKWJEsK0?t=1269
 ```
 npm i -g swagger-to-graphql
 swagger-to-graphql --swagger=/path/to/swagger_schema.json > ./types.graphql
