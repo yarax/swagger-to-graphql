@@ -42,8 +42,11 @@ const getRefProp = (jsonSchema: JSONSchemaType) => {
   return jsonSchema.$ref || (jsonSchema.schema && jsonSchema.schema.$ref);
 };
 
+const makeValidName = (name) => name.replace(/[^_0-9A-Za-z]/g, '_');  // eslint-disable-line no-param-reassign
+
 export const createGQLObject = (jsonSchema: JSONSchemaType, title: string, isInputType: boolean, gqlTypes: GraphQLTypeMap): GraphQLType => {
   title = (jsonSchema && jsonSchema.title) || title || '';  // eslint-disable-line no-param-reassign
+  title = makeValidName(title); // eslint-disable-line no-param-reassign
 
   if (isInputType && !title.endsWith('Input')) {
     title = title + 'Input'; // eslint-disable-line no-param-reassign
@@ -110,8 +113,14 @@ export const getTypeFields = (jsonSchema: JSONSchemaType, title: string, isInput
       }
     };
   }
-  return () =>
-    _.mapValues(jsonSchema.properties || {}, (propertySchema, propertyName) => {
+  return () => {
+    const properties = {};
+    if (jsonSchema.properties) {
+      Object.keys(jsonSchema.properties).forEach(key => {
+        properties[makeValidName(key)] = jsonSchema.properties[key];
+      });
+    }
+    return _.mapValues(properties, (propertySchema, propertyName) => {
       const baseType = jsonSchemaTypeToGraphQL(title, propertySchema, propertyName, isInputType, gqlTypes);
       const type = jsonSchema.required && jsonSchema.required.includes(propertyName) ? graphql.GraphQLNonNull(baseType) : baseType;
       return {
@@ -119,6 +128,7 @@ export const getTypeFields = (jsonSchema: JSONSchemaType, title: string, isInput
         type
       };
     });
+  };
 };
 
 const jsonSchemaTypeToGraphQL = (title: string, jsonSchema: JSONSchemaType, schemaName: string, isInputType: boolean, gqlTypes: GraphQLTypeMap) => {
