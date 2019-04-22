@@ -1,16 +1,20 @@
 // @flow
 import type {GraphQLType, JSONSchemaType, EndpointParam, GraphQLTypeMap} from './types';
+import { FloatOrNaN } from './types';
+
 import type {GraphQLScalarType} from 'graphql/type/definition.js.flow';
 import _ from 'lodash';
 import * as graphql from 'graphql';
 import {getSchema} from './swagger';
+import { BUILD_OPTIONS, buildOptions } from './build-options';
 
 const primitiveTypes = {
   string: graphql.GraphQLString,
   date: graphql.GraphQLString,
   integer: graphql.GraphQLInt,
   number: graphql.GraphQLFloat,
-  boolean: graphql.GraphQLBoolean
+  numberOrNaN: FloatOrNaN,
+  boolean: graphql.GraphQLBoolean,
 };
 
 const isObjectType = (jsonSchema) =>
@@ -150,6 +154,9 @@ const getPrimitiveTypes = (jsonSchema: JSONSchemaType): GraphQLScalarType => {
   const format = jsonSchema.format;
   if (format === 'int64') {
     jsonType = 'string';
+  }
+  if (buildOptions.includes(BUILD_OPTIONS.NaN) && jsonType === 'number') {
+    jsonType = 'numberOrNaN';
   }
   const type = primitiveTypes[jsonType];
   if (!type) {

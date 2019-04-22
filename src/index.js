@@ -1,9 +1,11 @@
 // @flow
 import type {GraphQLParameters, Endpoint, GraphQLType, RootGraphQLSchema, SwaggerToGraphQLOptions, GraphQLTypeMap} from './types';
+import { FloatOrNaN } from './types';
 import rp from 'request-promise';
 import { GraphQLSchema, GraphQLObjectType } from 'graphql';
 import { getAllEndPoints, loadSchema, loadRefs } from './swagger';
 import { createGQLObject, mapParametersToFields } from './typeMap';
+import { BUILD_OPTIONS, buildOptions } from './build-options';
 
 type Endpoints = {[string]: Endpoint};
 
@@ -28,6 +30,10 @@ const schemaFromEndpoints = (endpoints: Endpoints, proxyUrl, headers) => {
       name: 'Mutation',
       fields: mutationFields
     });
+  }
+
+  if (buildOptions.includes(BUILD_OPTIONS.NaN)) {
+    graphQLSchema.types = [FloatOrNaN];
   }
 
   return new GraphQLSchema(graphQLSchema);

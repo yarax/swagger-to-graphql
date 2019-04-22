@@ -1,4 +1,5 @@
-import type {GraphQLOutputType, GraphQLInputType, GraphQLObjectType} from 'graphql/type/definition.js.flow';
+import { GraphQLScalarType } from 'graphql';
+import type {GraphQLOutputType, GraphQLInputType, GraphQLObjectType, GraphQLNamedType} from 'graphql/type/definition.js.flow';
 
 export type SwaggerToGraphQLOptions = {
   GQLProxyBaseUrl: string,
@@ -18,7 +19,8 @@ type EndpointParam = {
 
 export type RootGraphQLSchema = {
   query: GraphQLObjectType,
-  mutation?: GraphQLObjectType
+  mutation?: GraphQLObjectType,
+  types?: [GraphQLNamedType]
 }
 
 export type GraphQLParameters = {[string]: any};
@@ -66,3 +68,11 @@ export type SwaggerSchema = {
 export type RefType = {
   $Ref: SwaggerSchema
 }
+
+export const FloatOrNaN = new GraphQLScalarType({
+  name: 'FloatOrNaN',
+  description: 'Float type that be NaN in addition to null or a real value.',
+  serialize(value) {
+    return isNaN(value) ? 'NaN' : value;
+  }
+});
