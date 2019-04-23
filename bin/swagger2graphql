@@ -5,7 +5,7 @@ var graphql = require('graphql');
 var build = require('../lib');
 
 if (argv.help) {
-  console.log('\nUsage: swagger2graphql --swagger=/path/to/schema.json --build-options=Opt1,Opt2');
+  console.log('\nUsage: swagger2graphql --swagger=/path/to/schema.json --options=Opt1,Opt2');
 }
 
 if (!argv.swagger) {

@@ -5,7 +5,7 @@ import rp from 'request-promise';
 import { GraphQLSchema, GraphQLObjectType } from 'graphql';
 import { getAllEndPoints, loadSchema, loadRefs } from './swagger';
 import { createGQLObject, mapParametersToFields } from './typeMap';
-import { BUILD_OPTIONS, buildOptions } from './build-options';
+import { BUILD_OPTIONS, buildOptions } from './buildOptions';
 
 type Endpoints = {[string]: Endpoint};
 

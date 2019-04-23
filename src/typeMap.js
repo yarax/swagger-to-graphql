@@ -6,7 +6,7 @@ import type {GraphQLScalarType} from 'graphql/type/definition.js.flow';
 import _ from 'lodash';
 import * as graphql from 'graphql';
 import {getSchema} from './swagger';
-import { BUILD_OPTIONS, buildOptions } from './build-options';
+import { BUILD_OPTIONS, buildOptions } from './buildOptions';
 
 const primitiveTypes = {
   string: graphql.GraphQLString,

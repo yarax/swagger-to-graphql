@@ -50,8 +50,15 @@ You can use the library just to convert schemas without actually running server
 
 ```
 npm i -g swagger-to-graphql
-swagger-to-graphql --swagger=/path/to/swagger_schema.json > ./types.graphql
+# Valid `options` should be added as a comma separated list (case insensitive).
+# Current options are listed below.
+swagger-to-graphql --swagger=/path/to/swagger_schema.json --options=Opt1,Opt2 > ./types.graphql
 ```
+
+## CLI options
+
+- `allow-nan` - instead of Float types that are exclusively just a valid Float or null, use a scalar type `FloatOrNaN` which can be a valid Float, the string value "NaN", or null.
+- Others TBD
 
 ## Video from O.J. Sousa Rodrigues at Vienna.JS
 <a href="https://www.youtube.com/watch?v=551gKWJEsK0&feature=youtu.be&t=1269" target="_blank"><img src="https://s3.eu-central-1.amazonaws.com/yarax-public-assets/2019-02-13_13-01-45.png"/></a>
