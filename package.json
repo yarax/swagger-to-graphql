@@ -1,6 +1,6 @@
 {
   "name": "swagger-to-graphql-colinyoung",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "author": "Roman Krivtsov (additions by Colin Young)",
   "repository": {
     "type": "git",
