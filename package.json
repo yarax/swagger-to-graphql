@@ -1,10 +1,10 @@
 {
-  "name": "swagger-to-graphql",
+  "name": "swagger-to-graphql-colinyoung",
   "version": "1.4.5",
-  "author": "Roman Krivtsov",
+  "author": "Colin Young",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yarax/swagger-to-graphql.git"
+    "url": "https://github.com/colinyoung/swagger-to-graphql.git"
   },
   "bin": "./bin/swagger2graphql",
   "dependencies": {
