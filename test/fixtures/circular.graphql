@@ -10,10 +10,10 @@ input CircularInput {
 
 type Mutation {
   """Updates a circular structure"""
-  patch_swagger_graphql_circular(body: CircularInput): [Circular]
+  patch_swagger_graphql_circular(body: CircularInput): [Circular]!
 }
 
 type Query {
   """A retrieves a circular structure"""
-  get_swagger_graphql_circular: [Circular]
+  get_swagger_graphql_circular: [Circular]!
 }
