@@ -1,7 +1,7 @@
 // @flow
 import type {GraphQLParameters, Endpoint, GraphQLType, RootGraphQLSchema, SwaggerToGraphQLOptions, GraphQLTypeMap} from './types';
 import rp from 'request-promise';
-import { GraphQLSchema, GraphQLObjectType } from 'graphql';
+import { GraphQLSchema, GraphQLObjectType, GraphQLNonNull } from 'graphql';
 import { getAllEndPoints, loadSchema, loadRefs } from './swagger';
 import { createGQLObject, mapParametersToFields } from './typeMap';
 
@@ -52,7 +52,7 @@ const getFields = (endpoints, isMutation, gqlTypes, proxyUrl, headers): GraphQLT
     return !!endpoints[typeName].mutation === !!isMutation;
   }).reduce((result, typeName) => {
     const endpoint = endpoints[typeName];
-    const type = createGQLObject(endpoint.response, typeName, false, gqlTypes);
+    const type = GraphQLNonNull(createGQLObject(endpoint.response, typeName, false, gqlTypes));
     const gType: GraphQLType = {
       type,
       description: endpoint.description,
