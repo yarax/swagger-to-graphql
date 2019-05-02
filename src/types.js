@@ -71,7 +71,7 @@ export type RefType = {
 
 export const FloatOrNaN = new GraphQLScalarType({
   name: 'FloatOrNaN',
-  description: 'Float type that be NaN in addition to null or a real value.',
+  description: 'Float type that can be "NaN" in addition to null or a real value.',
   serialize(value) {
     return isNaN(value) ? 'NaN' : value;
   }

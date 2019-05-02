@@ -55,9 +55,10 @@ npm i -g swagger-to-graphql
 swagger-to-graphql --swagger=/path/to/swagger_schema.json --options=Opt1,Opt2 > ./types.graphql
 ```
 
-## CLI options
+## CLI options (case insensitive)
 
 - `allow-nan` - instead of Float types that are exclusively just a valid Float or null, use a scalar type `FloatOrNaN` which can be a valid Float, the string value "NaN", or null.
+- `empty-to-json` - when a field has no type or is empty, instead of generating an object with a `empty: String` value, return a more flexible JSON type.
 - Others TBD
 
 ## Video from O.J. Sousa Rodrigues at Vienna.JS
