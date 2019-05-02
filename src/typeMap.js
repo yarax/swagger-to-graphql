@@ -1,4 +1,6 @@
 // @flow
+import { GraphQLJSON, GraphQLJSONObject } from 'graphql-type-json';
+
 import type {GraphQLType, JSONSchemaType, EndpointParam, GraphQLTypeMap} from './types';
 import { FloatOrNaN } from './types';
 
@@ -48,6 +50,8 @@ const getRefProp = (jsonSchema: JSONSchemaType) => {
 
 const makeValidName = (name) => name.replace(/[^_0-9A-Za-z]/g, '_');  // eslint-disable-line no-param-reassign
 
+const hasNoProperties = (jsonSchema) => !Object.keys(jsonSchema.properties || {}).length;
+
 export const createGQLObject = (jsonSchema: JSONSchemaType, title: string, isInputType: boolean, gqlTypes: GraphQLTypeMap): GraphQLType => {
   title = (jsonSchema && jsonSchema.title) || title || '';  // eslint-disable-line no-param-reassign
   title = makeValidName(title); // eslint-disable-line no-param-reassign
@@ -87,6 +91,10 @@ export const createGQLObject = (jsonSchema: JSONSchemaType, title: string, isInp
     return new graphql.GraphQLList(getPrimitiveTypes(jsonSchema.items));
   }
 
+  if (hasNoProperties(jsonSchema) && buildOptions.includes(BUILD_OPTIONS.EmptyToJSON)) {
+    return GraphQLJSON;
+  }
+
   const description = jsonSchema.description;
   const fields = getTypeFields(jsonSchema, title, isInputType, gqlTypes);
   let result;
@@ -109,7 +117,7 @@ export const createGQLObject = (jsonSchema: JSONSchemaType, title: string, isInp
 
 
 export const getTypeFields = (jsonSchema: JSONSchemaType, title: string, isInputType: boolean, gqlTypes: GraphQLTypeMap) => {
-  if (!Object.keys(jsonSchema.properties || {}).length) {
+  if (hasNoProperties(jsonSchema)) {
     return {
       empty: {
         description: 'default field',
