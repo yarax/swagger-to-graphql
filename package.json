@@ -1,6 +1,6 @@
 {
   "name": "swagger-to-graphql-colinyoung",
-  "version": "1.5.3",
+  "version": "1.6.0",
   "author": "Roman Krivtsov (additions by Colin Young)",
   "repository": {
     "type": "git",
@@ -9,7 +9,7 @@
   "bin": "./bin/swagger2graphql",
   "dependencies": {
     "babel-runtime": "^6.25.0",
-    "graphql": "14.0.2",
+    "graphql": "^14.1.1",
     "graphql-type-json": "^0.3.0",
     "isomorphic-fetch": "^2.2.1",
     "js-yaml": "^3.8.4",
@@ -35,9 +35,8 @@
     "eslint-config-airbnb-es5": "^1.1.0",
     "eslint-plugin-react": "^6.5.0",
     "express": "^4.15.3",
-    "express-graphql": "^0.6.12",
+    "express-graphql": "^0.8.0",
     "flow-bin": "^0.66.0",
-    "graphql": "14.0.2",
     "mocha": "^3.1.2",
     "nock": "^9.2.6",
     "supertest": "^3.1.0"
