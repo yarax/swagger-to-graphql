@@ -120,8 +120,8 @@ type Pet {
   id: String
   category: Category
   name: String!
-  photoUrls: [String]!
-  tags: [Tag]
+  photoUrls: [String!]!
+  tags: [Tag!]
 
   """pet status in the store"""
   status: String
@@ -131,8 +131,8 @@ input PetInput {
   id: String
   category: CategoryInput
   name: String!
-  photoUrls: [String]!
-  tags: [TagInput]
+  photoUrls: [String!]!
+  tags: [TagInput!]
 
   """pet status in the store"""
   status: String
@@ -140,12 +140,12 @@ input PetInput {
 
 type Query {
   """Multiple status values can be provided with comma separated strings"""
-  findPetsByStatus(status: [String]!): [Pet]!
+  findPetsByStatus(status: [String!]!): [Pet!]!
 
   """
   Muliple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
   """
-  findPetsByTags(tags: [String]!): [Pet]!
+  findPetsByTags(tags: [String!]!): [Pet!]!
 
   """Returns a single pet"""
   getPetById(petId: String!): Pet!

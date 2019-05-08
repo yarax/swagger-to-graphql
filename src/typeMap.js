@@ -76,11 +76,11 @@ export const createGQLObject = (jsonSchema: JSONSchemaType, title: string, isInp
 
   if (jsonSchema.type === 'array') {
     if (jsonSchema.items && jsonSchema.items.$ref) {
-      return new graphql.GraphQLList(getExistingType(jsonSchema.items.$ref, isInputType, gqlTypes));
+      return new graphql.GraphQLList(graphql.GraphQLNonNull(getExistingType(jsonSchema.items.$ref, isInputType, gqlTypes)));
     } else if (isObjectType(jsonSchema.items)) {
-      return new graphql.GraphQLList(createGQLObject(jsonSchema.items, title + '_items', isInputType, gqlTypes));
+      return new graphql.GraphQLList(graphql.GraphQLNonNull(createGQLObject(jsonSchema.items, title + '_items', isInputType, gqlTypes)));
     }
-    return new graphql.GraphQLList(getPrimitiveTypes(jsonSchema.items));
+    return new graphql.GraphQLList(graphql.GraphQLNonNull(getPrimitiveTypes(jsonSchema.items)));
   }
 
   const description = jsonSchema.description;
