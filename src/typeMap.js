@@ -1,6 +1,7 @@
 // @flow
 import type {GraphQLType, JSONSchemaType, EndpointParam, GraphQLTypeMap} from './types';
 import type {GraphQLScalarType} from 'graphql/type/definition.js.flow';
+import { GraphQLJSONObject } from 'graphql-type-json';
 import _ from 'lodash';
 import * as graphql from 'graphql';
 import {getSchema} from './swagger';
@@ -86,7 +87,9 @@ export const createGQLObject = (jsonSchema: JSONSchemaType, title: string, isInp
   const description = jsonSchema.description;
   const fields = getTypeFields(jsonSchema, title, isInputType, gqlTypes);
   let result;
-  if (isInputType) {
+  if (!jsonSchema || !fields) {
+    result = GraphQLJSONObject;
+  } else if (isInputType) {
     result = new graphql.GraphQLInputObjectType({
       name: title,
       description,
@@ -106,12 +109,7 @@ export const createGQLObject = (jsonSchema: JSONSchemaType, title: string, isInp
 
 export const getTypeFields = (jsonSchema: JSONSchemaType, title: string, isInputType: boolean, gqlTypes: GraphQLTypeMap) => {
   if (!Object.keys(jsonSchema.properties || {}).length) {
-    return {
-      empty: {
-        description: 'default field',
-        type: graphql.GraphQLString
-      }
-    };
+    return null;
   }
   return () => {
     const properties = {};
