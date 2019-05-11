@@ -111,6 +111,9 @@ export const getAllEndPoints = (
   Object.keys(schema.paths).forEach(path => {
     const route = schema.paths[path];
     Object.keys(route).forEach(method => {
+      if (method === 'parameters') {
+        return;
+      }
       const obj = route[method];
       const isMutation =
         ['post', 'put', 'patch', 'delete'].indexOf(method) !== -1;
