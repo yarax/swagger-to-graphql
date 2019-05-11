@@ -1,4 +1,6 @@
 // @flow
+// TODO: fix no-param-reassign
+/* eslint-disable no-param-reassign */
 import type { GraphQLScalarType } from 'graphql/type/definition.js.flow';
 import _ from 'lodash';
 import * as graphql from 'graphql';
@@ -45,16 +47,103 @@ const getExistingType = (
     if (!schema) {
       throw new Error(`Definition ${refTypeName} was not found in schema`);
     }
+    // eslint-disable-next-line no-use-before-define
     return createGQLObject(schema, refTypeName, isInputType, gqlTypes);
   }
   return gqlTypes[typeName];
 };
 
+const getPrimitiveTypes = (jsonSchema: JSONSchemaType): GraphQLScalarType => {
+  let jsonType = jsonSchema.type;
+  const { format } = jsonSchema;
+  if (format === 'int64') {
+    jsonType = 'string';
+  }
+  const type = primitiveTypes[jsonType];
+  if (!type) {
+    throw new Error(`Cannot build primitive type "${jsonType}"`);
+  }
+  return type;
+};
+
+const jsonSchemaTypeToGraphQL = (
+  title: string,
+  jsonSchema: JSONSchemaType,
+  schemaName: string,
+  isInputType: boolean,
+  gqlTypes: GraphQLTypeMap,
+) => {
+  const baseType = (() => {
+    if (jsonSchema.$ref) {
+      return getExistingType(jsonSchema.$ref, isInputType, gqlTypes);
+    }
+    if (isObjectType(jsonSchema)) {
+      // eslint-disable-next-line no-use-before-define
+      return createGQLObject(
+        jsonSchema,
+        `${title}_${schemaName}`,
+        isInputType,
+        gqlTypes,
+      );
+    }
+    if (jsonSchema.type) {
+      return getPrimitiveTypes(jsonSchema);
+    }
+    throw new Error(
+      `Don't know how to handle schema ${JSON.stringify(
+        jsonSchema,
+      )} without type and schema`,
+    );
+  })();
+  return jsonSchema.required ? graphql.GraphQLNonNull(baseType) : baseType;
+};
+
+const makeValidName = name => name.replace(/[^_0-9A-Za-z]/g, '_');
+
+export const getTypeFields = (
+  jsonSchema: JSONSchemaType,
+  title: string,
+  isInputType: boolean,
+  gqlTypes: GraphQLTypeMap,
+) => {
+  if (!Object.keys(jsonSchema.properties || {}).length) {
+    return {
+      empty: {
+        description: 'default field',
+        type: graphql.GraphQLString,
+      },
+    };
+  }
+  return () => {
+    const properties = {};
+    if (jsonSchema.properties) {
+      Object.keys(jsonSchema.properties).forEach(key => {
+        properties[makeValidName(key)] = jsonSchema.properties[key];
+      });
+    }
+    return _.mapValues(properties, (propertySchema, propertyName) => {
+      const baseType = jsonSchemaTypeToGraphQL(
+        title,
+        propertySchema,
+        propertyName,
+        isInputType,
+        gqlTypes,
+      );
+      const type =
+        jsonSchema.required && jsonSchema.required.includes(propertyName)
+          ? graphql.GraphQLNonNull(baseType)
+          : baseType;
+      return {
+        description: propertySchema.description,
+        type,
+      };
+    });
+  };
+};
+
 const getRefProp = (jsonSchema: JSONSchemaType) => {
   return jsonSchema.$ref || (jsonSchema.schema && jsonSchema.schema.$ref);
 };
-
-const makeValidName = name => name.replace(/[^_0-9A-Za-z]/g, '_'); // eslint-disable-line no-param-reassign
 
 export const createGQLObject = (
   jsonSchema: JSONSchemaType,
@@ -62,12 +151,12 @@ export const createGQLObject = (
   isInputType: boolean,
   gqlTypes: GraphQLTypeMap,
 ): GraphQLType => {
-  title = (jsonSchema && jsonSchema.title) || title || ''; // eslint-disable-line no-param-reassign
-  title = makeValidName(title); // eslint-disable-line no-param-reassign
+  title = (jsonSchema && jsonSchema.title) || title || '';
+  title = makeValidName(title);
 
   if (isInputType && !title.endsWith('Input')) {
-    title += 'Input'; // eslint-disable-line no-param-reassign
-    jsonSchema = _.clone(jsonSchema); // eslint-disable-line no-param-reassign
+    title += 'Input';
+    jsonSchema = _.clone(jsonSchema);
   }
 
   if (title in gqlTypes) {
@@ -76,7 +165,6 @@ export const createGQLObject = (
 
   if (!jsonSchema) {
     jsonSchema = {
-      // eslint-disable-line no-param-reassign
       type: 'object',
       properties: {},
       description: '',
@@ -129,91 +217,6 @@ export const createGQLObject = (
   }
   gqlTypes[title] = result;
   return result;
-};
-
-export const getTypeFields = (
-  jsonSchema: JSONSchemaType,
-  title: string,
-  isInputType: boolean,
-  gqlTypes: GraphQLTypeMap,
-) => {
-  if (!Object.keys(jsonSchema.properties || {}).length) {
-    return {
-      empty: {
-        description: 'default field',
-        type: graphql.GraphQLString,
-      },
-    };
-  }
-  return () => {
-    const properties = {};
-    if (jsonSchema.properties) {
-      Object.keys(jsonSchema.properties).forEach(key => {
-        properties[makeValidName(key)] = jsonSchema.properties[key];
-      });
-    }
-    return _.mapValues(properties, (propertySchema, propertyName) => {
-      const baseType = jsonSchemaTypeToGraphQL(
-        title,
-        propertySchema,
-        propertyName,
-        isInputType,
-        gqlTypes,
-      );
-      const type =
-        jsonSchema.required && jsonSchema.required.includes(propertyName)
-          ? graphql.GraphQLNonNull(baseType)
-          : baseType;
-      return {
-        description: propertySchema.description,
-        type,
-      };
-    });
-  };
-};
-
-const jsonSchemaTypeToGraphQL = (
-  title: string,
-  jsonSchema: JSONSchemaType,
-  schemaName: string,
-  isInputType: boolean,
-  gqlTypes: GraphQLTypeMap,
-) => {
-  const baseType = (() => {
-    if (jsonSchema.$ref) {
-      return getExistingType(jsonSchema.$ref, isInputType, gqlTypes);
-    }
-    if (isObjectType(jsonSchema)) {
-      return createGQLObject(
-        jsonSchema,
-        `${title}_${schemaName}`,
-        isInputType,
-        gqlTypes,
-      );
-    }
-    if (jsonSchema.type) {
-      return getPrimitiveTypes(jsonSchema);
-    }
-    throw new Error(
-      `Don't know how to handle schema ${JSON.stringify(
-        jsonSchema,
-      )} without type and schema`,
-    );
-  })();
-  return jsonSchema.required ? graphql.GraphQLNonNull(baseType) : baseType;
-};
-
-const getPrimitiveTypes = (jsonSchema: JSONSchemaType): GraphQLScalarType => {
-  let jsonType = jsonSchema.type;
-  const { format } = jsonSchema;
-  if (format === 'int64') {
-    jsonType = 'string';
-  }
-  const type = primitiveTypes[jsonType];
-  if (!type) {
-    throw new Error(`Cannot build primitive type "${jsonType}"`);
-  }
-  return type;
 };
 
 export const mapParametersToFields = (

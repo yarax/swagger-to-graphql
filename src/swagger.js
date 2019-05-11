@@ -9,17 +9,17 @@ import type {
   GraphQLParameters,
 } from './types';
 
-let __schema;
+let globalSchema;
 
 export const getSchema = () => {
-  if (!__schema || !Object.keys(__schema).length) {
+  if (!globalSchema || !Object.keys(globalSchema).length) {
     throw new Error('Schema was not loaded');
   }
-  return __schema;
+  return globalSchema;
 };
 
 const getGQLTypeNameFromURL = (method: string, url: string) => {
-  const fromUrl = url.replace(/[\{\}]+/g, '').replace(/[^a-zA-Z0-9_]+/g, '_');
+  const fromUrl = url.replace(/[{}]+/g, '').replace(/[^a-zA-Z0-9_]+/g, '_');
   return `${method}${fromUrl}`;
 };
 
@@ -37,12 +37,12 @@ const getSuccessResponse = (responses: Responses) => {
 };
 
 export const loadSchema = async (pathToSchema: string) => {
-  __schema = await refParser.bundle(pathToSchema);
-  return __schema;
+  globalSchema = await refParser.bundle(pathToSchema);
+  return globalSchema;
 };
 
 export const loadRefs = async (pathToSchema: string) => {
-  return await refParser.resolve(pathToSchema);
+  return refParser.resolve(pathToSchema);
 };
 
 const replaceOddChars = str => str.replace(/[^_a-zA-Z0-9]/g, '_');
@@ -72,13 +72,13 @@ const getServerPath = schema => {
 };
 
 const getParamDetails = (param, schema, refResolver) => {
-  let _param = param;
+  let resolvedParam = param;
   if (param.$ref) {
-    _param = refResolver.get(param.$ref);
+    resolvedParam = refResolver.get(param.$ref);
   }
-  const name = replaceOddChars(_param.name);
-  const { type } = _param;
-  const jsonSchema = _param;
+  const name = replaceOddChars(resolvedParam.name);
+  const { type } = resolvedParam;
+  const jsonSchema = resolvedParam;
 
   return { name, type, jsonSchema };
 };

@@ -14,38 +14,6 @@ import { createGQLObject, mapParametersToFields } from './typeMap';
 
 type Endpoints = { [string]: Endpoint };
 
-const schemaFromEndpoints = (endpoints: Endpoints, proxyUrl, headers) => {
-  const gqlTypes = {};
-  const queryFields = getFields(endpoints, false, gqlTypes, proxyUrl, headers);
-  if (!Object.keys(queryFields).length) {
-    throw new Error('Did not find any GET endpoints');
-  }
-  const rootType = new GraphQLObjectType({
-    name: 'Query',
-    fields: queryFields,
-  });
-
-  const graphQLSchema: RootGraphQLSchema = {
-    query: rootType,
-  };
-
-  const mutationFields = getFields(
-    endpoints,
-    true,
-    gqlTypes,
-    proxyUrl,
-    headers,
-  );
-  if (Object.keys(mutationFields).length) {
-    graphQLSchema.mutation = new GraphQLObjectType({
-      name: 'Mutation',
-      fields: mutationFields,
-    });
-  }
-
-  return new GraphQLSchema(graphQLSchema);
-};
-
 const resolver = (
   endpoint: Endpoint,
   proxyUrl: ?(Function | string),
@@ -89,9 +57,40 @@ const getFields = (
         args: mapParametersToFields(endpoint.parameters, typeName, gqlTypes),
         resolve: resolver(endpoint, proxyUrl, headers),
       };
-      result[typeName] = gType;
-      return result;
+      return { ...result, [typeName]: gType };
     }, {});
+};
+
+const schemaFromEndpoints = (endpoints: Endpoints, proxyUrl, headers) => {
+  const gqlTypes = {};
+  const queryFields = getFields(endpoints, false, gqlTypes, proxyUrl, headers);
+  if (!Object.keys(queryFields).length) {
+    throw new Error('Did not find any GET endpoints');
+  }
+  const rootType = new GraphQLObjectType({
+    name: 'Query',
+    fields: queryFields,
+  });
+
+  const graphQLSchema: RootGraphQLSchema = {
+    query: rootType,
+  };
+
+  const mutationFields = getFields(
+    endpoints,
+    true,
+    gqlTypes,
+    proxyUrl,
+    headers,
+  );
+  if (Object.keys(mutationFields).length) {
+    graphQLSchema.mutation = new GraphQLObjectType({
+      name: 'Mutation',
+      fields: mutationFields,
+    });
+  }
+
+  return new GraphQLSchema(graphQLSchema);
 };
 
 const build = async (
