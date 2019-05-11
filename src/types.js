@@ -1,46 +1,49 @@
-import type {GraphQLOutputType, GraphQLInputType, GraphQLObjectType} from 'graphql/type/definition.js.flow';
+import type {
+  GraphQLOutputType,
+  GraphQLInputType,
+  GraphQLObjectType,
+} from 'graphql/type/definition.js.flow';
 
 export type SwaggerToGraphQLOptions = {
   GQLProxyBaseUrl: string,
-  BearerToken?: string
-}
+  BearerToken?: string,
+};
 
 type Param = {
   type: string,
-  name: string
-}
+  name: string,
+};
 
 type EndpointParam = {
   type: string,
   name: string,
-  jsonSchema: string
-}
+  jsonSchema: string,
+};
 
 export type RootGraphQLSchema = {
   query: GraphQLObjectType,
-  mutation?: GraphQLObjectType
-}
+  mutation?: GraphQLObjectType,
+};
 
-export type GraphQLParameters = {[string]: any};
+export type GraphQLParameters = { [string]: any };
 
-export type GraphQLTypeMap = {[string]: GraphQLType};
+export type GraphQLTypeMap = { [string]: GraphQLType };
 
 export type Endpoint = {
   parameters: Array<EndpointParam>,
   description?: string,
   response: Object,
-  request: (args:GraphQLParameters, url: string) => Object,
-  mutation: boolean
-}
-
+  request: (args: GraphQLParameters, url: string) => Object,
+  mutation: boolean,
+};
 
 export type GraphQLType = GraphQLOutputType | GraphQLInputType;
 
 export type Responses = {
-        [string|number] : {
-          schema?: Object
-        }
-      };
+  [string | number]: {
+    schema?: Object,
+  },
+};
 
 export type JSONSchemaType = {
   $ref?: string,
@@ -49,8 +52,8 @@ export type JSONSchemaType = {
   properties?: Array<string>,
   title?: string,
   description?: string,
-  required?: boolean | Array<string>
-}
+  required?: boolean | Array<string>,
+};
 
 export type SwaggerSchema = {
   paths: {
@@ -58,11 +61,11 @@ export type SwaggerSchema = {
       description?: string,
       operationId?: string,
       parameters?: Array<Param>,
-      responses: Responses
-    }
-  }
-}
+      responses: Responses,
+    },
+  },
+};
 
 export type RefType = {
-  $Ref: SwaggerSchema
-}
+  $Ref: SwaggerSchema,
+};
