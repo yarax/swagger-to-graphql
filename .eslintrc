@@ -1,7 +1,0 @@
-{
-    "extends": "eslint-config-airbnb-es5",
-    "rules": {
-        "eol-last": 0,
-        "valid-jsdoc": 0
-    }
-}
