@@ -63,6 +63,6 @@
     "lint:fix": "eslint . --fix",
     "prepare": "npm run build",
     "start": "node example/app.js",
-    "test": "mocha --require babel-core/register"
+    "test": "mocha"
   }
 }
