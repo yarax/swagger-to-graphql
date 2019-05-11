@@ -5,7 +5,7 @@ type DeepStructure {
 
 type DeepStructure_body {
   url: DeepStructure_body_url!
-  images: [String]!
+  images: [String!]!
   version: String!
 }
 
@@ -15,5 +15,5 @@ type DeepStructure_body_url {
 }
 
 type Query {
-  get_test: [DeepStructure]
+  get_test: [DeepStructure!]!
 }
