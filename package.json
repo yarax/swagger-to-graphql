@@ -58,8 +58,8 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "babel src -d lib",
-    "lint": "eslint src/",
-    "lint:fix": "eslint src/ --fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "prepare": "npm run build",
     "start": "node example/app.js",
     "test": "mocha"

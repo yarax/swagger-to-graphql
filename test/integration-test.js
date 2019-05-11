@@ -1,20 +1,23 @@
 const nock = require('nock');
 const request = require('supertest');
-const graphQLSchema = require('../lib');
 const express = require('express');
 const graphqlHTTP = require('express-graphql');
+const graphQLSchema = require('../lib');
 
-const getServer = async (schemaPath) => {
+const getServer = async schemaPath => {
   const app = express();
   const schema = await graphQLSchema(schemaPath, 'http://mock-backend');
-  app.use('/graphql', graphqlHTTP(() => {
-    return {
-      schema,
-      graphiql: true
-    };
-  }));
+  app.use(
+    '/graphql',
+    graphqlHTTP(() => {
+      return {
+        schema,
+        graphiql: true,
+      };
+    }),
+  );
   return app;
-}
+};
 
 describe('swagger-to-graphql', () => {
   beforeEach(() => {
@@ -30,16 +33,18 @@ describe('swagger-to-graphql', () => {
   it('should convert graphql parameter names back to swagger parameter names', async () => {
     const nockScope = nock('http://mock-backend', {
       reqheaders: {
-        'dashed-request-header': 'mock request header'
-      }
+        'dashed-request-header': 'mock request header',
+      },
     })
       .get('/path/mock%20path')
       .query({
-        'dashed-query-param': 'mock query param'
+        'dashed-query-param': 'mock query param',
       })
-      .reply(200, { result: 'mocked'});
+      .reply(200, { result: 'mocked' });
 
-    await request(await getServer(require.resolve('./fixtures/special-parameters.json')))
+    await request(
+      await getServer(require.resolve('./fixtures/special-parameters.json')),
+    )
       .post('/graphql')
       .send({
         query: `
@@ -50,14 +55,14 @@ query { get_path_dashed_path_param(
   {
     result
   }
-}`
+}`,
       })
       .expect({
         data: {
           get_path_dashed_path_param: {
-            result: 'mocked'
-          }
-        }
+            result: 'mocked',
+          },
+        },
       });
 
     nockScope.done();
