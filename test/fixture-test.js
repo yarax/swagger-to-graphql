@@ -1,7 +1,7 @@
 const graphql = require('graphql');
 const fs = require('fs');
 const { expect } = require('chai');
-const graphQLSchema = require('../lib');
+const graphQLSchema = require('../src');
 
 describe('Fixture', () => {
   const directory = `${__dirname}/fixtures/`;

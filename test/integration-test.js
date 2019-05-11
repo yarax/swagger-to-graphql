@@ -2,7 +2,7 @@ const nock = require('nock');
 const request = require('supertest');
 const express = require('express');
 const graphqlHTTP = require('express-graphql');
-const graphQLSchema = require('../lib');
+const graphQLSchema = require('../src');
 
 const getServer = async schemaPath => {
   const app = express();
