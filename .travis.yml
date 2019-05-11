@@ -5,5 +5,5 @@ script:
   - npm run lint
   - npm run build
   # Ensure there are no file changes due to the build
-  - test -z $(git diff-index --name-only HEAD -- lib)
+  - test -z $(git diff-index --name-only HEAD --)
   - npm run test
