@@ -31,13 +31,16 @@
     "babel-preset-stage-0": "^6.24.1",
     "chai": "^4.2.0",
     "eslint": "^5.16.0",
-    "eslint-config-airbnb-es5": "^1.2.0",
-    "eslint-plugin-react": "^7.13.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-config-prettier": "^4.2.0",
+    "eslint-plugin-import": "^2.17.2",
+    "eslint-plugin-prettier": "^3.0.1",
     "express": "^4.16.4",
     "express-graphql": "^0.8.0",
     "flow-bin": "^0.98.1",
     "mocha": "^6.1.4",
     "nock": "^10.0.6",
+    "prettier": "^1.17.0",
     "supertest": "^4.0.2"
   },
   "keywords": [
@@ -53,6 +56,7 @@
   "scripts": {
     "build": "babel src -d lib",
     "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
     "prepare": "npm run build",
     "start": "node example/app.js",
     "test": "mocha"
