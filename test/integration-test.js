@@ -1,20 +1,18 @@
-const nock = require('nock');
-const request = require('supertest');
-const express = require('express');
-const graphqlHTTP = require('express-graphql');
-const graphQLSchema = require('../lib');
+import nock from 'nock';
+import request from 'supertest';
+import express from 'express';
+import graphqlHTTP from 'express-graphql';
+import graphQLSchema from '../src';
 
 const getServer = async schemaPath => {
   const app = express();
   const schema = await graphQLSchema(schemaPath, 'http://mock-backend');
   app.use(
     '/graphql',
-    graphqlHTTP(() => {
-      return {
-        schema,
-        graphiql: true,
-      };
-    }),
+    graphqlHTTP(() => ({
+      schema,
+      graphiql: true,
+    })),
   );
   return app;
 };
