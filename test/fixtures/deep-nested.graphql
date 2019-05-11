@@ -1,0 +1,19 @@
+type DeepStructure {
+  id: String!
+  body: DeepStructure_body!
+}
+
+type DeepStructure_body {
+  url: DeepStructure_body_url!
+  images: [String!]!
+  version: String!
+}
+
+type DeepStructure_body_url {
+  protocol: String
+  baseURL: String
+}
+
+type Query {
+  get_test: [DeepStructure!]!
+}

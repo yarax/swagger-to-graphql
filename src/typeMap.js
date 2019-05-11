@@ -130,7 +130,9 @@ export const getTypeFields = (
         gqlTypes,
       );
       const type =
-        jsonSchema.required && jsonSchema.required.includes(propertyName)
+        jsonSchema.required &&
+        jsonSchema.required.includes(propertyName) &&
+        !(baseType instanceof graphql.GraphQLNonNull)
           ? graphql.GraphQLNonNull(baseType)
           : baseType;
       return {
