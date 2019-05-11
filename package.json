@@ -58,6 +58,7 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "babel src -d lib",
+    "libchanged": "test -z $(git diff-index --name-only HEAD -- lib)",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prepare": "npm run build",
