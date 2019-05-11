@@ -183,20 +183,26 @@ export const createGQLObject = (
   if (jsonSchema.type === 'array') {
     if (jsonSchema.items && jsonSchema.items.$ref) {
       return new graphql.GraphQLList(
-        getExistingType(jsonSchema.items.$ref, isInputType, gqlTypes),
+        graphql.GraphQLNonNull(
+          getExistingType(jsonSchema.items.$ref, isInputType, gqlTypes),
+        ),
       );
     }
     if (isObjectType(jsonSchema.items)) {
       return new graphql.GraphQLList(
-        createGQLObject(
-          jsonSchema.items,
-          `${title}_items`,
-          isInputType,
-          gqlTypes,
+        graphql.GraphQLNonNull(
+          createGQLObject(
+            jsonSchema.items,
+            `${title}_items`,
+            isInputType,
+            gqlTypes,
+          ),
         ),
       );
     }
-    return new graphql.GraphQLList(getPrimitiveTypes(jsonSchema.items));
+    return new graphql.GraphQLList(
+      graphql.GraphQLNonNull(getPrimitiveTypes(jsonSchema.items)),
+    );
   }
 
   const { description } = jsonSchema;
