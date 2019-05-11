@@ -1,7 +1,7 @@
-const graphql = require('graphql');
-const fs = require('fs');
-const { expect } = require('chai');
-const graphQLSchema = require('../src');
+import * as graphql from 'graphql';
+import fs from 'fs';
+import { expect } from 'chai';
+import graphQLSchema from '../src';
 
 describe('Fixture', () => {
   const directory = `${__dirname}/fixtures/`;
@@ -9,14 +9,13 @@ describe('Fixture', () => {
     if (file.endsWith('.json')) {
       describe(file, () => {
         const graphqlFile = file.replace('.json', '.graphql');
-        it(`should convert to ${graphqlFile}`, () => {
-          return graphQLSchema(directory + file).then(schema => {
+        it(`should convert to ${graphqlFile}`, () =>
+          graphQLSchema(directory + file).then(schema => {
             const graphqlfile = directory + graphqlFile;
             const graphschema = graphql.printSchema(schema);
             const expected = fs.readFileSync(graphqlfile, 'utf8');
             expect(graphschema).to.equal(expected);
-          });
-        });
+          }));
       });
     }
   });
