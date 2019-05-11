@@ -64,6 +64,7 @@ const getFields = (
 const schemaFromEndpoints = (endpoints: Endpoints, proxyUrl, headers) => {
   const gqlTypes = {};
   const queryFields = getFields(endpoints, false, gqlTypes, proxyUrl, headers);
+
   if (!Object.keys(queryFields).length) {
     throw new Error('Did not find any GET endpoints');
   }
