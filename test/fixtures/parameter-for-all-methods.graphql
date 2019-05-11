@@ -1,0 +1,8 @@
+type get_mock_path {
+  """default field"""
+  empty: String
+}
+
+type Query {
+  get_mock_path(id: String!): get_mock_path!
+}
