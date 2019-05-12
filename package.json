@@ -61,6 +61,7 @@
     "libchanged": "test -z \"$(git diff HEAD)\" || (git diff HEAD && false)",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "prebuild": "prettier --write \"{bin,src,test,example}/**/*.js\" *.js",
     "prepare": "npm run build",
     "start": "node example/app.js",
     "test": "mocha"
