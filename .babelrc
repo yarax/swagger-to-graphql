@@ -1,4 +1,18 @@
 {
-  "presets": ["es2015", "stage-0"],
-  "plugins": ["add-module-exports", "syntax-flow", "transform-flow-strip-types", "transform-runtime"]
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "node": "8"
+        }
+      }
+    ]
+  ],
+  "plugins": [
+    "@babel/plugin-syntax-flow",
+    "@babel/plugin-transform-flow-strip-types",
+    "@babel/plugin-transform-runtime",
+    "babel-plugin-add-module-exports"
+  ]
 }
