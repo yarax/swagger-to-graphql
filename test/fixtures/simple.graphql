@@ -1,0 +1,7 @@
+type get_mock_path {
+  result: String!
+}
+
+type Query {
+  get_mock_path: get_mock_path!
+}
