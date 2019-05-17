@@ -1,3 +1,5 @@
+// @flow
+
 import type {
   GraphQLOutputType,
   GraphQLInputType,
@@ -55,7 +57,19 @@ export type JSONSchemaType = {
   required?: boolean | Array<string>,
 };
 
+export type ServerObject = {
+  url: string,
+  description: string,
+  variables: {
+    [string]: string,
+  },
+};
+
 export type SwaggerSchema = {
+  host?: string,
+  basePath?: string,
+  schemes?: [string],
+  servers: ServerObject[],
   paths: {
     [string]: {
       description?: string,

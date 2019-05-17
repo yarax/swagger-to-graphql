@@ -1,0 +1,29 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Minimal swagger file",
+    "version": "1.0.0"
+  },
+  "host": "mock-host",
+  "basePath": "/mock-basepath",
+  "paths": {
+    "/mock-path": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "gets the mock resource",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "type": "string"
+                }
+              },
+              "required": ["result"]
+            }
+          }
+        }
+      }
+    }
+  }
+}
