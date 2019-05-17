@@ -63,6 +63,7 @@
     "lint:fix": "eslint . --fix",
     "prepare": "npm run build",
     "start": "node example/app.js",
-    "test": "mocha"
+    "test": "mocha",
+    "test:watch": "npm run test -- --watch"
   }
 }
