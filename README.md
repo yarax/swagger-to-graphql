@@ -40,7 +40,7 @@ graphQLSchema(pathToSwaggerSchema, proxyUrl, customHeaders).then(schema => {
 ```
 
 Constructor (graphQLSchema) arguments:
-* `pathToSwaggerSchema` (string) is a path to your local swagger schema file. *required*
+* `pathToSwaggerSchema` (string) is a path or URL to your swagger schema file. *required*
 * `proxyUrl` (string) base URL which will be used to hit your HTTP API. Can be taken either from Swagger schema `baseUrl` configuration or from this parameter.
 * `customHeaders` (object) key value object of custom headers, which should be included to the HTTP request. Can be used for example for authorization (look at the example above)
 
