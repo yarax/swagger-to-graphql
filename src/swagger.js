@@ -47,28 +47,37 @@ export const loadRefs = async (pathToSchema: string) => {
 
 const replaceOddChars = str => str.replace(/[^_a-zA-Z0-9]/g, '_');
 
-const getServerPath = schema => {
+export const getServerPath = (schema: SwaggerSchema) => {
   const server =
     schema.servers && Array.isArray(schema.servers)
       ? schema.servers[0]
-      : schema.servers;
+      : schema.host
+      ? [
+          (schema.schemes && schema.schemes[0]) || 'http',
+          '://',
+          schema.host,
+          schema.basePath,
+        ]
+          .filter(Boolean)
+          .join('')
+      : undefined;
   if (!server) {
     return undefined;
   }
   if (typeof server === 'string') {
     return server;
   }
-  let { url } = server;
-  if (server.variables) {
-    Object.keys(server.variables).forEach(variable => {
-      let value = server.variables[variable];
-      if (typeof value === 'object') {
-        value = value.default || value.enum[0];
-      }
-      url = url.replace(`{${variable}}`, value);
-    });
-  }
-  return url;
+  const { url, variables } = server;
+  return variables
+    ? Object.keys(server.variables).reduce((acc, variableName) => {
+        const variable = server.variables[variableName];
+        const value =
+          typeof variable === 'string'
+            ? variable
+            : variable.default || variable.enum[0];
+        return acc.replace(`{${variableName}}`, value);
+      }, url)
+    : url;
 };
 
 const getParamDetails = (param, schema, refResolver) => {
