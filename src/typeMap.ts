@@ -1,6 +1,17 @@
 // TODO: fix no-param-reassign
 /* eslint-disable no-param-reassign */
-import * as graphql from 'graphql';
+import {
+  GraphQLBoolean,
+  GraphQLFloat,
+  GraphQLInputObjectType,
+  GraphQLInt,
+  GraphQLList,
+  GraphQLNonNull,
+  GraphQLObjectType,
+  GraphQLOutputType,
+  GraphQLScalarType,
+  GraphQLString,
+} from 'graphql';
 import _ from 'lodash';
 import {
   ArraySchema,
@@ -16,14 +27,32 @@ import {
 } from './types';
 import { getSchema } from './swagger';
 
-const primitiveTypes = {
-  string: graphql.GraphQLString,
-  date: graphql.GraphQLString,
-  integer: graphql.GraphQLInt,
-  number: graphql.GraphQLFloat,
-  boolean: graphql.GraphQLBoolean,
-};
+export function parseResponse(response: string, returnType: GraphQLOutputType) {
+  const nullableType =
+    returnType instanceof GraphQLNonNull ? returnType.ofType : returnType;
+  if (
+    nullableType instanceof GraphQLObjectType ||
+    nullableType instanceof GraphQLList
+  ) {
+    return JSON.parse(response);
+  }
+  if (nullableType instanceof GraphQLScalarType) {
+    if (nullableType.name === 'String') {
+      return response;
+    }
+    if (nullableType.name === 'Int') {
+      return parseInt(response, 10);
+    }
+    if (nullableType.name === 'Float') {
+      return parseFloat(response);
+    }
+    if (nullableType.name === 'Boolean') {
+      return Boolean(response);
+    }
+  }
 
+  throw new Error(`Unexpected returnType ${nullableType}`);
+}
 function isRefType(input: JSONSchemaType): input is RefType {
   return Object.keys(input).includes('$ref');
 }
@@ -43,13 +72,26 @@ const isArrayType = (jsonSchema: JSONSchemaType): jsonSchema is ArraySchema =>
   !isBodyType(jsonSchema) &&
   (Object.keys(jsonSchema).includes('items') || jsonSchema.type === 'array');
 
-function isScalarType(input: JSONSchemaType): input is ScalarSchema {
-  return Object.keys(input).includes('format');
-}
-
 const getTypeNameFromRef = (ref: string) => {
   const cutRef = ref.replace('#/definitions/', '');
   return cutRef.replace(/\//, '_');
+};
+
+const primitiveTypes = {
+  string: GraphQLString,
+  date: GraphQLString,
+  integer: GraphQLInt,
+  number: GraphQLFloat,
+  boolean: GraphQLBoolean,
+};
+
+const getPrimitiveTypes = (jsonSchema: ScalarSchema): GraphQLScalarType => {
+  const jsonType = jsonSchema.format === 'int64' ? 'string' : jsonSchema.type;
+  const type = primitiveTypes[jsonType];
+  if (!type) {
+    throw new Error(`Cannot build primitive type "${jsonType}"`);
+  }
+  return type;
 };
 
 const getExistingType = (
@@ -72,20 +114,6 @@ const getExistingType = (
     return createGQLObject(schema, refTypeName, isInputType, gqlTypes);
   }
   return gqlTypes[typeName];
-};
-
-const getPrimitiveTypes = (
-  jsonSchema: JSONSchemaNoRefOrBody,
-): graphql.GraphQLScalarType => {
-  let jsonType = jsonSchema.type;
-  if (isScalarType(jsonSchema) && jsonSchema.format === 'int64') {
-    jsonType = 'string';
-  }
-  const type = primitiveTypes[jsonType];
-  if (!type) {
-    throw new Error(`Cannot build primitive type "${jsonType}"`);
-  }
-  return type;
 };
 
 export const jsonSchemaTypeToGraphQL = (
@@ -127,7 +155,7 @@ export const jsonSchemaTypeToGraphQL = (
     );
   })();
   return !isRefType(jsonSchema) && jsonSchema.required === true
-    ? graphql.GraphQLNonNull(baseType)
+    ? GraphQLNonNull(baseType)
     : baseType;
 };
 
@@ -146,7 +174,7 @@ export const getTypeFields = (
     return {
       empty: {
         description: 'default field',
-        type: graphql.GraphQLString,
+        type: GraphQLString,
       },
     };
   }
@@ -171,8 +199,8 @@ export const getTypeFields = (
           isObjectType(jsonSchema) &&
           jsonSchema.required &&
           jsonSchema.required.includes(propertyName) &&
-          !(baseType instanceof graphql.GraphQLNonNull)
-            ? graphql.GraphQLNonNull(baseType)
+          !(baseType instanceof GraphQLNonNull)
+            ? GraphQLNonNull(baseType)
             : baseType;
         return {
           description: isRefType(propertySchema)
@@ -231,15 +259,15 @@ export const createGQLObject = (
 
   if (isArrayType(jsonSchema)) {
     if (isRefType(jsonSchema.items)) {
-      return new graphql.GraphQLList(
-        graphql.GraphQLNonNull(
+      return new GraphQLList(
+        GraphQLNonNull(
           getExistingType(jsonSchema.items.$ref, isInputType, gqlTypes),
         ),
       );
     }
     if (isObjectType(jsonSchema.items) || isArrayType(jsonSchema.items)) {
-      return new graphql.GraphQLList(
-        graphql.GraphQLNonNull(
+      return new GraphQLList(
+        GraphQLNonNull(
           createGQLObject(
             jsonSchema.items,
             `${title}_items`,
@@ -249,22 +277,20 @@ export const createGQLObject = (
         ),
       );
     }
-    return new graphql.GraphQLList(
-      graphql.GraphQLNonNull(getPrimitiveTypes(jsonSchema.items)),
-    );
+    return new GraphQLList(GraphQLNonNull(getPrimitiveTypes(jsonSchema.items)));
   }
 
   const { description } = jsonSchema;
   const fields = getTypeFields(jsonSchema, title, isInputType, gqlTypes);
   let result;
   if (isInputType) {
-    result = new graphql.GraphQLInputObjectType({
+    result = new GraphQLInputObjectType({
       name: title,
       description,
       fields,
     });
   } else {
-    result = new graphql.GraphQLObjectType({
+    result = new GraphQLObjectType({
       name: title,
       description,
       fields,

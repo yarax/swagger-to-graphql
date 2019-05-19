@@ -4,6 +4,7 @@ import {
   GraphQLFieldConfigMap,
   GraphQLNonNull,
   GraphQLObjectType,
+  GraphQLResolveInfo,
   GraphQLSchema,
 } from 'graphql';
 import {
@@ -14,13 +15,22 @@ import {
   SwaggerToGraphQLOptions,
 } from './types';
 import { getAllEndPoints, loadRefs, loadSchema } from './swagger';
-import { jsonSchemaTypeToGraphQL, mapParametersToFields } from './typeMap';
+import {
+  jsonSchemaTypeToGraphQL,
+  mapParametersToFields,
+  parseResponse,
+} from './typeMap';
 
 const resolver = (
   endpoint: Endpoint,
   proxyUrl: Function | string | null,
   customHeaders = {},
-) => async (_, args: GraphQLParameters, opts: SwaggerToGraphQLOptions) => {
+) => async (
+  _,
+  args: GraphQLParameters,
+  opts: SwaggerToGraphQLOptions,
+  info: GraphQLResolveInfo,
+) => {
   const proxy = !proxyUrl
     ? opts.GQLProxyBaseUrl
     : typeof proxyUrl === 'function'
@@ -34,7 +44,7 @@ const resolver = (
     req.headers = Object.assign(req.headers, customHeaders);
   }
   const res = await rp(req);
-  return JSON.parse(res);
+  return parseResponse(res, info.returnType);
 };
 
 const getFields = (

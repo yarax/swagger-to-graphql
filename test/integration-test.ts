@@ -220,4 +220,30 @@ describe('swagger-to-graphql', () => {
       nockScope.done();
     });
   });
+
+  describe('return-scalar', () => {
+    const getMockPathQuery = `
+        query { 
+          get_mock_path
+        }
+        `;
+    it('should return scalars', async () => {
+      const nockScope = nock('http://mock-host')
+        .get('/mock-basepath/mock-path')
+        .reply(200, 'mock result');
+
+      await request(
+        await createServer(require.resolve('./fixtures/return-scalar.json')),
+      )
+        .post('/graphql')
+        .send({
+          query: getMockPathQuery,
+        })
+        .expect({
+          data: { get_mock_path: 'mock result' },
+        });
+
+      nockScope.done();
+    });
+  });
 });
