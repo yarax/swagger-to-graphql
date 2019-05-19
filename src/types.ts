@@ -1,85 +1,134 @@
-// @flow
-
-import type {
+import {
   GraphQLOutputType,
   GraphQLInputType,
   GraphQLObjectType,
-} from 'graphql/type/definition.js.flow';
+} from 'graphql';
+import { CoreOptions, Request } from 'request';
 
-export type SwaggerToGraphQLOptions = {
-  GQLProxyBaseUrl: string,
-  BearerToken?: string,
-};
+import JSON = Mocha.reporters.JSON;
 
-type Param = {
-  type: string,
-  name: string,
-};
+export interface SwaggerToGraphQLOptions extends Request {
+  GQLProxyBaseUrl: string;
+  BearerToken?: string;
+}
 
-type EndpointParam = {
-  type: string,
-  name: string,
-  jsonSchema: string,
-};
+interface Param {
+  type: string;
+  name: string;
+}
 
-export type RootGraphQLSchema = {
-  query: GraphQLObjectType,
-  mutation?: GraphQLObjectType,
-};
+export interface EndpointParam {
+  type: string;
+  name: string;
+  jsonSchema: JSONSchemaType;
+}
 
-export type GraphQLParameters = { [string]: any };
+export interface RootGraphQLSchema {
+  query: GraphQLObjectType;
+  mutation?: GraphQLObjectType;
+}
 
-export type Endpoint = {
-  parameters: Array<EndpointParam>,
-  description?: string,
-  response: Object,
-  request: (args: GraphQLParameters, url: string) => Object,
-  mutation: boolean,
-};
+export interface GraphQLParameters {
+  [key: string]: any;
+}
+
+export interface RequestOptions extends CoreOptions {
+  url: string;
+}
+
+export interface Endpoint {
+  parameters: EndpointParam[];
+  description?: string;
+  response: JSONSchemaType | undefined;
+  request: (args: GraphQLParameters, url: string) => RequestOptions;
+  mutation: boolean;
+}
 
 export type GraphQLType = GraphQLOutputType | GraphQLInputType;
 
-export type GraphQLTypeMap = { [string]: GraphQLType };
+export interface GraphQLTypeMap {
+  [typeName: string]: GraphQLType;
+}
 
-export type Responses = {
-  [string | number]: {
-    schema?: Object,
-  },
-};
+export interface Responses {
+  [key: string]: {
+    schema?: Record<string, any>;
+  };
+  [key: number]: {
+    schema?: Record<string, any>;
+  };
+}
 
-export type JSONSchemaType = {
-  $ref?: string,
-  schema?: JSONSchemaType,
-  type?: string,
-  properties?: Array<string>,
-  title?: string,
-  description?: string,
-  required?: boolean | Array<string>,
-};
+export interface RefType {
+  $ref: string;
+}
 
-export type ServerObject = {
-  url: string,
-  description: string,
+interface CommonSchema {
+  description?: string;
+  title?: string;
+}
+
+export interface BodySchema extends CommonSchema {
+  in: 'body';
+  schema: JSONSchemaType;
+  required?: boolean;
+}
+
+export interface ObjectSchema extends CommonSchema {
+  type: 'object';
+  properties?: {
+    [propertyName: string]: JSONSchemaType;
+  };
+  required: string[];
+}
+
+export interface ArraySchema extends CommonSchema {
+  type: 'array';
+  items: RefType | JSONSchemaNoRefOrBody;
+  required?: boolean;
+}
+
+export interface ScalarSchema extends CommonSchema {
+  type: string;
+  format?: string;
+  required?: boolean;
+}
+
+export type JSONSchemaNoRefOrBody = ObjectSchema | ArraySchema | ScalarSchema;
+
+export type JSONSchemaType = RefType | BodySchema | JSONSchemaNoRefOrBody;
+
+export interface Variable {
+  default?: string;
+  enum: string[];
+}
+
+export interface ServerObject {
+  url: string;
+  description?: string;
   variables: {
-    [string]: string,
-  },
-};
+    [key: string]: string | Variable;
+  };
+}
 
-export type SwaggerSchema = {
-  host?: string,
-  basePath?: string,
-  schemes?: [string],
-  servers: ServerObject[],
+export interface OperationObject {
+  description?: string;
+  operationId?: string;
+  parameters?: Param[];
+  responses: Responses;
+}
+
+export interface PathObject {
+  parameters?: Param[];
+  [operation: string]: OperationObject | Param[];
+}
+
+export interface SwaggerSchema {
+  host?: string;
+  basePath?: string;
+  schemes?: [string];
+  servers?: ServerObject[];
   paths: {
-    [string]: {
-      description?: string,
-      operationId?: string,
-      parameters?: Array<Param>,
-      responses: Responses,
-    },
-  },
-};
-
-export type RefType = {
-  $Ref: SwaggerSchema,
-};
+    [pathUrl: string]: PathObject;
+  };
+}

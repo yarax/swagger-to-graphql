@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import { getServerPath } from '../src/swagger';
+import { SwaggerSchema } from '../src/types';
 
 describe('swagger', () => {
   describe('getServerPath', () => {
@@ -7,6 +8,7 @@ describe('swagger', () => {
       expect(
         getServerPath({
           host: 'mock-host',
+          paths: {},
         }),
       ).equal('http://mock-host');
     });
@@ -17,7 +19,7 @@ describe('swagger', () => {
           schemes: ['https'],
           host: 'mock-host',
           basePath: '/mock-basepath',
-        }),
+        } as SwaggerSchema),
       ).equal('https://mock-host/mock-basepath');
     });
 
@@ -33,6 +35,7 @@ describe('swagger', () => {
               },
             },
           ],
+          paths: {},
         }),
       ).equal('https://mock-host/mock-basepath');
     });
@@ -50,6 +53,7 @@ describe('swagger', () => {
               },
             },
           ],
+          paths: {},
         }),
       ).equal('http://mock-host');
     });
@@ -68,6 +72,7 @@ describe('swagger', () => {
               },
             },
           ],
+          paths: {},
         }),
       ).equal('http://mock-host');
     });

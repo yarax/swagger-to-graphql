@@ -1,8 +1,11 @@
 module.exports = {
-  parser: 'babel-eslint',
-  extends: ['airbnb-base', 'plugin:prettier/recommended', "plugin:flowtype/recommended"],
-  plugins:['flowtype'],
+  extends: [
+    'airbnb-base',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:prettier/recommended',
+    'prettier/@typescript-eslint',
+  ],
   rules: {
-    "no-nested-ternary": "off"
-  }
+    'no-nested-ternary': 'off',
+  },
 };

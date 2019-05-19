@@ -1,2 +1,2 @@
---require babel-core/register
---watch-extensions json,js,graphql
+--require ts-node/register
+--watch-extensions json,ts,graphql

@@ -1,7 +1,8 @@
 import * as graphql from 'graphql';
 import fs from 'fs';
 import { expect } from 'chai';
-import graphQLSchema from '../src';
+
+const graphQLSchema = require('../src');
 
 describe('Fixture', () => {
   const directory = `${__dirname}/fixtures/`;

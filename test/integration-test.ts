@@ -2,11 +2,12 @@ import nock from 'nock';
 import request from 'supertest';
 import express from 'express';
 import graphqlHTTP from 'express-graphql';
-import graphQLSchema from '../src';
 
-const createServer = async (...schemaArgs) => {
+const graphQLSchema = require('../src');
+
+const createServer = async (path, ...schemaArgs) => {
   const app = express();
-  const schema = await graphQLSchema(...schemaArgs);
+  const schema = await graphQLSchema(path, ...schemaArgs);
   app.use(
     '/graphql',
     graphqlHTTP(() => ({
