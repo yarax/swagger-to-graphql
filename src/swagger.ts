@@ -1,14 +1,13 @@
 import refParser from 'json-schema-ref-parser';
 import getRequestOptions from 'node-request-by-swagger';
 import {
-  SwaggerSchema,
   Endpoint,
-  Responses,
-  RefType,
+  Endpoints,
   GraphQLParameters,
   OperationObject,
+  Responses,
+  SwaggerSchema,
 } from './types';
-import { Endpoints } from './index';
 
 import $RefParser = require('json-schema-ref-parser');
 
@@ -90,9 +89,7 @@ const getParamDetails = (param, schema, refResolver) => {
   }
   const name = replaceOddChars(resolvedParam.name);
   const { type } = resolvedParam;
-  const jsonSchema = resolvedParam;
-
-  return { name, type, jsonSchema };
+  return { name, type, jsonSchema: resolvedParam };
 };
 
 const renameGraphqlParametersToSwaggerParameters = (

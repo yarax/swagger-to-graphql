@@ -1,29 +1,20 @@
 import rp from 'request-promise';
 import {
-  GraphQLSchema,
-  GraphQLObjectType,
-  GraphQLNonNull,
-  GraphQLFieldConfigMap,
   GraphQLFieldConfig,
+  GraphQLFieldConfigMap,
+  GraphQLNonNull,
+  GraphQLObjectType,
+  GraphQLSchema,
 } from 'graphql';
 import {
-  GraphQLParameters,
   Endpoint,
-  GraphQLType,
+  Endpoints,
+  GraphQLParameters,
   RootGraphQLSchema,
   SwaggerToGraphQLOptions,
-  GraphQLTypeMap,
 } from './types';
-import { getAllEndPoints, loadSchema, loadRefs } from './swagger';
-import {
-  createGQLObject,
-  jsonSchemaTypeToGraphQL,
-  mapParametersToFields,
-} from './typeMap';
-
-export interface Endpoints {
-  [operationId: string]: Endpoint;
-}
+import { getAllEndPoints, loadRefs, loadSchema } from './swagger';
+import { jsonSchemaTypeToGraphQL, mapParametersToFields } from './typeMap';
 
 const resolver = (
   endpoint: Endpoint,

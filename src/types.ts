@@ -5,8 +5,6 @@ import {
 } from 'graphql';
 import { CoreOptions, Request } from 'request';
 
-import JSON = Mocha.reporters.JSON;
-
 export interface SwaggerToGraphQLOptions extends Request {
   GQLProxyBaseUrl: string;
   BearerToken?: string;
@@ -42,6 +40,10 @@ export interface Endpoint {
   response: JSONSchemaType | undefined;
   request: (args: GraphQLParameters, url: string) => RequestOptions;
   mutation: boolean;
+}
+
+export interface Endpoints {
+  [operationId: string]: Endpoint;
 }
 
 export type GraphQLType = GraphQLOutputType | GraphQLInputType;

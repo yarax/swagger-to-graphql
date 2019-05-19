@@ -1,7 +1,6 @@
 // TODO: fix no-param-reassign
 /* eslint-disable no-param-reassign */
 import * as graphql from 'graphql';
-import { GraphQLScalarType } from 'graphql';
 import _ from 'lodash';
 import {
   ArraySchema,
@@ -17,8 +16,6 @@ import {
 } from './types';
 import { getSchema } from './swagger';
 
-import json = Mocha.reporters.json;
-
 const primitiveTypes = {
   string: graphql.GraphQLString,
   date: graphql.GraphQLString,
@@ -27,8 +24,13 @@ const primitiveTypes = {
   boolean: graphql.GraphQLBoolean,
 };
 
+function isRefType(input: JSONSchemaType): input is RefType {
+  return Object.keys(input).includes('$ref');
+}
+
 const isBodyType = (jsonSchema: JSONSchemaType): jsonSchema is BodySchema =>
-  Object.keys(jsonSchema).includes('in') && jsonSchema.in === 'body';
+  Object.keys(jsonSchema).includes('in') &&
+  (jsonSchema as BodySchema).in === 'body';
 
 const isObjectType = (jsonSchema: JSONSchemaType): jsonSchema is ObjectSchema =>
   !isRefType(jsonSchema) &&
@@ -41,9 +43,6 @@ const isArrayType = (jsonSchema: JSONSchemaType): jsonSchema is ArraySchema =>
   !isBodyType(jsonSchema) &&
   (Object.keys(jsonSchema).includes('items') || jsonSchema.type === 'array');
 
-function isRefType(input: JSONSchemaType): input is RefType {
-  return Object.keys(input).includes('$ref');
-}
 function isScalarType(input: JSONSchemaType): input is ScalarSchema {
   return Object.keys(input).includes('format');
 }
@@ -77,7 +76,7 @@ const getExistingType = (
 
 const getPrimitiveTypes = (
   jsonSchema: JSONSchemaNoRefOrBody,
-): GraphQLScalarType => {
+): graphql.GraphQLScalarType => {
   let jsonType = jsonSchema.type;
   if (isScalarType(jsonSchema) && jsonSchema.format === 'int64') {
     jsonType = 'string';

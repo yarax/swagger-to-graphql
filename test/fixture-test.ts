@@ -2,6 +2,7 @@ import * as graphql from 'graphql';
 import fs from 'fs';
 import { expect } from 'chai';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const graphQLSchema = require('../src');
 
 describe('Fixture', () => {

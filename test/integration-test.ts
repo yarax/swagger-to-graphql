@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/camelcase */
 import nock from 'nock';
 import request from 'supertest';
 import express from 'express';
 import graphqlHTTP from 'express-graphql';
 
-const graphQLSchema = require('../src');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const graphQLSchema = require('../src/index.ts');
 
 const createServer = async (path, ...schemaArgs) => {
   const app = express();
