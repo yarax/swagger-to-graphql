@@ -114,3 +114,4 @@ const build = async (
 };
 
 module.exports = build;
+export default build;
