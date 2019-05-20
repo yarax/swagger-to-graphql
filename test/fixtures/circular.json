@@ -68,9 +68,7 @@
                     "type": "string"
                 },
                 "reference": {
-                    "schema": {
-                        "$ref": "#/definitions/Circular"
-                    }
+                    "$ref": "#/definitions/Circular"
                 }
             }
         }

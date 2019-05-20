@@ -1,7 +1,7 @@
-type get_mock_path {
+type get_mock_path_response {
   result: String!
 }
 
 type Query {
-  get_mock_path: get_mock_path!
+  get_mock_path: get_mock_path_response!
 }

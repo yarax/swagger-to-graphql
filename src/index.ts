@@ -1,24 +1,36 @@
-// @flow
 import rp from 'request-promise';
-import { GraphQLSchema, GraphQLObjectType, GraphQLNonNull } from 'graphql';
-import type {
-  GraphQLParameters,
+import {
+  GraphQLFieldConfig,
+  GraphQLFieldConfigMap,
+  GraphQLNonNull,
+  GraphQLObjectType,
+  GraphQLResolveInfo,
+  GraphQLSchema,
+} from 'graphql';
+import {
   Endpoint,
-  GraphQLType,
+  Endpoints,
+  GraphQLParameters,
   RootGraphQLSchema,
   SwaggerToGraphQLOptions,
-  GraphQLTypeMap,
 } from './types';
-import { getAllEndPoints, loadSchema, loadRefs } from './swagger';
-import { createGQLObject, mapParametersToFields } from './typeMap';
-
-type Endpoints = { [string]: Endpoint };
+import { getAllEndPoints, loadRefs, loadSchema } from './swagger';
+import {
+  jsonSchemaTypeToGraphQL,
+  mapParametersToFields,
+  parseResponse,
+} from './typeMap';
 
 const resolver = (
   endpoint: Endpoint,
-  proxyUrl: ?(Function | string),
+  proxyUrl: Function | string | null,
   customHeaders = {},
-) => async (_, args: GraphQLParameters, opts: SwaggerToGraphQLOptions) => {
+) => async (
+  _,
+  args: GraphQLParameters,
+  opts: SwaggerToGraphQLOptions,
+  info: GraphQLResolveInfo,
+) => {
   const proxy = !proxyUrl
     ? opts.GQLProxyBaseUrl
     : typeof proxyUrl === 'function'
@@ -32,32 +44,38 @@ const resolver = (
     req.headers = Object.assign(req.headers, customHeaders);
   }
   const res = await rp(req);
-  return JSON.parse(res);
+  return parseResponse(res, info.returnType);
 };
 
 const getFields = (
-  endpoints,
-  isMutation,
+  endpoints: Endpoints,
+  isMutation: boolean,
   gqlTypes,
   proxyUrl,
   headers,
-): GraphQLTypeMap => {
+): GraphQLFieldConfigMap<any, any> => {
   return Object.keys(endpoints)
-    .filter((typeName: string) => {
-      return !!endpoints[typeName].mutation === !!isMutation;
+    .filter((operationId: string) => {
+      return !!endpoints[operationId].mutation === !!isMutation;
     })
-    .reduce((result, typeName) => {
-      const endpoint = endpoints[typeName];
+    .reduce((result, operationId) => {
+      const endpoint: Endpoint = endpoints[operationId];
       const type = GraphQLNonNull(
-        createGQLObject(endpoint.response, typeName, false, gqlTypes),
+        jsonSchemaTypeToGraphQL(
+          operationId,
+          endpoint.response || { type: 'string' },
+          'response',
+          false,
+          gqlTypes,
+        ),
       );
-      const gType: GraphQLType = {
+      const gType: GraphQLFieldConfig<any, any> = {
         type,
         description: endpoint.description,
-        args: mapParametersToFields(endpoint.parameters, typeName, gqlTypes),
+        args: mapParametersToFields(endpoint.parameters, operationId, gqlTypes),
         resolve: resolver(endpoint, proxyUrl, headers),
       };
-      return { ...result, [typeName]: gType };
+      return { ...result, [operationId]: gType };
     }, {});
 };
 
@@ -95,8 +113,8 @@ const schemaFromEndpoints = (endpoints: Endpoints, proxyUrl, headers) => {
 
 const build = async (
   swaggerPath: string,
-  proxyUrl: ?(Function | string) = null,
-  headers: ?{ [string]: string },
+  proxyUrl?: Function | string | null,
+  headers?: { [key: string]: string } | undefined,
 ) => {
   const swaggerSchema = await loadSchema(swaggerPath);
   const refs = await loadRefs(swaggerPath);
@@ -105,4 +123,5 @@ const build = async (
   return schema;
 };
 
+module.exports = build;
 export default build;

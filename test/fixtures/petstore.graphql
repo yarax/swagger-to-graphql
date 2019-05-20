@@ -1,8 +1,3 @@
-type addPet {
-  """default field"""
-  empty: String
-}
-
 type Category {
   id: String
   name: String
@@ -13,73 +8,33 @@ input CategoryInput {
   name: String
 }
 
-type createUser {
-  """default field"""
-  empty: String
-}
-
-type createUsersWithArrayInput {
-  """default field"""
-  empty: String
-}
-
-type createUsersWithListInput {
-  """default field"""
-  empty: String
-}
-
-type deleteOrder {
-  """default field"""
-  empty: String
-}
-
-type deletePet {
-  """default field"""
-  empty: String
-}
-
-type deleteUser {
-  """default field"""
-  empty: String
-}
-
-type getInventory {
-  """default field"""
-  empty: String
-}
-
-type loginUser {
-  """default field"""
-  empty: String
-}
-
-type logoutUser {
+type getInventory_response {
   """default field"""
   empty: String
 }
 
 type Mutation {
-  addPet(body: PetInput!): addPet!
-  updatePet(body: PetInput!): updatePet!
-  updatePetWithForm(petId: String!, name: String, status: String): updatePetWithForm!
-  deletePet(api_key: String, petId: String!): deletePet!
+  addPet(body: PetInput!): String!
+  updatePet(body: PetInput!): String!
+  updatePetWithForm(petId: String!, name: String, status: String): String!
+  deletePet(api_key: String, petId: String!): String!
   placeOrder(body: OrderInput!): Order!
 
   """
   For valid response try integer IDs with positive integer value. Negative or non-integer values will generate API errors
   """
-  deleteOrder(orderId: String!): deleteOrder!
+  deleteOrder(orderId: String!): String!
 
   """This can only be done by the logged in user."""
-  createUser(body: UserInput!): createUser!
-  createUsersWithArrayInput(body: param_createUsersWithArrayInput_bodyInput!): createUsersWithArrayInput!
-  createUsersWithListInput(body: param_createUsersWithListInput_bodyInput!): createUsersWithListInput!
+  createUser(body: UserInput!): String!
+  createUsersWithArrayInput(body: [UserInput!]!): String!
+  createUsersWithListInput(body: [UserInput!]!): String!
 
   """This can only be done by the logged in user."""
-  updateUser(username: String!, body: UserInput!): updateUser!
+  updateUser(username: String!, body: UserInput!): String!
 
   """This can only be done by the logged in user."""
-  deleteUser(username: String!): deleteUser!
+  deleteUser(username: String!): String!
 }
 
 type Order {
@@ -102,18 +57,6 @@ input OrderInput {
   """Order Status"""
   status: String
   complete: Boolean
-}
-
-"""List of user object"""
-input param_createUsersWithArrayInput_bodyInput {
-  """default field"""
-  empty: String
-}
-
-"""List of user object"""
-input param_createUsersWithListInput_bodyInput {
-  """default field"""
-  empty: String
 }
 
 type Pet {
@@ -151,14 +94,14 @@ type Query {
   getPetById(petId: String!): Pet!
 
   """Returns a map of status codes to quantities"""
-  getInventory: getInventory!
+  getInventory: getInventory_response!
 
   """
   For valid response try integer IDs with value >= 1 and <= 10. Other values will generated exceptions
   """
   getOrderById(orderId: String!): Order!
-  loginUser(username: String!, password: String!): loginUser!
-  logoutUser: logoutUser!
+  loginUser(username: String!, password: String!): String!
+  logoutUser: String!
   getUserByName(username: String!): User!
 }
 
@@ -170,21 +113,6 @@ type Tag {
 input TagInput {
   id: String
   name: String
-}
-
-type updatePet {
-  """default field"""
-  empty: String
-}
-
-type updatePetWithForm {
-  """default field"""
-  empty: String
-}
-
-type updateUser {
-  """default field"""
-  empty: String
 }
 
 type User {

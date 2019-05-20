@@ -7,6 +7,7 @@ describe('swagger', () => {
       expect(
         getServerPath({
           host: 'mock-host',
+          paths: {},
         }),
       ).equal('http://mock-host');
     });
@@ -17,6 +18,7 @@ describe('swagger', () => {
           schemes: ['https'],
           host: 'mock-host',
           basePath: '/mock-basepath',
+          paths: {},
         }),
       ).equal('https://mock-host/mock-basepath');
     });
@@ -33,6 +35,7 @@ describe('swagger', () => {
               },
             },
           ],
+          paths: {},
         }),
       ).equal('https://mock-host/mock-basepath');
     });
@@ -50,6 +53,7 @@ describe('swagger', () => {
               },
             },
           ],
+          paths: {},
         }),
       ).equal('http://mock-host');
     });
@@ -68,6 +72,7 @@ describe('swagger', () => {
               },
             },
           ],
+          paths: {},
         }),
       ).equal('http://mock-host');
     });

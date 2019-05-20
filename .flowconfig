@@ -1,9 +1,0 @@
-[ignore]
-node_modules
-test
-lib
-[include]
-
-[libs]
-
-[options]

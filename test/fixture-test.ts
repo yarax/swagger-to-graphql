@@ -1,6 +1,7 @@
 import * as graphql from 'graphql';
 import fs from 'fs';
 import { expect } from 'chai';
+
 import graphQLSchema from '../src';
 
 describe('Fixture', () => {
