@@ -53,6 +53,7 @@ export function parseResponse(response: string, returnType: GraphQLOutputType) {
 
   throw new Error(`Unexpected returnType ${nullableType}`);
 }
+
 function isRefType(input: JSONSchemaType): input is RefType {
   return Object.keys(input).includes('$ref');
 }
@@ -111,7 +112,7 @@ const getExistingType = (
       throw new Error(`Definition ${refTypeName} was not found in schema`);
     }
     // eslint-disable-next-line no-use-before-define,@typescript-eslint/no-use-before-define
-    return createGQLObject(schema, refTypeName, isInputType, gqlTypes);
+    return createGraphQLType(schema, refTypeName, isInputType, gqlTypes);
   }
   return gqlTypes[typeName];
 };
@@ -138,13 +139,24 @@ export const jsonSchemaTypeToGraphQL = (
     }
     if (isObjectType(jsonSchema) || isArrayType(jsonSchema)) {
       // eslint-disable-next-line no-use-before-define,@typescript-eslint/no-use-before-define
-      return createGQLObject(
+      return createGraphQLType(
         jsonSchema,
         `${title}_${propertyName}`,
         isInputType,
         gqlTypes,
       );
     }
+
+    if (jsonSchema.type === 'file') {
+      // eslint-disable-next-line no-use-before-define,@typescript-eslint/no-use-before-define
+      return createGraphQLType(
+        { type: 'object', properties: { unsupported: { type: 'string' } } },
+        `${title}_${propertyName}`,
+        isInputType,
+        gqlTypes,
+      );
+    }
+
     if (jsonSchema.type) {
       return getPrimitiveTypes(jsonSchema);
     }
@@ -217,7 +229,7 @@ const getRefProp = (jsonSchema: JSONSchemaType) => {
   return isRefType(jsonSchema) && jsonSchema.$ref;
 };
 
-export const createGQLObject = (
+export const createGraphQLType = (
   jsonSchema: JSONSchemaType | undefined,
   title: string,
   isInputType: boolean,
@@ -258,18 +270,21 @@ export const createGQLObject = (
   }
 
   if (isArrayType(jsonSchema)) {
-    if (isRefType(jsonSchema.items)) {
+    const itemsSchema = Array.isArray(jsonSchema.items)
+      ? jsonSchema.items[0]
+      : jsonSchema.items;
+    if (isRefType(itemsSchema)) {
       return new GraphQLList(
         GraphQLNonNull(
-          getExistingType(jsonSchema.items.$ref, isInputType, gqlTypes),
+          getExistingType(itemsSchema.$ref, isInputType, gqlTypes),
         ),
       );
     }
-    if (isObjectType(jsonSchema.items) || isArrayType(jsonSchema.items)) {
+    if (isObjectType(itemsSchema) || isArrayType(itemsSchema)) {
       return new GraphQLList(
         GraphQLNonNull(
-          createGQLObject(
-            jsonSchema.items,
+          createGraphQLType(
+            itemsSchema,
             `${title}_items`,
             isInputType,
             gqlTypes,
@@ -277,7 +292,21 @@ export const createGQLObject = (
         ),
       );
     }
-    return new GraphQLList(GraphQLNonNull(getPrimitiveTypes(jsonSchema.items)));
+
+    if (itemsSchema.type === 'file') {
+      // eslint-disable-next-line no-use-before-define,@typescript-eslint/no-use-before-define
+      return new GraphQLList(
+        GraphQLNonNull(
+          createGraphQLType(
+            { type: 'object', properties: { unsupported: { type: 'string' } } },
+            title,
+            isInputType,
+            gqlTypes,
+          ),
+        ),
+      );
+    }
+    return new GraphQLList(GraphQLNonNull(getPrimitiveTypes(itemsSchema)));
   }
 
   const { description } = jsonSchema;

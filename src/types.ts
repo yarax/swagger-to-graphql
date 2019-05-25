@@ -55,9 +55,11 @@ export interface GraphQLTypeMap {
 export interface Responses {
   [key: string]: {
     schema?: Record<string, any>;
+    type?: 'file';
   };
   [key: number]: {
     schema?: Record<string, any>;
+    type?: 'file';
   };
 }
 
@@ -86,7 +88,7 @@ export interface ObjectSchema extends CommonSchema {
 
 export interface ArraySchema extends CommonSchema {
   type: 'array';
-  items: RefType | JSONSchemaNoRefOrBody;
+  items: RefType | JSONSchemaNoRefOrBody | RefType[] | JSONSchemaNoRefOrBody[];
   required?: boolean;
 }
 
