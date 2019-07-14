@@ -67,7 +67,10 @@
       "required": [
         "id",
         "body"
-      ]
+      ],
+      "xml": {
+        "name": "DeepStructure"
+      }
     }
   }
 }

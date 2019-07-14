@@ -9,8 +9,6 @@ import {
   SwaggerSchema,
 } from './types';
 
-import $RefParser = require('json-schema-ref-parser');
-
 let globalSchema;
 
 export const getSchema = () => {
@@ -39,12 +37,8 @@ const getSuccessResponse = (responses: Responses) => {
 };
 
 export const loadSchema = async (pathToSchema: string) => {
-  globalSchema = await refParser.bundle(pathToSchema);
+  globalSchema = await refParser.dereference(pathToSchema);
   return globalSchema;
-};
-
-export const loadRefs = async (pathToSchema: string) => {
-  return refParser.resolve(pathToSchema);
 };
 
 const replaceOddChars = str => str.replace(/[^_a-zA-Z0-9]/g, '_');
@@ -82,11 +76,8 @@ export const getServerPath = (schema: SwaggerSchema) => {
     : url;
 };
 
-const getParamDetails = (param, schema, refResolver) => {
+const getParamDetails = (param, schema) => {
   let resolvedParam = param;
-  if (param.$ref) {
-    resolvedParam = refResolver.get(param.$ref);
-  }
   const name = replaceOddChars(resolvedParam.name);
   const { type } = resolvedParam;
   return { name, type, jsonSchema: resolvedParam };
@@ -113,7 +104,6 @@ const renameGraphqlParametersToSwaggerParameters = (
  */
 export const getAllEndPoints = (
   schema: SwaggerSchema,
-  refs: $RefParser.$Refs,
 ): Endpoints => {
   const allOperations = {};
   const serverPath = getServerPath(schema);
@@ -142,7 +132,7 @@ export const getAllEndPoints = (
 
       if (obj.parameters) {
         parameterDetails = obj.parameters.map(param =>
-          getParamDetails(param, schema, refs),
+          getParamDetails(param, schema),
         );
       } else {
         parameterDetails = [];

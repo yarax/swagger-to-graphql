@@ -50,6 +50,9 @@
         "result": {
           "type": "string"
         }
+      },
+      "xml": {
+        "name": "Response"
       }
     }
   },

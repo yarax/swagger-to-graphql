@@ -63,10 +63,6 @@ export interface Responses {
   };
 }
 
-export interface RefType {
-  $ref: string;
-}
-
 interface CommonSchema {
   description?: string;
   title?: string;
@@ -84,11 +80,14 @@ export interface ObjectSchema extends CommonSchema {
     [propertyName: string]: JSONSchemaType;
   };
   required: string[];
+  xml?: {
+    name?: string;
+  }
 }
 
 export interface ArraySchema extends CommonSchema {
   type: 'array';
-  items: RefType | JSONSchemaNoRefOrBody | RefType[] | JSONSchemaNoRefOrBody[];
+  items: JSONSchemaNoBody | JSONSchemaNoBody[];
   required?: boolean;
 }
 
@@ -98,9 +97,9 @@ export interface ScalarSchema extends CommonSchema {
   required?: boolean;
 }
 
-export type JSONSchemaNoRefOrBody = ObjectSchema | ArraySchema | ScalarSchema;
+export type JSONSchemaNoBody = ObjectSchema | ArraySchema | ScalarSchema;
 
-export type JSONSchemaType = RefType | BodySchema | JSONSchemaNoRefOrBody;
+export type JSONSchemaType = BodySchema | JSONSchemaNoBody;
 
 export interface Variable {
   default?: string;
