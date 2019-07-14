@@ -77,7 +77,7 @@ export const getServerPath = (schema: SwaggerSchema) => {
 };
 
 const getParamDetails = (param, schema) => {
-  let resolvedParam = param;
+  const resolvedParam = param;
   const name = replaceOddChars(resolvedParam.name);
   const { type } = resolvedParam;
   return { name, type, jsonSchema: resolvedParam };
@@ -102,9 +102,7 @@ const renameGraphqlParametersToSwaggerParameters = (
 /**
  * Go through schema and grab routes
  */
-export const getAllEndPoints = (
-  schema: SwaggerSchema,
-): Endpoints => {
+export const getAllEndPoints = (schema: SwaggerSchema): Endpoints => {
   const allOperations = {};
   const serverPath = getServerPath(schema);
   Object.keys(schema.paths).forEach(path => {

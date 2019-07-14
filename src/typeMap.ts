@@ -127,9 +127,7 @@ export const jsonSchemaTypeToGraphQL = (
       )} without type and schema`,
     );
   })();
-  return jsonSchema.required === true
-    ? GraphQLNonNull(baseType)
-    : baseType;
+  return jsonSchema.required === true ? GraphQLNonNull(baseType) : baseType;
 };
 
 const makeValidName = name => name.replace(/[^_0-9A-Za-z]/g, '_');
@@ -183,7 +181,6 @@ export const getTypeFields = (
     );
   };
 };
-
 
 export const createGraphQLType = (
   jsonSchema: JSONSchemaType | undefined,

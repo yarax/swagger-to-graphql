@@ -82,7 +82,7 @@ export interface ObjectSchema extends CommonSchema {
   required: string[];
   xml?: {
     name?: string;
-  }
+  };
 }
 
 export interface ArraySchema extends CommonSchema {
