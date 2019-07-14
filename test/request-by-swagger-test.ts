@@ -2,7 +2,7 @@ import assert from 'assert';
 import request from 'request';
 
 import { getRequestOptions } from '../src/request-by-swagger';
-import { OperationObject, Param } from '../src/types';
+import { OperationObject } from '../src/types';
 
 import schema = require('./fixtures/petstore.json');
 
@@ -30,7 +30,7 @@ describe('build options by endpoint', () => {
   });
 
   it('should generate valid request options', done => {
-    request(requestOptions, (err, data) => {
+    request(requestOptions, () => {
       done();
     });
   });

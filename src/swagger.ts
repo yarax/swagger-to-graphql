@@ -76,7 +76,7 @@ export const getServerPath = (schema: SwaggerSchema) => {
     : url;
 };
 
-const getParamDetails = (param, schema) => {
+const getParamDetails = param => {
   const resolvedParam = param;
   const name = replaceOddChars(resolvedParam.name);
   const { type } = resolvedParam;
@@ -129,9 +129,7 @@ export const getAllEndPoints = (schema: SwaggerSchema): Endpoints => {
       //
 
       if (obj.parameters) {
-        parameterDetails = obj.parameters.map(param =>
-          getParamDetails(param, schema),
-        );
+        parameterDetails = obj.parameters.map(param => getParamDetails(param));
       } else {
         parameterDetails = [];
       }
