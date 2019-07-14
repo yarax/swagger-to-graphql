@@ -12,7 +12,6 @@
     "js-yaml": "^3.13.1",
     "json-schema-ref-parser": "^6.1.0",
     "lodash": "^4.17.11",
-    "node-request-by-swagger": "^1.1.4",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
     "yargs": "^13.2.4"

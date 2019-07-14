@@ -1,5 +1,4 @@
 import refParser from 'json-schema-ref-parser';
-import getRequestOptions from 'node-request-by-swagger';
 import {
   Endpoint,
   Endpoints,
@@ -8,6 +7,7 @@ import {
   Responses,
   SwaggerSchema,
 } from './types';
+import { getRequestOptions } from "./request-by-swagger";
 
 let globalSchema;
 
