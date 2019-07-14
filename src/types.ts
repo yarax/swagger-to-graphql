@@ -10,8 +10,8 @@ export interface SwaggerToGraphQLOptions extends Request {
   BearerToken?: string;
 }
 
-interface Param {
-  type: string;
+export interface Param {
+  type?: string;
   name: string;
   required: boolean;
   in: 'header' | 'query' | 'body' | 'formData' | 'path';

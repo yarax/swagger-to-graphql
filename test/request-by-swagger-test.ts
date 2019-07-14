@@ -1,23 +1,24 @@
-import { getRequestOptions } from '../src/request-by-swagger';
+import assert from 'assert';
+import request from 'request';
 
-const assert = require('assert');
-const request = require('request');
-const schema = require('./fixtures/petstore.json');
+import { getRequestOptions } from '../src/request-by-swagger';
+import { OperationObject, Param } from '../src/types';
+
+import schema = require('./fixtures/petstore.json');
 
 let requestOptions;
 
 describe('build options by endpoint', () => {
   it('should add request body to request options', () => {
     const url = '/pet';
-    const endpoint = schema.paths[url].post;
-    const request = {
-      body: { name: 'test' },
-    };
+    const endpoint = schema.paths[url].post as OperationObject;
     const options = {
       method: 'post',
       baseUrl: `http://${schema.host}${schema.basePath}`,
       url,
-      request,
+      request: {
+        body: { name: 'test' },
+      },
     };
     requestOptions = getRequestOptions(endpoint, options);
     assert.deepEqual(requestOptions, {
@@ -36,16 +37,16 @@ describe('build options by endpoint', () => {
 
   it('should add request headers to request options', () => {
     const url = '/pet/{petId}';
-    const endpoint = schema.paths[url].delete;
-    const request = {
-      petId: 'mock-pet-id',
-      api_key: 'mock api key',
-    };
+    const endpoint = schema.paths[url].delete as OperationObject;
     const options = {
       method: 'delete',
       baseUrl: `http://${schema.host}${schema.basePath}`,
       url,
-      request,
+      request: {
+        petId: 'mock-pet-id',
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        api_key: 'mock api key',
+      },
     };
     requestOptions = getRequestOptions(endpoint, options);
     assert.deepEqual(requestOptions, {
@@ -53,6 +54,7 @@ describe('build options by endpoint', () => {
       method: 'delete',
       headers: {
         'content-type': 'application/json',
+        // eslint-disable-next-line @typescript-eslint/camelcase
         api_key: 'mock api key',
       },
     });
@@ -60,16 +62,16 @@ describe('build options by endpoint', () => {
 
   it('should allow empty strings', () => {
     const url = '/pet/{petId}';
-    const endpoint = schema.paths[url].delete;
-    const request = {
-      petId: '',
-      api_key: 'mock api key',
-    };
+    const endpoint = schema.paths[url].delete as OperationObject;
     const options = {
       method: 'delete',
       baseUrl: `http://${schema.host}${schema.basePath}`,
       url,
-      request,
+      request: {
+        petId: '',
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        api_key: 'mock api key',
+      },
     };
     requestOptions = getRequestOptions(endpoint, options);
     assert.deepEqual(requestOptions, {
@@ -77,6 +79,7 @@ describe('build options by endpoint', () => {
       method: 'delete',
       headers: {
         'content-type': 'application/json',
+        // eslint-disable-next-line @typescript-eslint/camelcase
         api_key: 'mock api key',
       },
     });

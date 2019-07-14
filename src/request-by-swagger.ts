@@ -13,10 +13,10 @@ export interface Fixture {
 export function getRequestOptions(
   { consumes, parameters }: OperationObject,
   fixture: Fixture,
-  baseUrl?: string,
+  baseUrlParam?: string,
 ) {
   const contentType = consumes ? consumes[0] : 'application/json';
-  baseUrl = baseUrl || fixture.baseUrl || '';
+  const baseUrl = baseUrlParam || fixture.baseUrl || '';
   const reqOpts: OptionsWithUrl = {
     url: `${baseUrl}${fixture.url}`,
     method: fixture.method,
@@ -64,14 +64,9 @@ export function getRequestOptions(
             ? reqOpts.url.replace(`{${param.name}}`, value)
             : reqOpts.url;
         break;
-      case 'query':
+      case 'query': {
         if (!reqOpts.qs) reqOpts.qs = {};
-        let newValue;
-        if (Array.isArray(value)) {
-          newValue = value[0];
-        } else {
-          newValue = value;
-        }
+        const newValue = Array.isArray(value) ? value[0] : value;
         if (typeof newValue !== 'string' && typeof newValue !== 'number') {
           throw new Error(
             'GET query string for non string/number values is not supported',
@@ -79,6 +74,7 @@ export function getRequestOptions(
         }
         reqOpts.qs[param.name] = newValue;
         break;
+      }
       case 'header':
         if (!reqOpts.headers) reqOpts.headers = {};
         reqOpts.headers[param.name] = value;
