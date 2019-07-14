@@ -3,16 +3,18 @@ import {
   GraphQLInputType,
   GraphQLObjectType,
 } from 'graphql';
-import { CoreOptions, Request } from 'request';
+import { CoreOptions, OptionsWithUrl, Request } from 'request';
 
 export interface SwaggerToGraphQLOptions extends Request {
   GQLProxyBaseUrl: string;
   BearerToken?: string;
 }
 
-interface Param {
-  type: string;
+export interface Param {
+  type?: string;
   name: string;
+  required: boolean;
+  in: 'header' | 'query' | 'body' | 'formData' | 'path';
 }
 
 export interface EndpointParam {
@@ -38,7 +40,7 @@ export interface Endpoint {
   parameters: EndpointParam[];
   description?: string;
   response: JSONSchemaType | undefined;
-  request: (args: GraphQLParameters, url: string) => RequestOptions;
+  request: (args: GraphQLParameters, url: string) => OptionsWithUrl;
   mutation: boolean;
 }
 
@@ -119,6 +121,7 @@ export interface OperationObject {
   operationId?: string;
   parameters?: Param[];
   responses: Responses;
+  consumes?: string[];
 }
 
 export interface PathObject {

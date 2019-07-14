@@ -1,5 +1,4 @@
 import refParser from 'json-schema-ref-parser';
-import getRequestOptions from 'node-request-by-swagger';
 import {
   Endpoint,
   Endpoints,
@@ -8,6 +7,7 @@ import {
   Responses,
   SwaggerSchema,
 } from './types';
+import { getRequestOptions } from './request-by-swagger';
 
 let globalSchema;
 
@@ -76,7 +76,7 @@ export const getServerPath = (schema: SwaggerSchema) => {
     : url;
 };
 
-const getParamDetails = (param, schema) => {
+const getParamDetails = param => {
   const resolvedParam = param;
   const name = replaceOddChars(resolvedParam.name);
   const { type } = resolvedParam;
@@ -129,9 +129,7 @@ export const getAllEndPoints = (schema: SwaggerSchema): Endpoints => {
       //
 
       if (obj.parameters) {
-        parameterDetails = obj.parameters.map(param =>
-          getParamDetails(param, schema),
-        );
+        parameterDetails = obj.parameters.map(param => getParamDetails(param));
       } else {
         parameterDetails = [];
       }
@@ -152,15 +150,11 @@ export const getAllEndPoints = (schema: SwaggerSchema): Endpoints => {
             graphqlParameters,
             parameterDetails,
           );
-          return getRequestOptions(
-            obj,
-            {
-              request,
-              url,
-              method,
-            },
-            '',
-          );
+          return getRequestOptions(obj, {
+            request,
+            url,
+            method,
+          });
         },
         mutation: isMutation,
       };
