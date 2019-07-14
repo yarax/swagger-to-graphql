@@ -7,7 +7,7 @@ import {
   Responses,
   SwaggerSchema,
 } from './types';
-import { getRequestOptions } from "./request-by-swagger";
+import { getRequestOptions } from './request-by-swagger';
 
 let globalSchema;
 
@@ -152,15 +152,11 @@ export const getAllEndPoints = (schema: SwaggerSchema): Endpoints => {
             graphqlParameters,
             parameterDetails,
           );
-          return getRequestOptions(
-            obj,
-            {
-              request,
-              url,
-              method,
-            },
-            '',
-          );
+          return getRequestOptions(obj, {
+            request,
+            url,
+            method,
+          });
         },
         mutation: isMutation,
       };

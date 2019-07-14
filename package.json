@@ -24,6 +24,7 @@
     "@types/graphql": "^14.2.0",
     "@types/lodash": "^4.14.132",
     "@types/mocha": "^5.2.6",
+    "@types/request": "^2.48.2",
     "@types/request-promise": "^4.1.44",
     "@typescript-eslint/eslint-plugin": "^1.9.0",
     "chai": "^4.2.0",
