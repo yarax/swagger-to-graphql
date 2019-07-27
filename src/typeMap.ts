@@ -12,7 +12,6 @@ import {
   GraphQLScalarType,
   GraphQLString,
 } from 'graphql';
-import _ from 'lodash';
 import {
   ArraySchema,
   BodySchema,
@@ -23,6 +22,7 @@ import {
   ObjectSchema,
   ScalarSchema,
 } from './types';
+import mapValues from 'lodash/mapValues';
 
 export function parseResponse(response: string, returnType: GraphQLOutputType) {
   const nullableType =
@@ -156,7 +156,7 @@ export const getTypeFields = (
         properties[makeValidName(key)] = jsonSchema.properties[key];
       });
     }
-    return _.mapValues(
+    return mapValues(
       properties,
       (propertySchema: JSONSchemaType, propertyName) => {
         const baseType = jsonSchemaTypeToGraphQL(
@@ -198,7 +198,6 @@ export const createGraphQLType = (
 
   if (isInputType && !title.endsWith('Input')) {
     title += 'Input';
-    jsonSchema = _.clone(jsonSchema);
   }
 
   if (title in gqlTypes) {
@@ -213,7 +212,7 @@ export const createGraphQLType = (
       title,
     };
   } else if (!jsonSchema.title) {
-    jsonSchema.title = title;
+    jsonSchema = { ...jsonSchema, title };
   }
 
   if (isArrayType(jsonSchema)) {
