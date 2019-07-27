@@ -80,7 +80,7 @@ const getParamDetails = param => {
   const resolvedParam = param;
   const name = replaceOddChars(resolvedParam.name);
   const { type } = resolvedParam;
-  return { name, type, jsonSchema: resolvedParam };
+  return { name, ...(type && { type }), jsonSchema: resolvedParam };
 };
 
 const renameGraphqlParametersToSwaggerParameters = (
