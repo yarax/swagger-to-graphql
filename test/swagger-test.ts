@@ -1,5 +1,12 @@
+import { EndpointParam } from './../src/types';
 import { expect } from 'chai';
-import { getServerPath } from '../src/swagger';
+import {
+  getServerPath,
+  loadSchema,
+  getParamDetails,
+} from '../src/swagger';
+import { Param } from '../src/types';
+import { assertType } from 'typescript-is';
 
 describe('swagger', () => {
   describe('getServerPath', () => {
@@ -75,6 +82,42 @@ describe('swagger', () => {
           paths: {},
         }),
       ).equal('http://mock-host');
+    });
+  });
+
+  describe('getParameterDetails', () => {
+    it('should get details for openapi 2 and 3', async () => {
+      function testParameter(parameter: Param) {
+        try {
+          // assertType<Param>(parameter);
+        } catch (e) {
+          console.log('Not a Param:', parameter);
+          throw e;
+        }
+        let paramDetails;
+        try {
+          paramDetails = getParamDetails(parameter);
+          assertType<EndpointParam>(paramDetails);
+        } catch (e) {
+          console.log('Not EndpointParam:', paramDetails);
+          console.log('parameter:', parameter);
+          throw e;
+        }
+      }
+      const openapi2Schema = await loadSchema(`test/fixtures/petstore.yaml`);
+      openapi2Schema.paths['/pet'].post.parameters.forEach(testParameter);
+      const openapi3Schema = await loadSchema(
+        `test/fixtures/petstore-openapi3.yaml`,
+      );
+      openapi3Schema.paths['/pet/findByStatus'].get.parameters.forEach(testParameter)
+      testParameter({
+        in: 'body',
+        name: 'body',
+        ...openapi3Schema.paths['/pet'].post.requestBody.content[
+          'application/json'
+        ],
+      });
+
     });
   });
 });

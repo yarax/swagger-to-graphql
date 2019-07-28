@@ -81,7 +81,7 @@ export function getRequestOptions(
         break;
       default:
         throw new Error(
-          `Unsupported param type for param ${param.name}: ${param.in}`,
+          `Unsupported param type for param ${JSON.stringify(param)}`,
         );
     }
   });

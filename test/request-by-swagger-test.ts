@@ -1,14 +1,20 @@
+import { loadSchema } from './../src/swagger';
 import assert from 'assert';
 import request from 'request';
 
 import { getRequestOptions } from '../src/request-by-swagger';
 import { OperationObject } from '../src/types';
 
-import schema = require('./fixtures/petstore.json');
+let schema;
 
 let requestOptions;
 
 describe('build options by endpoint', () => {
+  beforeEach(async () => {
+    if (!schema) {
+      schema = await loadSchema('./test/fixtures/petstore.json');
+    }
+  });
   it('should add request body to request options', () => {
     const url = '/pet';
     const endpoint = schema.paths[url].post as OperationObject;

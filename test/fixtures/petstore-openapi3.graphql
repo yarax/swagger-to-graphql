@@ -1,0 +1,142 @@
+type Category {
+  id: String
+  name: String
+}
+
+input CategoryInput {
+  id: String
+  name: String
+}
+
+type getInventory_response {
+  """default field"""
+  empty: String
+}
+
+type Mutation {
+  addPet(body: PetInput!): String!
+  updatePet(body: PetInput!): String!
+  updatePetWithForm(petId: String!, name: String, status: String): String!
+  deletePet(api_key: String, petId: String!): String!
+  placeOrder(body: OrderInput!): Order!
+
+  """
+  For valid response try integer IDs with positive integer value. Negative or non-integer values will generate API errors
+  """
+  deleteOrder(orderId: String!): String!
+
+  """This can only be done by the logged in user."""
+  createUser(body: UserInput!): String!
+  createUsersWithArrayInput(body: [UserInput!]!): String!
+  createUsersWithListInput(body: [UserInput!]!): String!
+
+  """This can only be done by the logged in user."""
+  updateUser(username: String!, body: UserInput!): String!
+
+  """This can only be done by the logged in user."""
+  deleteUser(username: String!): String!
+}
+
+type Order {
+  id: String
+  petId: String
+  quantity: Int
+  shipDate: String
+
+  """Order Status"""
+  status: String
+  complete: Boolean
+}
+
+input OrderInput {
+  id: String
+  petId: String
+  quantity: Int
+  shipDate: String
+
+  """Order Status"""
+  status: String
+  complete: Boolean
+}
+
+type Pet {
+  id: String
+  category: Category
+  name: String!
+  photoUrls: [String!]!
+  tags: [Tag!]
+
+  """pet status in the store"""
+  status: String
+}
+
+input PetInput {
+  id: String
+  category: CategoryInput
+  name: String!
+  photoUrls: [String!]!
+  tags: [TagInput!]
+
+  """pet status in the store"""
+  status: String
+}
+
+type Query {
+  """Multiple status values can be provided with comma separated strings"""
+  findPetsByStatus(status: [String!]!): [Pet!]!
+
+  """
+  Muliple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
+  """
+  findPetsByTags(tags: [String!]!): [Pet!]!
+
+  """Returns a single pet"""
+  getPetById(petId: String!): Pet!
+
+  """Returns a map of status codes to quantities"""
+  getInventory: getInventory_response!
+
+  """
+  For valid response try integer IDs with value >= 1 and <= 10. Other values will generated exceptions
+  """
+  getOrderById(orderId: String!): Order!
+  loginUser(username: String!, password: String!): String!
+  logoutUser: String!
+  getUserByName(username: String!): User!
+}
+
+type Tag {
+  id: String
+  name: String
+}
+
+input TagInput {
+  id: String
+  name: String
+}
+
+type User {
+  id: String
+  username: String
+  firstName: String
+  lastName: String
+  email: String
+  password: String
+  phone: String
+
+  """User Status"""
+  userStatus: Int
+}
+
+input UserInput {
+  id: String
+  username: String
+  firstName: String
+  lastName: String
+  email: String
+  password: String
+  phone: String
+
+  """User Status"""
+  userStatus: Int
+}

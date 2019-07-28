@@ -10,16 +10,38 @@ export interface SwaggerToGraphQLOptions extends Request {
   BearerToken?: string;
 }
 
-export interface Param {
-  type?: string;
+export interface BodyParam {
   name: string;
   required?: boolean;
-  in: 'header' | 'query' | 'body' | 'formData' | 'path';
+  schema: JSONSchemaType;
+  in: 'body';
 }
 
+export interface Oa2NonBodyParam {
+  name: string;
+  type: string;
+  in: 'header' | 'query' | 'formData' | 'path';
+  required?: boolean;
+}
+
+export interface Oa3NonBodyParam {
+  name: string;
+  in: 'header' | 'query' | 'formData' | 'path';
+  required?: boolean;
+  schema: JSONSchemaType;
+}
+
+export type NonBodyParam = Oa2NonBodyParam | Oa3NonBodyParam;
+
+export type Param = BodyParam | NonBodyParam;
+
+export const isOa3NonBodyParam = (param: Param): param is Oa3NonBodyParam => {
+  return param.name !== 'body' && !!(param as Oa3NonBodyParam).schema;
+};
 export interface EndpointParam {
   type?: string;
   name: string;
+  swaggerName: string;
   jsonSchema: JSONSchemaType;
 }
 

@@ -41,7 +41,9 @@
     "prettier": "^1.17.1",
     "supertest": "^4.0.2",
     "ts-node": "^8.1.1",
-    "typescript": "^3.4.5"
+    "ttypescript": "^1.5.7",
+    "typescript": "^3.4.5",
+    "typescript-is": "^0.12.2"
   },
   "keywords": [
     "graphql",
@@ -54,13 +56,13 @@
   "license": "MIT",
   "main": "lib/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "ttsc",
     "libchanged": "test -z \"$(git diff HEAD)\" || (git diff HEAD && false)",
     "lint": "eslint --ext .js,.ts .",
     "lint:fix": "npm run lint -- --fix",
     "prepare": "npm run build",
     "start": "node example/app.js",
-    "test": "mocha",
+    "test": "TS_NODE_COMPILER=ttypescript mocha",
     "test:watch": "npm run test -- --watch"
   }
 }

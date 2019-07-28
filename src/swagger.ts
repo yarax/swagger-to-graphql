@@ -6,6 +6,9 @@ import {
   OperationObject,
   Responses,
   SwaggerSchema,
+  EndpointParam,
+  Param,
+  isOa3NonBodyParam,
 } from './types';
 import { getRequestOptions } from './request-by-swagger';
 
@@ -76,22 +79,32 @@ export const getServerPath = (schema: SwaggerSchema) => {
     : url;
 };
 
-const getParamDetails = param => {
-  const resolvedParam = param;
-  const name = replaceOddChars(resolvedParam.name);
-  const { type } = resolvedParam;
-  return { name, ...(type && { type }), jsonSchema: resolvedParam };
+export const getParamDetails = (param: Param): EndpointParam => {
+  const name = replaceOddChars(param.name);
+  const swaggerName = param.name;
+  if (isOa3NonBodyParam(param)) {
+    const { schema, required } = param;
+    return {
+      name,
+      swaggerName,
+      jsonSchema: { ...schema, ...(required && { required }) },
+    };
+  }
+
+  return {
+    name,
+    swaggerName,
+    jsonSchema: param,
+  };
 };
 
 const renameGraphqlParametersToSwaggerParameters = (
-  graphqlParameters,
-  parameterDetails,
-) => {
+  graphqlParameters: GraphQLParameters,
+  parameterDetails: EndpointParam[],
+): GraphQLParameters => {
   const result = {};
   Object.keys(graphqlParameters).forEach(inputGraphqlName => {
-    const {
-      jsonSchema: { name: swaggerName },
-    } = parameterDetails.find(
+    const { swaggerName } = parameterDetails.find(
       ({ name: graphqlName }) => graphqlName === inputGraphqlName,
     );
     result[swaggerName] = graphqlParameters[inputGraphqlName];
