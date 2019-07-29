@@ -1,10 +1,6 @@
 import { EndpointParam } from './../src/types';
 import { expect } from 'chai';
-import {
-  getServerPath,
-  loadSchema,
-  getParamDetails,
-} from '../src/swagger';
+import { getServerPath, loadSchema, getParamDetails } from '../src/swagger';
 import { Param } from '../src/types';
 import { assertType } from 'typescript-is';
 
@@ -99,17 +95,20 @@ describe('swagger', () => {
           paramDetails = getParamDetails(parameter);
           assertType<EndpointParam>(paramDetails);
         } catch (e) {
-          console.log('Not EndpointParam:', paramDetails);
+          console.log('Not EndpointParam:', JSON.stringify(paramDetails));
           console.log('parameter:', parameter);
           throw e;
         }
       }
       const openapi2Schema = await loadSchema(`test/fixtures/petstore.yaml`);
-      openapi2Schema.paths['/pet'].post.parameters.forEach(testParameter);
+      (openapi2Schema.paths['/pet'].post.parameters as Param[]).forEach(
+        testParameter,
+      );
       const openapi3Schema = await loadSchema(
         `test/fixtures/petstore-openapi3.yaml`,
       );
-      openapi3Schema.paths['/pet/findByStatus'].get.parameters.forEach(testParameter)
+      (openapi3Schema.paths['/pet/findByStatus'].get
+        .parameters as Param[]).forEach(testParameter);
       testParameter({
         in: 'body',
         name: 'body',
@@ -117,7 +116,6 @@ describe('swagger', () => {
           'application/json'
         ],
       });
-
     });
   });
 });

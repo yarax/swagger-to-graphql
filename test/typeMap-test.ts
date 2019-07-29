@@ -8,6 +8,7 @@ import {
   GraphQLString,
   GraphQLInputObjectType,
   GraphQLNonNull,
+  GraphQLScalarType,
 } from 'graphql';
 import { jsonSchemaTypeToGraphQL, parseResponse } from '../src/typeMap';
 
@@ -56,7 +57,7 @@ describe('typeMap', () => {
         'mockpropertyname',
         true,
         {},
-      );
+      ) as GraphQLInputObjectType;
 
       expect(graphqlFileType).to.be.instanceOf(GraphQLInputObjectType);
       expect(graphqlFileType.name).to.equal('mocktitle_mockpropertynameInput');
@@ -82,7 +83,7 @@ describe('typeMap', () => {
         'mockpropertyname',
         true,
         {},
-      );
+      ) as GraphQLList<GraphQLNonNull<GraphQLInputObjectType>>;
 
       expect(graphqlList).to.be.instanceOf(GraphQLList);
 
@@ -119,7 +120,7 @@ describe('typeMap', () => {
         'mockpropertyname',
         true,
         {},
-      );
+      ) as GraphQLList<GraphQLNonNull<GraphQLScalarType>>;
 
       expect(graphqlList).to.be.instanceOf(GraphQLList);
 

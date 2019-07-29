@@ -19,7 +19,7 @@ export interface BodyParam {
 
 export interface Oa2NonBodyParam {
   name: string;
-  type: string;
+  type: JSONSchemaTypes;
   in: 'header' | 'query' | 'formData' | 'path';
   required?: boolean;
 }
@@ -40,6 +40,7 @@ export const isOa3NonBodyParam = (param: Param): param is Oa3NonBodyParam => {
 };
 export interface EndpointParam {
   type?: string;
+  required: boolean;
   name: string;
   swaggerName: string;
   jsonSchema: JSONSchemaType;
@@ -74,7 +75,7 @@ export interface GraphQLTypeMap {
 
 export interface Responses {
   [key: string]: {
-    schema?: Record<string, any>;
+    schema?: JSONSchemaType;
     type?: 'file';
   };
 }
@@ -92,10 +93,10 @@ export interface BodySchema extends CommonSchema {
 
 export interface ObjectSchema extends CommonSchema {
   type: 'object';
-  properties?: {
+  properties: {
     [propertyName: string]: JSONSchemaType;
   };
-  required: string[];
+  required?: string[];
   xml?: {
     name?: string;
   };
@@ -107,8 +108,10 @@ export interface ArraySchema extends CommonSchema {
   required?: boolean;
 }
 
+type JSONSchemaTypes = 'string' | 'date' | 'integer' | 'number' | 'boolean' | 'file';
+
 export interface ScalarSchema extends CommonSchema {
-  type: string;
+  type: JSONSchemaTypes;
   format?: string;
   required?: boolean;
 }
@@ -131,6 +134,7 @@ export interface ServerObject {
 }
 
 export interface OperationObject {
+  requestBody?: any;
   description?: string;
   operationId?: string;
   parameters?: Param[];

@@ -5,9 +5,9 @@ import express from 'express';
 import graphqlHTTP from 'express-graphql';
 import graphQLSchema from '../src';
 
-const createServer = async (path, ...schemaArgs) => {
+const createServer = async (...args: Parameters<typeof graphQLSchema>) => {
   const app = express();
-  const schema = await graphQLSchema(path, ...schemaArgs);
+  const schema = await graphQLSchema(...args);
   app.use(
     '/graphql',
     graphqlHTTP(() => ({
@@ -166,9 +166,10 @@ describe('swagger-to-graphql', () => {
 
       await request(
         await createServer(require.resolve('./fixtures/simple.json'), opts => {
-          return `http://${opts
-            .get('host')
-            .replace('graphql', 'api')}/override-basepath`;
+          return `http://${opts.headers.host.replace(
+            'graphql',
+            'api',
+          )}/override-basepath`;
         }),
       )
         .post('/graphql')

@@ -1,13 +1,13 @@
 import { loadSchema } from './../src/swagger';
 import assert from 'assert';
-import request from 'request';
+import request, { OptionsWithUrl } from 'request';
 
 import { getRequestOptions } from '../src/request-by-swagger';
-import { OperationObject } from '../src/types';
+import { OperationObject, SwaggerSchema } from '../src/types';
 
-let schema;
+let schema: SwaggerSchema;
 
-let requestOptions;
+let requestOptions: OptionsWithUrl;
 
 describe('build options by endpoint', () => {
   beforeEach(async () => {

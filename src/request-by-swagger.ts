@@ -24,7 +24,6 @@ export function getRequestOptions(
       'content-type': contentType,
     },
   };
-  reqOpts.headers['content-type'] = contentType;
 
   (parameters || []).forEach(param => {
     const value = fixture.request[param.name];

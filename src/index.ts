@@ -13,6 +13,7 @@ import {
   GraphQLParameters,
   RootGraphQLSchema,
   SwaggerToGraphQLOptions,
+  GraphQLTypeMap,
 } from './types';
 import { getAllEndPoints, loadSchema } from './swagger';
 import {
@@ -21,21 +22,23 @@ import {
   parseResponse,
 } from './typeMap';
 
+type ProxyUrl = ((opts: SwaggerToGraphQLOptions) => string) | string | null | undefined;
+
 const resolver = (
   endpoint: Endpoint,
-  proxyUrl: Function | string | null,
+  proxyUrl: ProxyUrl,
   customHeaders = {},
 ) => async (
-  _,
+  _source: any,
   args: GraphQLParameters,
   opts: SwaggerToGraphQLOptions,
   info: GraphQLResolveInfo,
 ) => {
-  const proxy = !proxyUrl
+  const proxy = (!proxyUrl
     ? opts.GQLProxyBaseUrl
     : typeof proxyUrl === 'function'
     ? proxyUrl(opts)
-    : proxyUrl;
+    : proxyUrl) || '';
   const req = endpoint.request(args, proxy);
   if (opts.headers) {
     const { host, ...otherHeaders } = opts.headers;
@@ -47,12 +50,13 @@ const resolver = (
   return parseResponse(res, info.returnType);
 };
 
+
 const getFields = (
   endpoints: Endpoints,
   isMutation: boolean,
-  gqlTypes,
-  proxyUrl,
-  headers,
+  gqlTypes: GraphQLTypeMap,
+  proxyUrl: ProxyUrl,
+  headers: { [key: string]: string } | undefined,
 ): GraphQLFieldConfigMap<any, any> => {
   return Object.keys(endpoints)
     .filter((operationId: string) => {
@@ -79,7 +83,7 @@ const getFields = (
     }, {});
 };
 
-const schemaFromEndpoints = (endpoints: Endpoints, proxyUrl, headers) => {
+const schemaFromEndpoints = (endpoints: Endpoints, proxyUrl: ProxyUrl, headers: { [key: string]: string } | undefined) => {
   const gqlTypes = {};
   const queryFields = getFields(endpoints, false, gqlTypes, proxyUrl, headers);
   if (!Object.keys(queryFields).length) {
@@ -113,7 +117,7 @@ const schemaFromEndpoints = (endpoints: Endpoints, proxyUrl, headers) => {
 
 const build = async (
   swaggerPath: string,
-  proxyUrl?: Function | string | null,
+  proxyUrl?: ProxyUrl,
   headers?: { [key: string]: string } | undefined,
 ) => {
   const swaggerSchema = await loadSchema(swaggerPath);

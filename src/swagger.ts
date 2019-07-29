@@ -9,10 +9,12 @@ import {
   EndpointParam,
   Param,
   isOa3NonBodyParam,
+  JSONSchemaType,
+  Oa3NonBodyParam,
 } from './types';
 import { getRequestOptions } from './request-by-swagger';
 
-let globalSchema;
+let globalSchema: SwaggerSchema | undefined;
 
 export const getSchema = () => {
   if (!globalSchema || !Object.keys(globalSchema).length) {
@@ -26,25 +28,25 @@ const getGQLTypeNameFromURL = (method: string, url: string) => {
   return `${method}${fromUrl}`;
 };
 
-const getSuccessResponse = (responses: Responses) => {
-  let resp;
-
-  if (!responses) return null;
-
-  Object.keys(responses).some(code => {
-    resp = responses[code];
+const getSuccessResponse = (
+  responses: Responses,
+): JSONSchemaType | undefined => {
+  const successCode = Object.keys(responses).find(code => {
     return code[0] === '2';
   });
 
-  return resp && resp.schema;
+  return successCode ? responses[successCode].schema : undefined;
 };
 
-export const loadSchema = async (pathToSchema: string) => {
-  globalSchema = await refParser.dereference(pathToSchema);
-  return globalSchema;
+export const loadSchema = async (
+  pathToSchema: string,
+): Promise<SwaggerSchema> => {
+  const result = await refParser.dereference(pathToSchema);
+  globalSchema = result;
+  return result;
 };
 
-const replaceOddChars = str => str.replace(/[^_a-zA-Z0-9]/g, '_');
+const replaceOddChars = (str: string) => str.replace(/[^_a-zA-Z0-9]/g, '_');
 
 export const getServerPath = (schema: SwaggerSchema) => {
   const server =
@@ -83,17 +85,19 @@ export const getParamDetails = (param: Param): EndpointParam => {
   const name = replaceOddChars(param.name);
   const swaggerName = param.name;
   if (isOa3NonBodyParam(param)) {
-    const { schema, required } = param;
+    const { schema, required } = param as Oa3NonBodyParam;
     return {
       name,
       swaggerName,
-      jsonSchema: { ...schema, ...(required && { required }) },
+      required: !!required,
+      jsonSchema: schema,
     };
   }
 
   return {
     name,
     swaggerName,
+    required: !!param.required,
     jsonSchema: param,
   };
 };
@@ -102,11 +106,17 @@ const renameGraphqlParametersToSwaggerParameters = (
   graphqlParameters: GraphQLParameters,
   parameterDetails: EndpointParam[],
 ): GraphQLParameters => {
-  const result = {};
+  const result: GraphQLParameters = {};
   Object.keys(graphqlParameters).forEach(inputGraphqlName => {
-    const { swaggerName } = parameterDetails.find(
+    const foundParameterDetail = parameterDetails.find(
       ({ name: graphqlName }) => graphqlName === inputGraphqlName,
     );
+    if (!foundParameterDetail) {
+      throw new Error(
+        `Expected parameter detail with name: ${inputGraphqlName}`,
+      );
+    }
+    const { swaggerName } = foundParameterDetail;
     result[swaggerName] = graphqlParameters[inputGraphqlName];
   });
   return result;
@@ -116,7 +126,7 @@ const renameGraphqlParametersToSwaggerParameters = (
  * Go through schema and grab routes
  */
 export const getAllEndPoints = (schema: SwaggerSchema): Endpoints => {
-  const allOperations = {};
+  const allOperations: Endpoints = {};
   const serverPath = getServerPath(schema);
   Object.keys(schema.paths).forEach(path => {
     const route = schema.paths[path];
@@ -129,7 +139,6 @@ export const getAllEndPoints = (schema: SwaggerSchema): Endpoints => {
         ['post', 'put', 'patch', 'delete'].indexOf(method) !== -1;
       const operationId =
         obj.operationId || getGQLTypeNameFromURL(method, path);
-      let parameterDetails;
 
       // [FIX] for when parameters is a child of route and not route[method]
       if (route.parameters) {
@@ -141,11 +150,9 @@ export const getAllEndPoints = (schema: SwaggerSchema): Endpoints => {
       }
       //
 
-      if (obj.parameters) {
-        parameterDetails = obj.parameters.map(param => getParamDetails(param));
-      } else {
-        parameterDetails = [];
-      }
+      const parameterDetails = obj.parameters
+        ? obj.parameters.map(param => getParamDetails(param))
+        : [];
 
       const endpoint: Endpoint = {
         parameters: parameterDetails,
