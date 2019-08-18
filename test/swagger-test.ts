@@ -85,7 +85,7 @@ describe('swagger', () => {
     it('should get details for openapi 2 and 3', async () => {
       function testParameter(parameter: Param) {
         try {
-          // assertType<Param>(parameter);
+          assertType<Param>(parameter);
         } catch (e) {
           console.log('Not a Param:', parameter);
           throw e;
