@@ -114,13 +114,6 @@ describe('swagger', () => {
       );
       (openapi3Schema.paths['/pet/findByStatus'].get
         .parameters as Param[]).forEach(testParameter);
-      testParameter({
-        in: 'body',
-        name: 'body',
-        ...openapi3Schema.paths['/pet'].post.requestBody.content[
-          'application/json'
-        ],
-      });
     });
   });
 });

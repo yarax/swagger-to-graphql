@@ -11,6 +11,7 @@ import {
   isOa3NonBodyParam,
   JSONSchemaType,
   Oa3NonBodyParam,
+  OA3BodyParam,
 } from './types';
 import { getRequestOptions } from './request-by-swagger';
 
@@ -121,6 +122,30 @@ export const getParamDetails = (param: Param): EndpointParam => {
   };
 };
 
+export const getParamDetailsFromRequestBody = (
+  requestBody: OA3BodyParam,
+): EndpointParam => {
+  function getSchemaFromRequestBody(): JSONSchemaType {
+    if (requestBody.content['application/json']) {
+      return requestBody.content['application/json'].schema;
+    }
+    if (requestBody.content['application/x-www-form-urlencoded']) {
+      return requestBody.content['application/x-www-form-urlencoded'].schema;
+    }
+    throw new Error(
+      `Unsupported content type(s) found: ${Object.keys(
+        requestBody.content,
+      ).join(', ')}`,
+    );
+  }
+  return {
+    name: 'body',
+    swaggerName: 'requestBody',
+    required: !!requestBody.required,
+    jsonSchema: getSchemaFromRequestBody(),
+  };
+};
+
 const renameGraphqlParametersToSwaggerParameters = (
   graphqlParameters: GraphQLParameters,
   parameterDetails: EndpointParam[],
@@ -153,30 +178,38 @@ export const getAllEndPoints = (schema: SwaggerSchema): Endpoints => {
       if (method === 'parameters') {
         return;
       }
-      const obj: OperationObject = route[method] as OperationObject;
+      const operationObject: OperationObject = route[method] as OperationObject;
       const isMutation =
         ['post', 'put', 'patch', 'delete'].indexOf(method) !== -1;
       const operationId =
-        obj.operationId || getGQLTypeNameFromURL(method, path);
+        operationObject.operationId || getGQLTypeNameFromURL(method, path);
 
       // [FIX] for when parameters is a child of route and not route[method]
       if (route.parameters) {
-        if (obj.parameters) {
-          obj.parameters = route.parameters.concat(obj.parameters);
+        if (operationObject.parameters) {
+          operationObject.parameters = route.parameters.concat(
+            operationObject.parameters,
+          );
         } else {
-          obj.parameters = route.parameters;
+          operationObject.parameters = route.parameters;
         }
       }
-      //
 
-      const parameterDetails = obj.parameters
-        ? obj.parameters.map(param => getParamDetails(param))
+      const bodyParams = operationObject.requestBody
+        ? [getParamDetailsFromRequestBody(operationObject.requestBody)]
         : [];
+
+      const parameterDetails = [
+        ...(operationObject.parameters
+          ? operationObject.parameters.map(param => getParamDetails(param))
+          : []),
+        ...bodyParams,
+      ];
 
       const endpoint: Endpoint = {
         parameters: parameterDetails,
-        description: obj.description,
-        response: getSuccessResponse(obj.responses),
+        description: operationObject.description,
+        response: getSuccessResponse(operationObject.responses),
         request: (graphqlParameters: GraphQLParameters, optBaseUrl: string) => {
           const baseUrl = optBaseUrl || serverPath; // eslint-disable-line no-param-reassign
           if (!baseUrl) {
@@ -189,7 +222,7 @@ export const getAllEndPoints = (schema: SwaggerSchema): Endpoints => {
             graphqlParameters,
             parameterDetails,
           );
-          return getRequestOptions(obj, {
+          return getRequestOptions(operationObject, {
             request,
             url,
             method,

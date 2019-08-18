@@ -35,6 +35,19 @@ export type NonBodyParam = Oa2NonBodyParam | Oa3NonBodyParam;
 
 export type Param = BodyParam | NonBodyParam;
 
+export interface OA3BodyParam {
+  content: {
+    'application/json'?: {
+      schema: JSONSchemaType;
+    };
+    'application/x-www-form-urlencoded'?: {
+      schema: JSONSchemaType;
+    };
+  };
+  description?: string;
+  required: boolean;
+}
+
 export const isOa3NonBodyParam = (param: Param): param is Oa3NonBodyParam => {
   return param.name !== 'body' && !!(param as Oa3NonBodyParam).schema;
 };
@@ -111,7 +124,13 @@ export interface ArraySchema extends CommonSchema {
   required?: boolean;
 }
 
-type JSONSchemaTypes = 'string' | 'date' | 'integer' | 'number' | 'boolean' | 'file';
+type JSONSchemaTypes =
+  | 'string'
+  | 'date'
+  | 'integer'
+  | 'number'
+  | 'boolean'
+  | 'file';
 
 export interface ScalarSchema extends CommonSchema {
   type: JSONSchemaTypes;
@@ -137,7 +156,7 @@ export interface ServerObject {
 }
 
 export interface OperationObject {
-  requestBody?: any;
+  requestBody?: OA3BodyParam;
   description?: string;
   operationId?: string;
   parameters?: Param[];
