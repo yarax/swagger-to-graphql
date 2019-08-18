@@ -1,6 +1,11 @@
-import { EndpointParam } from './../src/types';
+import { ArraySchema, EndpointParam } from './../src/types';
 import { expect } from 'chai';
-import { getServerPath, loadSchema, getParamDetails } from '../src/swagger';
+import {
+  getServerPath,
+  loadSchema,
+  getParamDetails,
+  getSuccessResponse,
+} from '../src/swagger';
 import { Param } from '../src/types';
 import { assertType } from 'typescript-is';
 
@@ -117,5 +122,35 @@ describe('swagger', () => {
         ],
       });
     });
+  });
+});
+
+describe('getSuccessResponse ', () => {
+  it('should return responses for openapi 3', async () => {
+    const openapi3Schema = await loadSchema(
+      `test/fixtures/petstore-openapi3.yaml`,
+    );
+    const {
+      get: { responses },
+    } = openapi3Schema.paths['/pet/findByStatus'];
+    const successResponse = getSuccessResponse(responses);
+    if (!successResponse) {
+      throw new Error('successResponse not defined');
+    }
+    expect((successResponse as ArraySchema).type).to.equal('array');
+    expect((successResponse as ArraySchema).items).to.be.an('object');
+  });
+
+  it('should return responses for openapi 2', async () => {
+    const openapi3Schema = await loadSchema(`test/fixtures/petstore.json`);
+    const {
+      get: { responses },
+    } = openapi3Schema.paths['/pet/findByStatus'];
+    const successResponse = getSuccessResponse(responses);
+    if (!successResponse) {
+      throw new Error('successResponse not defined');
+    }
+    expect((successResponse as ArraySchema).type).to.equal('array');
+    expect((successResponse as ArraySchema).items).to.be.an('object');
   });
 });

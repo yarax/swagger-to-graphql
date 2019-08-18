@@ -28,14 +28,33 @@ const getGQLTypeNameFromURL = (method: string, url: string) => {
   return `${method}${fromUrl}`;
 };
 
-const getSuccessResponse = (
+export const getSuccessResponse = (
   responses: Responses,
 ): JSONSchemaType | undefined => {
   const successCode = Object.keys(responses).find(code => {
     return code[0] === '2';
   });
 
-  return successCode ? responses[successCode].schema : undefined;
+  if (!successCode) {
+    return undefined;
+  }
+
+  const successResponse = responses[successCode];
+  if (!successResponse) {
+    throw new Error(`Expected responses[${successCode}] to be defined`);
+  }
+  if (successResponse.schema) {
+    return successResponse.schema;
+  }
+
+  if (successResponse.content) {
+    return successResponse.content['application/json'].schema;
+  }
+  throw new Error(
+    `Expected response to have either schema or content, got: ${Object.keys(
+      successResponse,
+    ).join(', ')}`,
+  );
 };
 
 export const loadSchema = async (

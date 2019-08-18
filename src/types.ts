@@ -76,6 +76,9 @@ export interface GraphQLTypeMap {
 export interface Responses {
   [key: string]: {
     schema?: JSONSchemaType;
+    content?: {
+      'application/json': { schema: JSONSchemaType };
+    };
     type?: 'file';
   };
 }
