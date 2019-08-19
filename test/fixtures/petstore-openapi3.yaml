@@ -613,6 +613,9 @@ components:
         name: Tag
     Pet:
       type: object
+      required:
+        - name
+        - photoUrls
       properties:
         id:
           type: integer
