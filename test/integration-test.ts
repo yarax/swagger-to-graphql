@@ -29,6 +29,40 @@ describe('swagger-to-graphql', () => {
     nock.enableNetConnect();
   });
 
+  describe('openapi 3', () => {
+    it('should work with formdata', async () => {
+      const nockScope = nock('http://mock-backend')
+        .post('/pet/1111', 'name=new name&status=new status')
+        .reply(200, 'mock result');
+
+      await request(
+        await createServer(
+          require.resolve('./fixtures/petstore-openapi3.yaml'),
+          'http://mock-backend',
+        ),
+      )
+        .post('/graphql')
+        .send({
+          query: `
+            mutation {
+              updatePetWithForm(
+                petId: "1111"
+                name: "new name"
+                status: "new status" 
+              )
+            }
+          `,
+        })
+        .expect({
+          data: {
+            updatePetWithForm: 'mock result',
+          },
+        });
+
+      nockScope.done();
+    });
+  });
+
   describe('special parameter names', () => {
     it('should convert graphql parameter names back to swagger parameter names', async () => {
       const nockScope = nock('http://mock-backend', {

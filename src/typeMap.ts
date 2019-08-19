@@ -18,14 +18,12 @@ import {
 } from 'graphql';
 import mapValues from 'lodash/mapValues';
 import {
-  ArraySchema,
-  BodySchema,
   EndpointParam,
   GraphQLType,
   GraphQLTypeMap,
   JSONSchemaType,
-  ObjectSchema,
 } from './types';
+import { isArrayType, isBodyType, isObjectType } from './json-schema';
 
 export function parseResponse(response: string, returnType: GraphQLOutputType) {
   const nullableType =
@@ -53,19 +51,6 @@ export function parseResponse(response: string, returnType: GraphQLOutputType) {
 
   throw new Error(`Unexpected returnType ${nullableType}`);
 }
-
-const isBodyType = (jsonSchema: JSONSchemaType): jsonSchema is BodySchema =>
-  Object.keys(jsonSchema).includes('in') &&
-  (jsonSchema as BodySchema).in === 'body';
-
-const isObjectType = (jsonSchema: JSONSchemaType): jsonSchema is ObjectSchema =>
-  !isBodyType(jsonSchema) &&
-  (Object.keys(jsonSchema).includes('properties') ||
-    jsonSchema.type === 'object');
-
-const isArrayType = (jsonSchema: JSONSchemaType): jsonSchema is ArraySchema =>
-  !isBodyType(jsonSchema) &&
-  (Object.keys(jsonSchema).includes('items') || jsonSchema.type === 'array');
 
 const primitiveTypes = {
   string: GraphQLString,

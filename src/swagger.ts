@@ -1,19 +1,20 @@
 import refParser from 'json-schema-ref-parser';
 import {
   Endpoint,
+  EndpointParam,
   Endpoints,
   GraphQLParameters,
-  OperationObject,
-  Responses,
-  SwaggerSchema,
-  EndpointParam,
-  Param,
   isOa3Param,
   JSONSchemaType,
-  Oa3Param,
   OA3BodyParam,
+  Oa3Param,
+  OperationObject,
+  Param,
+  Responses,
+  SwaggerSchema,
 } from './types';
 import { getRequestOptions } from './request-by-swagger';
+import { isObjectType } from './json-schema';
 
 let globalSchema: SwaggerSchema | undefined;
 
@@ -124,15 +125,14 @@ export const getParamDetails = (param: Param): EndpointParam => {
   };
 };
 
+const contentTypeFormData = 'application/x-www-form-urlencoded';
 export const getParamDetailsFromRequestBody = (
   requestBody: OA3BodyParam,
-): EndpointParam => {
+): EndpointParam[] => {
+  const formData = requestBody.content[contentTypeFormData];
   function getSchemaFromRequestBody(): JSONSchemaType {
     if (requestBody.content['application/json']) {
       return requestBody.content['application/json'].schema;
-    }
-    if (requestBody.content['application/x-www-form-urlencoded']) {
-      return requestBody.content['application/x-www-form-urlencoded'].schema;
     }
     throw new Error(
       `Unsupported content type(s) found: ${Object.keys(
@@ -140,14 +140,41 @@ export const getParamDetailsFromRequestBody = (
       ).join(', ')}`,
     );
   }
-  return {
-    name: 'body',
-    swaggerName: 'requestBody',
-    type: 'body',
-    required: !!requestBody.required,
-    jsonSchema: getSchemaFromRequestBody(),
-  };
+  if (formData) {
+    const formdataSchema = formData.schema;
+    if (!isObjectType(formdataSchema)) {
+      throw new Error(
+        `RequestBody is formData, expected an object schema, got "${JSON.stringify(
+          formdataSchema,
+        )}"`,
+      );
+    }
+    return Object.entries(formdataSchema.properties).map<EndpointParam>(
+      ([name, schema]) => ({
+        name: replaceOddChars(name),
+        swaggerName: name,
+        type: 'body',
+        required: formdataSchema.required
+          ? formdataSchema.required.includes(name)
+          : false,
+        jsonSchema: schema,
+      }),
+    );
+  }
+  return [
+    {
+      name: 'body',
+      swaggerName: 'requestBody',
+      type: 'body',
+      required: !!requestBody.required,
+      jsonSchema: getSchemaFromRequestBody(),
+    },
+  ];
 };
+
+function isFormdataRequest(requestBody: OA3BodyParam): boolean {
+  return !!requestBody.content[contentTypeFormData];
+}
 
 /**
  * Go through schema and grab routes
@@ -179,7 +206,7 @@ export const getAllEndPoints = (schema: SwaggerSchema): Endpoints => {
       }
 
       const bodyParams = operationObject.requestBody
-        ? [getParamDetailsFromRequestBody(operationObject.requestBody)]
+        ? getParamDetailsFromRequestBody(operationObject.requestBody)
         : [];
 
       const parameterDetails = [
@@ -208,6 +235,8 @@ export const getAllEndPoints = (schema: SwaggerSchema): Endpoints => {
             method,
             formData: operationObject.consumes
               ? !operationObject.consumes.includes('application/json')
+              : operationObject.requestBody
+              ? isFormdataRequest(operationObject.requestBody)
               : false,
           });
         },
