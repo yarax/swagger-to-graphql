@@ -13,10 +13,9 @@ export interface Fixture {
 export function getRequestOptions(
   { consumes, parameters }: OperationObject,
   fixture: Fixture,
-  baseUrlParam?: string,
 ) {
   const contentType = consumes ? consumes[0] : 'application/json';
-  const baseUrl = baseUrlParam || fixture.baseUrl || '';
+  const baseUrl = fixture.baseUrl || '';
   const reqOpts: OptionsWithUrl = {
     url: `${baseUrl}${fixture.url}`,
     method: fixture.method,
