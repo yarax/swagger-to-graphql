@@ -1,7 +1,7 @@
 import { OptionsWithUrl } from 'request';
 import { OperationObject } from './types';
 
-export interface Fixture {
+export interface RequestOptionsInput {
   url?: string;
   parameterValues: {
     [key: string]: any;
@@ -12,70 +12,72 @@ export interface Fixture {
 
 export function getRequestOptions(
   { consumes, parameters }: OperationObject,
-  fixture: Fixture,
+  requestOptionsInput: RequestOptionsInput,
 ) {
   const contentType = consumes ? consumes[0] : 'application/json';
-  const baseUrl = fixture.baseUrl || '';
-  const reqOpts: OptionsWithUrl = {
-    url: `${baseUrl}${fixture.url}`,
-    method: fixture.method,
+  const baseUrl = requestOptionsInput.baseUrl || '';
+  const result: OptionsWithUrl = {
+    url: `${baseUrl}${requestOptionsInput.url}`,
+    method: requestOptionsInput.method,
     headers: {
       'content-type': contentType,
     },
   };
 
   (parameters || []).forEach(param => {
-    const value = fixture.parameterValues[param.name];
+    const value = requestOptionsInput.parameterValues[param.name];
 
     if (param.required && !value && value !== '')
       throw new Error(
         `No required request field ${
           param.name
-        } for ${fixture.method.toUpperCase()} ${fixture.url}`,
+        } for ${requestOptionsInput.method.toUpperCase()} ${
+          requestOptionsInput.url
+        }`,
       );
     if (!value && value !== '') return;
 
     switch (param.in) {
       case 'body':
         if (contentType === 'application/x-www-form-urlencoded') {
-          reqOpts.body = reqOpts.body
-            ? `${reqOpts.body}&${param.name}=${value}`
+          result.body = result.body
+            ? `${result.body}&${param.name}=${value}`
             : `${param.name}=${value}`;
-          reqOpts.json = false;
+          result.json = false;
         } else if (contentType.includes('application/json')) {
-          reqOpts.body = JSON.stringify(value);
+          result.body = JSON.stringify(value);
         } else {
-          reqOpts.body = value;
+          result.body = value;
         }
         break;
       case 'formData':
-        if (!reqOpts.formData)
-          reqOpts.formData = {
+        if (!result.formData)
+          result.formData = {
             attachments: [],
           };
-        reqOpts.formData.attachments.push(value);
-        reqOpts.json = false;
+        result.formData.attachments.push(value);
+        result.json = false;
         break;
       case 'path':
-        reqOpts.url =
-          typeof reqOpts.url === 'string'
-            ? reqOpts.url.replace(`{${param.name}}`, value)
-            : reqOpts.url;
+        result.url =
+          typeof result.url === 'string'
+            ? result.url.replace(`{${param.name}}`, value)
+            : result.url;
         break;
       case 'query': {
-        if (!reqOpts.qs) reqOpts.qs = {};
+        if (!result.qs) result.qs = {};
         const newValue = Array.isArray(value) ? value[0] : value;
         if (typeof newValue !== 'string' && typeof newValue !== 'number') {
           throw new Error(
             'GET query string for non string/number values is not supported',
           );
         }
-        reqOpts.qs[param.name] = newValue;
+        result.qs[param.name] = newValue;
         break;
       }
       case 'header':
-        if (!reqOpts.headers) reqOpts.headers = {};
-        reqOpts.headers[param.name] = value;
+        if (!result.headers) result.headers = {};
+        result.headers[param.name] = value;
         break;
       default:
         throw new Error(
@@ -84,5 +86,5 @@ export function getRequestOptions(
     }
   });
 
-  return reqOpts;
+  return result;
 }
