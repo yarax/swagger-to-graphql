@@ -63,7 +63,7 @@ npm i -g swagger-to-graphql
 swagger-to-graphql --swagger=/path/to/swagger_schema.json > ./types.graphql
 ```
 
-## Resources
+# Resources
 
 - Blogpost: [Moving existing API from REST to GraphQL](https://medium.com/@raxwunter/moving-existing-api-from-rest-to-graphql-205bab22c184)
 - Video: [O.J. Sousa Rodrigues at Vienna.JS](https://www.youtube.com/watch?v=551gKWJEsK0&feature=youtu.be&t=1269")
