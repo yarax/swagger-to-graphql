@@ -1,6 +1,6 @@
-import { loadSchema } from './../src/swagger';
 import assert from 'assert';
 import request, { OptionsWithUrl } from 'request';
+import { loadSchema } from '../src/swagger';
 
 import { getRequestOptions } from '../src/request-by-swagger';
 import { OperationObject, SwaggerSchema } from '../src/types';

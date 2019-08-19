@@ -1,13 +1,12 @@
-import { ArraySchema, EndpointParam } from './../src/types';
 import { expect } from 'chai';
+import { assertType } from 'typescript-is';
+import { ArraySchema, EndpointParam, Param } from '../src/types';
 import {
   getServerPath,
   loadSchema,
   getParamDetails,
   getSuccessResponse,
 } from '../src/swagger';
-import { Param } from '../src/types';
-import { assertType } from 'typescript-is';
 
 describe('swagger', () => {
   describe('getServerPath', () => {

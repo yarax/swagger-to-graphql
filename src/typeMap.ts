@@ -16,6 +16,7 @@ import {
   GraphQLInputFieldConfigMap,
   GraphQLFieldConfigMap,
 } from 'graphql';
+import mapValues from 'lodash/mapValues';
 import {
   ArraySchema,
   BodySchema,
@@ -25,7 +26,6 @@ import {
   JSONSchemaType,
   ObjectSchema,
 } from './types';
-import mapValues from 'lodash/mapValues';
 
 export function parseResponse(response: string, returnType: GraphQLOutputType) {
   const nullableType =
