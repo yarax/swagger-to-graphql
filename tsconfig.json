@@ -63,5 +63,5 @@
       { "transform": "typescript-is/lib/transform-inline/transformer" }
     ]
   },
-  "include": ["**/*.ts"]
+  "include": ["src/**/*.ts"]
 }

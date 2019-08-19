@@ -62,8 +62,8 @@ export const loadSchema = async (
   pathToSchema: string,
 ): Promise<SwaggerSchema> => {
   const result = await refParser.dereference(pathToSchema);
-  globalSchema = result;
-  return result;
+  globalSchema = result as SwaggerSchema;
+  return globalSchema;
 };
 
 const replaceOddChars = (str: string) => str.replace(/[^_a-zA-Z0-9]/g, '_');
