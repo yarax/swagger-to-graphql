@@ -22,7 +22,7 @@ describe('build options by endpoint', () => {
       method: 'post',
       baseUrl: `http://${schema.host}${schema.basePath}`,
       url,
-      request: {
+      parameterValues: {
         body: { name: 'test' },
       },
     };
@@ -48,7 +48,7 @@ describe('build options by endpoint', () => {
       method: 'delete',
       baseUrl: `http://${schema.host}${schema.basePath}`,
       url,
-      request: {
+      parameterValues: {
         petId: 'mock-pet-id',
         // eslint-disable-next-line @typescript-eslint/camelcase
         api_key: 'mock api key',
@@ -73,7 +73,7 @@ describe('build options by endpoint', () => {
       method: 'delete',
       baseUrl: `http://${schema.host}${schema.basePath}`,
       url,
-      request: {
+      parameterValues: {
         petId: '',
         // eslint-disable-next-line @typescript-eslint/camelcase
         api_key: 'mock api key',

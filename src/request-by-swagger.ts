@@ -3,7 +3,7 @@ import { OperationObject } from './types';
 
 export interface Fixture {
   url?: string;
-  request: {
+  parameterValues: {
     [key: string]: any;
   };
   method: string;
@@ -26,7 +26,7 @@ export function getRequestOptions(
   };
 
   (parameters || []).forEach(param => {
-    const value = fixture.request[param.name];
+    const value = fixture.parameterValues[param.name];
 
     if (param.required && !value && value !== '')
       throw new Error(

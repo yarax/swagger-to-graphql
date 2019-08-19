@@ -218,12 +218,12 @@ export const getAllEndPoints = (schema: SwaggerSchema): Endpoints => {
             );
           }
           const url = `${baseUrl}${path}`;
-          const request = renameGraphqlParametersToSwaggerParameters(
+          const parameterValues = renameGraphqlParametersToSwaggerParameters(
             graphqlParameters,
             parameterDetails,
           );
           return getRequestOptions(operationObject, {
-            request,
+            parameterValues,
             url,
             method,
           });
