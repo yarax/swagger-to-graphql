@@ -25,8 +25,10 @@ export const getSchema = () => {
   return globalSchema;
 };
 
+const replaceOddChars = (str: string) => str.replace(/[^_a-zA-Z0-9]/g, '_');
+
 const getGQLTypeNameFromURL = (method: string, url: string) => {
-  const fromUrl = url.replace(/[{}]+/g, '').replace(/[^a-zA-Z0-9_]+/g, '_');
+  const fromUrl = replaceOddChars(url.replace(/[{}]+/g, ''));
   return `${method}${fromUrl}`;
 };
 
@@ -52,11 +54,8 @@ export const getSuccessResponse = (
   if (successResponse.content) {
     return successResponse.content['application/json'].schema;
   }
-  throw new Error(
-    `Expected response to have either schema or content, got: ${Object.keys(
-      successResponse,
-    ).join(', ')}`,
-  );
+
+  return undefined;
 };
 
 export const loadSchema = async (
@@ -66,8 +65,6 @@ export const loadSchema = async (
   globalSchema = result as SwaggerSchema;
   return globalSchema;
 };
-
-const replaceOddChars = (str: string) => str.replace(/[^_a-zA-Z0-9]/g, '_');
 
 export const getServerPath = (schema: SwaggerSchema) => {
   const server =
@@ -191,8 +188,9 @@ export const getAllEndPoints = (schema: SwaggerSchema): Endpoints => {
       const operationObject: OperationObject = route[method] as OperationObject;
       const isMutation =
         ['post', 'put', 'patch', 'delete'].indexOf(method) !== -1;
-      const operationId =
-        operationObject.operationId || getGQLTypeNameFromURL(method, path);
+      const operationId = operationObject.operationId
+        ? replaceOddChars(operationObject.operationId)
+        : getGQLTypeNameFromURL(method, path);
 
       // [FIX] for when parameters is a child of route and not route[method]
       if (route.parameters) {
