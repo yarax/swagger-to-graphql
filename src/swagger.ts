@@ -8,9 +8,9 @@ import {
   SwaggerSchema,
   EndpointParam,
   Param,
-  isOa3NonBodyParam,
+  isOa3Param,
   JSONSchemaType,
-  Oa3NonBodyParam,
+  Oa3Param,
   OA3BodyParam,
 } from './types';
 import { getRequestOptions } from './request-by-swagger';
@@ -104,8 +104,8 @@ export const getServerPath = (schema: SwaggerSchema) => {
 export const getParamDetails = (param: Param): EndpointParam => {
   const name = replaceOddChars(param.name);
   const swaggerName = param.name;
-  if (isOa3NonBodyParam(param)) {
-    const { schema, required } = param as Oa3NonBodyParam;
+  if (isOa3Param(param)) {
+    const { schema, required } = param as Oa3Param;
     return {
       name,
       swaggerName,

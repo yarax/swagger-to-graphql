@@ -2,7 +2,6 @@ import rp from 'request-promise';
 import {
   GraphQLFieldConfig,
   GraphQLFieldConfigMap,
-  GraphQLNonNull,
   GraphQLObjectType,
   GraphQLResolveInfo,
   GraphQLSchema,
@@ -22,7 +21,11 @@ import {
   parseResponse,
 } from './typeMap';
 
-type ProxyUrl = ((opts: SwaggerToGraphQLOptions) => string) | string | null | undefined;
+type ProxyUrl =
+  | ((opts: SwaggerToGraphQLOptions) => string)
+  | string
+  | null
+  | undefined;
 
 const resolver = (
   endpoint: Endpoint,
@@ -34,11 +37,12 @@ const resolver = (
   opts: SwaggerToGraphQLOptions,
   info: GraphQLResolveInfo,
 ) => {
-  const proxy = (!proxyUrl
-    ? opts.GQLProxyBaseUrl
-    : typeof proxyUrl === 'function'
-    ? proxyUrl(opts)
-    : proxyUrl) || '';
+  const proxy =
+    (!proxyUrl
+      ? opts.GQLProxyBaseUrl
+      : typeof proxyUrl === 'function'
+      ? proxyUrl(opts)
+      : proxyUrl) || '';
   const req = endpoint.request(args, proxy);
   if (opts.headers) {
     const { host, ...otherHeaders } = opts.headers;
@@ -49,7 +53,6 @@ const resolver = (
   const res = await rp(req);
   return parseResponse(res, info.returnType);
 };
-
 
 const getFields = (
   endpoints: Endpoints,
@@ -64,14 +67,13 @@ const getFields = (
     })
     .reduce((result, operationId) => {
       const endpoint: Endpoint = endpoints[operationId];
-      const type = GraphQLNonNull(
-        jsonSchemaTypeToGraphQL(
-          operationId,
-          endpoint.response || { type: 'string' },
-          'response',
-          false,
-          gqlTypes,
-        ),
+      const type = jsonSchemaTypeToGraphQL(
+        operationId,
+        endpoint.response || { type: 'string' },
+        'response',
+        false,
+        gqlTypes,
+        true,
       );
       const gType: GraphQLFieldConfig<any, any> = {
         type,
@@ -83,7 +85,11 @@ const getFields = (
     }, {});
 };
 
-const schemaFromEndpoints = (endpoints: Endpoints, proxyUrl: ProxyUrl, headers: { [key: string]: string } | undefined) => {
+const schemaFromEndpoints = (
+  endpoints: Endpoints,
+  proxyUrl: ProxyUrl,
+  headers: { [key: string]: string } | undefined,
+) => {
   const gqlTypes = {};
   const queryFields = getFields(endpoints, false, gqlTypes, proxyUrl, headers);
   if (!Object.keys(queryFields).length) {

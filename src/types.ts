@@ -24,14 +24,14 @@ export interface Oa2NonBodyParam {
   required?: boolean;
 }
 
-export interface Oa3NonBodyParam {
+export interface Oa3Param {
   name: string;
   in: 'header' | 'query' | 'formData' | 'path';
   required?: boolean;
   schema: JSONSchemaType;
 }
 
-export type NonBodyParam = Oa2NonBodyParam | Oa3NonBodyParam;
+export type NonBodyParam = Oa2NonBodyParam | Oa3Param;
 
 export type Param = BodyParam | NonBodyParam;
 
@@ -48,8 +48,8 @@ export interface OA3BodyParam {
   required: boolean;
 }
 
-export const isOa3NonBodyParam = (param: Param): param is Oa3NonBodyParam => {
-  return param.name !== 'body' && !!(param as Oa3NonBodyParam).schema;
+export const isOa3Param = (param: Param): param is Oa3Param => {
+  return !!(param as Oa3Param).schema;
 };
 export interface EndpointParam {
   type?: string;

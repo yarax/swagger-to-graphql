@@ -57,6 +57,7 @@ describe('typeMap', () => {
         'mockpropertyname',
         true,
         {},
+        false,
       ) as GraphQLInputObjectType;
 
       expect(graphqlFileType).to.be.instanceOf(GraphQLInputObjectType);
@@ -83,6 +84,7 @@ describe('typeMap', () => {
         'mockpropertyname',
         true,
         {},
+        false,
       ) as GraphQLList<GraphQLNonNull<GraphQLInputObjectType>>;
 
       expect(graphqlList).to.be.instanceOf(GraphQLList);
@@ -120,6 +122,7 @@ describe('typeMap', () => {
         'mockpropertyname',
         true,
         {},
+        false,
       ) as GraphQLList<GraphQLNonNull<GraphQLScalarType>>;
 
       expect(graphqlList).to.be.instanceOf(GraphQLList);
