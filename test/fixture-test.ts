@@ -21,7 +21,7 @@ describe('Fixture', () => {
     }
   });
 
-  xdescribe('petstore converted to openapi 3', () => {
+  describe('petstore converted to openapi 3', () => {
     it('should have the same graphql schema as openapi 2', async () => {
       const file = `test/fixtures/petstore-openapi3.yaml`;
       const graphqlFile = `test/fixtures/petstore-openapi3.graphql`;

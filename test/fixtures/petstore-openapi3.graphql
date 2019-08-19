@@ -16,7 +16,7 @@ type getInventory_response {
 type Mutation {
   addPet(body: PetInput!): String!
   updatePet(body: PetInput!): String!
-  updatePetWithForm(petId: String!, name: String, status: String): String!
+  updatePetWithForm(petId: String!, body: param_updatePetWithForm_bodyInput): String!
   deletePet(api_key: String, petId: String!): String!
   placeOrder(body: OrderInput!): Order!
 
@@ -57,6 +57,14 @@ input OrderInput {
   """Order Status"""
   status: String
   complete: Boolean
+}
+
+input param_updatePetWithForm_bodyInput {
+  """Updated name of the pet"""
+  name: String
+
+  """Updated status of the pet"""
+  status: String
 }
 
 type Pet {
