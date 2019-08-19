@@ -52,8 +52,8 @@ export const isOa3Param = (param: Param): param is Oa3Param => {
   return !!(param as Oa3Param).schema;
 };
 export interface EndpointParam {
-  type?: string;
   required: boolean;
+  type: 'header' | 'query' | 'formData' | 'path' | 'body';
   name: string;
   swaggerName: string;
   jsonSchema: JSONSchemaType;

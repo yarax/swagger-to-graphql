@@ -1,53 +1,54 @@
 import { OptionsWithUrl } from 'request';
-import { OperationObject } from './types';
+import { EndpointParam } from './types';
 
 export interface RequestOptionsInput {
   url?: string;
+  parameterDetails: EndpointParam[];
   parameterValues: {
     [key: string]: any;
   };
   method: string;
   baseUrl?: string;
+  formData?: boolean;
 }
 
-export function getRequestOptions(
-  { consumes, parameters }: OperationObject,
-  requestOptionsInput: RequestOptionsInput,
-) {
-  const contentType = consumes ? consumes[0] : 'application/json';
-  const baseUrl = requestOptionsInput.baseUrl || '';
+export function getRequestOptions({
+  baseUrl = '',
+  formData = false,
+  url,
+  method,
+  parameterDetails,
+  parameterValues,
+}: RequestOptionsInput) {
+  const contentType = formData
+    ? 'application/x-www-form-urlencoded'
+    : 'application/json';
   const result: OptionsWithUrl = {
-    url: `${baseUrl}${requestOptionsInput.url}`,
-    method: requestOptionsInput.method,
+    url: `${baseUrl}${url}`,
+    method,
     headers: {
       'content-type': contentType,
     },
   };
 
-  (parameters || []).forEach(param => {
-    const value = requestOptionsInput.parameterValues[param.name];
+  parameterDetails.forEach(({ name, swaggerName, type, required }) => {
+    const value = parameterValues[name];
 
-    if (param.required && !value && value !== '')
+    if (required && !value && value !== '')
       throw new Error(
-        `No required request field ${
-          param.name
-        } for ${requestOptionsInput.method.toUpperCase()} ${
-          requestOptionsInput.url
-        }`,
+        `No required request field ${name} for ${method.toUpperCase()} ${url}`,
       );
     if (!value && value !== '') return;
 
-    switch (param.in) {
+    switch (type) {
       case 'body':
-        if (contentType === 'application/x-www-form-urlencoded') {
+        if (formData) {
           result.body = result.body
-            ? `${result.body}&${param.name}=${value}`
-            : `${param.name}=${value}`;
+            ? `${result.body}&${swaggerName}=${value}`
+            : `${swaggerName}=${value}`;
           result.json = false;
-        } else if (contentType.includes('application/json')) {
-          result.body = JSON.stringify(value);
         } else {
-          result.body = value;
+          result.body = JSON.stringify(value);
         }
         break;
       case 'formData':
@@ -61,7 +62,7 @@ export function getRequestOptions(
       case 'path':
         result.url =
           typeof result.url === 'string'
-            ? result.url.replace(`{${param.name}}`, value)
+            ? result.url.replace(`{${swaggerName}}`, value)
             : result.url;
         break;
       case 'query': {
@@ -72,16 +73,16 @@ export function getRequestOptions(
             'GET query string for non string/number values is not supported',
           );
         }
-        result.qs[param.name] = newValue;
+        result.qs[swaggerName] = newValue;
         break;
       }
       case 'header':
         if (!result.headers) result.headers = {};
-        result.headers[param.name] = value;
+        result.headers[swaggerName] = value;
         break;
       default:
         throw new Error(
-          `Unsupported param type for param ${JSON.stringify(param)}`,
+          `Unsupported param type for param "${name}" and type "${type}"`,
         );
     }
   });

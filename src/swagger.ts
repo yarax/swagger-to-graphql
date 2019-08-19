@@ -105,10 +105,11 @@ export const getParamDetails = (param: Param): EndpointParam => {
   const name = replaceOddChars(param.name);
   const swaggerName = param.name;
   if (isOa3Param(param)) {
-    const { schema, required } = param as Oa3Param;
+    const { schema, required, in: type } = param as Oa3Param;
     return {
       name,
       swaggerName,
+      type,
       required: !!required,
       jsonSchema: schema,
     };
@@ -117,6 +118,7 @@ export const getParamDetails = (param: Param): EndpointParam => {
   return {
     name,
     swaggerName,
+    type: param.in,
     required: !!param.required,
     jsonSchema: param,
   };
@@ -141,29 +143,10 @@ export const getParamDetailsFromRequestBody = (
   return {
     name: 'body',
     swaggerName: 'requestBody',
+    type: 'body',
     required: !!requestBody.required,
     jsonSchema: getSchemaFromRequestBody(),
   };
-};
-
-const renameGraphqlParametersToSwaggerParameters = (
-  graphqlParameters: GraphQLParameters,
-  parameterDetails: EndpointParam[],
-): GraphQLParameters => {
-  const result: GraphQLParameters = {};
-  Object.keys(graphqlParameters).forEach(inputGraphqlName => {
-    const foundParameterDetail = parameterDetails.find(
-      ({ name: graphqlName }) => graphqlName === inputGraphqlName,
-    );
-    if (!foundParameterDetail) {
-      throw new Error(
-        `Expected parameter detail with name: ${inputGraphqlName}`,
-      );
-    }
-    const { swaggerName } = foundParameterDetail;
-    result[swaggerName] = graphqlParameters[inputGraphqlName];
-  });
-  return result;
 };
 
 /**
@@ -210,7 +193,7 @@ export const getAllEndPoints = (schema: SwaggerSchema): Endpoints => {
         parameters: parameterDetails,
         description: operationObject.description,
         response: getSuccessResponse(operationObject.responses),
-        request: (graphqlParameters: GraphQLParameters, optBaseUrl: string) => {
+        request: (parameterValues: GraphQLParameters, optBaseUrl: string) => {
           const baseUrl = optBaseUrl || serverPath; // eslint-disable-line no-param-reassign
           if (!baseUrl) {
             throw new Error(
@@ -218,14 +201,14 @@ export const getAllEndPoints = (schema: SwaggerSchema): Endpoints => {
             );
           }
           const url = `${baseUrl}${path}`;
-          const parameterValues = renameGraphqlParametersToSwaggerParameters(
-            graphqlParameters,
+          return getRequestOptions({
             parameterDetails,
-          );
-          return getRequestOptions(operationObject, {
             parameterValues,
             url,
             method,
+            formData: operationObject.consumes
+              ? !operationObject.consumes.includes('application/json')
+              : false,
           });
         },
         mutation: isMutation,
