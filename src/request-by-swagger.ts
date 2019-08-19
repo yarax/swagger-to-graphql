@@ -1,90 +1,91 @@
 import { OptionsWithUrl } from 'request';
-import { OperationObject } from './types';
+import { EndpointParam } from './types';
 
-export interface Fixture {
+export interface RequestOptionsInput {
   url?: string;
-  request: {
+  parameterDetails: EndpointParam[];
+  parameterValues: {
     [key: string]: any;
   };
   method: string;
   baseUrl?: string;
+  formData?: boolean;
 }
 
-export function getRequestOptions(
-  { consumes, parameters }: OperationObject,
-  fixture: Fixture,
-  baseUrlParam?: string,
-) {
-  const contentType = consumes ? consumes[0] : 'application/json';
-  const baseUrl = baseUrlParam || fixture.baseUrl || '';
-  const reqOpts: OptionsWithUrl = {
-    url: `${baseUrl}${fixture.url}`,
-    method: fixture.method,
+export function getRequestOptions({
+  baseUrl = '',
+  formData = false,
+  url,
+  method,
+  parameterDetails,
+  parameterValues,
+}: RequestOptionsInput) {
+  const contentType = formData
+    ? 'application/x-www-form-urlencoded'
+    : 'application/json';
+  const result: OptionsWithUrl = {
+    url: `${baseUrl}${url}`,
+    method,
     headers: {
       'content-type': contentType,
     },
   };
-  reqOpts.headers['content-type'] = contentType;
 
-  (parameters || []).forEach(param => {
-    const value = fixture.request[param.name];
+  parameterDetails.forEach(({ name, swaggerName, type, required }) => {
+    const value = parameterValues[name];
 
-    if (param.required && !value && value !== '')
+    if (required && !value && value !== '')
       throw new Error(
-        `No required request field ${
-          param.name
-        } for ${fixture.method.toUpperCase()} ${fixture.url}`,
+        `No required request field ${name} for ${method.toUpperCase()} ${url}`,
       );
     if (!value && value !== '') return;
 
-    switch (param.in) {
+    switch (type) {
       case 'body':
-        if (contentType === 'application/x-www-form-urlencoded') {
-          reqOpts.body = reqOpts.body
-            ? `${reqOpts.body}&${param.name}=${value}`
-            : `${param.name}=${value}`;
-          reqOpts.json = false;
-        } else if (contentType.includes('application/json')) {
-          reqOpts.body = JSON.stringify(value);
+        if (formData) {
+          result.body = result.body
+            ? `${result.body}&${swaggerName}=${value}`
+            : `${swaggerName}=${value}`;
+          result.json = false;
         } else {
-          reqOpts.body = value;
+          result.body = JSON.stringify(value);
         }
         break;
       case 'formData':
-        if (!reqOpts.formData)
-          reqOpts.formData = {
+        if (!result.formData)
+          result.formData = {
             attachments: [],
           };
-        reqOpts.formData.attachments.push(value);
-        reqOpts.json = false;
+        result.formData.attachments.push(value);
+        result.json = false;
         break;
       case 'path':
-        reqOpts.url =
-          typeof reqOpts.url === 'string'
-            ? reqOpts.url.replace(`{${param.name}}`, value)
-            : reqOpts.url;
+        result.url =
+          typeof result.url === 'string'
+            ? result.url.replace(`{${swaggerName}}`, value)
+            : result.url;
         break;
       case 'query': {
-        if (!reqOpts.qs) reqOpts.qs = {};
+        if (!result.qs) result.qs = {};
         const newValue = Array.isArray(value) ? value[0] : value;
         if (typeof newValue !== 'string' && typeof newValue !== 'number') {
           throw new Error(
             'GET query string for non string/number values is not supported',
           );
         }
-        reqOpts.qs[param.name] = newValue;
+        result.qs[swaggerName] = newValue;
         break;
       }
       case 'header':
-        if (!reqOpts.headers) reqOpts.headers = {};
-        reqOpts.headers[param.name] = value;
+        if (!result.headers) result.headers = {};
+        result.headers[swaggerName] = value;
         break;
       default:
         throw new Error(
-          `Unsupported param type for param ${param.name}: ${param.in}`,
+          `Unsupported param type for param "${name}" and type "${type}"`,
         );
     }
   });
 
-  return reqOpts;
+  return result;
 }

@@ -1,15 +1,22 @@
 import refParser from 'json-schema-ref-parser';
 import {
   Endpoint,
+  EndpointParam,
   Endpoints,
   GraphQLParameters,
+  isOa3Param,
+  JSONSchemaType,
+  OA3BodyParam,
+  Oa3Param,
   OperationObject,
+  Param,
   Responses,
   SwaggerSchema,
 } from './types';
 import { getRequestOptions } from './request-by-swagger';
+import { isObjectType } from './json-schema';
 
-let globalSchema;
+let globalSchema: SwaggerSchema | undefined;
 
 export const getSchema = () => {
   if (!globalSchema || !Object.keys(globalSchema).length) {
@@ -23,25 +30,44 @@ const getGQLTypeNameFromURL = (method: string, url: string) => {
   return `${method}${fromUrl}`;
 };
 
-const getSuccessResponse = (responses: Responses) => {
-  let resp;
-
-  if (!responses) return null;
-
-  Object.keys(responses).some(code => {
-    resp = responses[code];
+export const getSuccessResponse = (
+  responses: Responses,
+): JSONSchemaType | undefined => {
+  const successCode = Object.keys(responses).find(code => {
     return code[0] === '2';
   });
 
-  return resp && resp.schema;
+  if (!successCode) {
+    return undefined;
+  }
+
+  const successResponse = responses[successCode];
+  if (!successResponse) {
+    throw new Error(`Expected responses[${successCode}] to be defined`);
+  }
+  if (successResponse.schema) {
+    return successResponse.schema;
+  }
+
+  if (successResponse.content) {
+    return successResponse.content['application/json'].schema;
+  }
+  throw new Error(
+    `Expected response to have either schema or content, got: ${Object.keys(
+      successResponse,
+    ).join(', ')}`,
+  );
 };
 
-export const loadSchema = async (pathToSchema: string) => {
-  globalSchema = await refParser.dereference(pathToSchema);
+export const loadSchema = async (
+  pathToSchema: string,
+): Promise<SwaggerSchema> => {
+  const result = await refParser.dereference(pathToSchema);
+  globalSchema = result as SwaggerSchema;
   return globalSchema;
 };
 
-const replaceOddChars = str => str.replace(/[^_a-zA-Z0-9]/g, '_');
+const replaceOddChars = (str: string) => str.replace(/[^_a-zA-Z0-9]/g, '_');
 
 export const getServerPath = (schema: SwaggerSchema) => {
   const server =
@@ -76,34 +102,85 @@ export const getServerPath = (schema: SwaggerSchema) => {
     : url;
 };
 
-const getParamDetails = param => {
-  const resolvedParam = param;
-  const name = replaceOddChars(resolvedParam.name);
-  const { type } = resolvedParam;
-  return { name, type, jsonSchema: resolvedParam };
+export const getParamDetails = (param: Param): EndpointParam => {
+  const name = replaceOddChars(param.name);
+  const swaggerName = param.name;
+  if (isOa3Param(param)) {
+    const { schema, required, in: type } = param as Oa3Param;
+    return {
+      name,
+      swaggerName,
+      type,
+      required: !!required,
+      jsonSchema: schema,
+    };
+  }
+
+  return {
+    name,
+    swaggerName,
+    type: param.in,
+    required: !!param.required,
+    jsonSchema: param,
+  };
 };
 
-const renameGraphqlParametersToSwaggerParameters = (
-  graphqlParameters,
-  parameterDetails,
-) => {
-  const result = {};
-  Object.keys(graphqlParameters).forEach(inputGraphqlName => {
-    const {
-      jsonSchema: { name: swaggerName },
-    } = parameterDetails.find(
-      ({ name: graphqlName }) => graphqlName === inputGraphqlName,
+const contentTypeFormData = 'application/x-www-form-urlencoded';
+export const getParamDetailsFromRequestBody = (
+  requestBody: OA3BodyParam,
+): EndpointParam[] => {
+  const formData = requestBody.content[contentTypeFormData];
+  function getSchemaFromRequestBody(): JSONSchemaType {
+    if (requestBody.content['application/json']) {
+      return requestBody.content['application/json'].schema;
+    }
+    throw new Error(
+      `Unsupported content type(s) found: ${Object.keys(
+        requestBody.content,
+      ).join(', ')}`,
     );
-    result[swaggerName] = graphqlParameters[inputGraphqlName];
-  });
-  return result;
+  }
+  if (formData) {
+    const formdataSchema = formData.schema;
+    if (!isObjectType(formdataSchema)) {
+      throw new Error(
+        `RequestBody is formData, expected an object schema, got "${JSON.stringify(
+          formdataSchema,
+        )}"`,
+      );
+    }
+    return Object.entries(formdataSchema.properties).map<EndpointParam>(
+      ([name, schema]) => ({
+        name: replaceOddChars(name),
+        swaggerName: name,
+        type: 'body',
+        required: formdataSchema.required
+          ? formdataSchema.required.includes(name)
+          : false,
+        jsonSchema: schema,
+      }),
+    );
+  }
+  return [
+    {
+      name: 'body',
+      swaggerName: 'requestBody',
+      type: 'body',
+      required: !!requestBody.required,
+      jsonSchema: getSchemaFromRequestBody(),
+    },
+  ];
 };
+
+function isFormdataRequest(requestBody: OA3BodyParam): boolean {
+  return !!requestBody.content[contentTypeFormData];
+}
 
 /**
  * Go through schema and grab routes
  */
 export const getAllEndPoints = (schema: SwaggerSchema): Endpoints => {
-  const allOperations = {};
+  const allOperations: Endpoints = {};
   const serverPath = getServerPath(schema);
   Object.keys(schema.paths).forEach(path => {
     const route = schema.paths[path];
@@ -111,34 +188,39 @@ export const getAllEndPoints = (schema: SwaggerSchema): Endpoints => {
       if (method === 'parameters') {
         return;
       }
-      const obj: OperationObject = route[method] as OperationObject;
+      const operationObject: OperationObject = route[method] as OperationObject;
       const isMutation =
         ['post', 'put', 'patch', 'delete'].indexOf(method) !== -1;
       const operationId =
-        obj.operationId || getGQLTypeNameFromURL(method, path);
-      let parameterDetails;
+        operationObject.operationId || getGQLTypeNameFromURL(method, path);
 
       // [FIX] for when parameters is a child of route and not route[method]
       if (route.parameters) {
-        if (obj.parameters) {
-          obj.parameters = route.parameters.concat(obj.parameters);
+        if (operationObject.parameters) {
+          operationObject.parameters = route.parameters.concat(
+            operationObject.parameters,
+          );
         } else {
-          obj.parameters = route.parameters;
+          operationObject.parameters = route.parameters;
         }
       }
-      //
 
-      if (obj.parameters) {
-        parameterDetails = obj.parameters.map(param => getParamDetails(param));
-      } else {
-        parameterDetails = [];
-      }
+      const bodyParams = operationObject.requestBody
+        ? getParamDetailsFromRequestBody(operationObject.requestBody)
+        : [];
+
+      const parameterDetails = [
+        ...(operationObject.parameters
+          ? operationObject.parameters.map(param => getParamDetails(param))
+          : []),
+        ...bodyParams,
+      ];
 
       const endpoint: Endpoint = {
         parameters: parameterDetails,
-        description: obj.description,
-        response: getSuccessResponse(obj.responses),
-        request: (graphqlParameters: GraphQLParameters, optBaseUrl: string) => {
+        description: operationObject.description,
+        response: getSuccessResponse(operationObject.responses),
+        request: (parameterValues: GraphQLParameters, optBaseUrl: string) => {
           const baseUrl = optBaseUrl || serverPath; // eslint-disable-line no-param-reassign
           if (!baseUrl) {
             throw new Error(
@@ -146,14 +228,16 @@ export const getAllEndPoints = (schema: SwaggerSchema): Endpoints => {
             );
           }
           const url = `${baseUrl}${path}`;
-          const request = renameGraphqlParametersToSwaggerParameters(
-            graphqlParameters,
+          return getRequestOptions({
             parameterDetails,
-          );
-          return getRequestOptions(obj, {
-            request,
+            parameterValues,
             url,
             method,
+            formData: operationObject.consumes
+              ? !operationObject.consumes.includes('application/json')
+              : operationObject.requestBody
+              ? isFormdataRequest(operationObject.requestBody)
+              : false,
           });
         },
         mutation: isMutation,

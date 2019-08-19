@@ -8,10 +8,11 @@
   },
   "bin": "./bin/swagger2graphql",
   "dependencies": {
+    "@types/json-schema": "^7.0.3",
     "isomorphic-fetch": "^2.2.1",
     "js-yaml": "^3.13.1",
     "json-schema-ref-parser": "^6.1.0",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.15",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
     "yargs": "^13.2.4"
@@ -21,11 +22,15 @@
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",
+    "@types/express": "^4.17.0",
+    "@types/express-graphql": "^0.8.0",
     "@types/graphql": "^14.2.0",
     "@types/lodash": "^4.14.132",
     "@types/mocha": "^5.2.6",
+    "@types/nock": "^10.0.3",
     "@types/request": "^2.48.2",
     "@types/request-promise": "^4.1.44",
+    "@types/supertest": "^2.0.8",
     "@typescript-eslint/eslint-plugin": "^1.9.0",
     "chai": "^4.2.0",
     "eslint": "^5.16.0",
@@ -41,7 +46,9 @@
     "prettier": "^1.17.1",
     "supertest": "^4.0.2",
     "ts-node": "^8.1.1",
-    "typescript": "^3.4.5"
+    "ttypescript": "^1.5.7",
+    "typescript": "^3.4.5",
+    "typescript-is": "^0.12.2"
   },
   "keywords": [
     "graphql",
@@ -54,13 +61,13 @@
   "license": "MIT",
   "main": "lib/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "ttsc",
     "libchanged": "test -z \"$(git diff HEAD)\" || (git diff HEAD && false)",
     "lint": "eslint --ext .js,.ts .",
     "lint:fix": "npm run lint -- --fix",
     "prepare": "npm run build",
     "start": "node example/app.js",
-    "test": "mocha",
+    "test": "TS_NODE_COMPILER=ttypescript mocha",
     "test:watch": "npm run test -- --watch"
   }
 }

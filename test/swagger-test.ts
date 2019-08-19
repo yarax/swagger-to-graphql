@@ -1,5 +1,12 @@
 import { expect } from 'chai';
-import { getServerPath } from '../src/swagger';
+import { assertType } from 'typescript-is';
+import { ArraySchema, EndpointParam, Param } from '../src/types';
+import {
+  getServerPath,
+  loadSchema,
+  getParamDetails,
+  getSuccessResponse,
+} from '../src/swagger';
 
 describe('swagger', () => {
   describe('getServerPath', () => {
@@ -76,5 +83,66 @@ describe('swagger', () => {
         }),
       ).equal('http://mock-host');
     });
+  });
+
+  describe('getParameterDetails', () => {
+    it('should get details for openapi 2 and 3', async () => {
+      function testParameter(parameter: Param) {
+        try {
+          assertType<Param>(parameter);
+        } catch (e) {
+          console.log('Not a Param:', parameter);
+          throw e;
+        }
+        let paramDetails;
+        try {
+          paramDetails = getParamDetails(parameter);
+          assertType<EndpointParam>(paramDetails);
+        } catch (e) {
+          console.log('Not EndpointParam:', JSON.stringify(paramDetails));
+          console.log('parameter:', parameter);
+          throw e;
+        }
+      }
+      const openapi2Schema = await loadSchema(`test/fixtures/petstore.yaml`);
+      (openapi2Schema.paths['/pet'].post.parameters as Param[]).forEach(
+        testParameter,
+      );
+      const openapi3Schema = await loadSchema(
+        `test/fixtures/petstore-openapi3.yaml`,
+      );
+      (openapi3Schema.paths['/pet/findByStatus'].get
+        .parameters as Param[]).forEach(testParameter);
+    });
+  });
+});
+
+describe('getSuccessResponse ', () => {
+  it('should return responses for openapi 3', async () => {
+    const openapi3Schema = await loadSchema(
+      `test/fixtures/petstore-openapi3.yaml`,
+    );
+    const {
+      get: { responses },
+    } = openapi3Schema.paths['/pet/findByStatus'];
+    const successResponse = getSuccessResponse(responses);
+    if (!successResponse) {
+      throw new Error('successResponse not defined');
+    }
+    expect((successResponse as ArraySchema).type).to.equal('array');
+    expect((successResponse as ArraySchema).items).to.be.an('object');
+  });
+
+  it('should return responses for openapi 2', async () => {
+    const openapi3Schema = await loadSchema(`test/fixtures/petstore.json`);
+    const {
+      get: { responses },
+    } = openapi3Schema.paths['/pet/findByStatus'];
+    const successResponse = getSuccessResponse(responses);
+    if (!successResponse) {
+      throw new Error('successResponse not defined');
+    }
+    expect((successResponse as ArraySchema).type).to.equal('array');
+    expect((successResponse as ArraySchema).items).to.be.an('object');
   });
 });

@@ -1,28 +1,52 @@
-import assert from 'assert';
-import request from 'request';
+import request, { OptionsWithUrl } from 'request';
+import { expect } from 'chai';
 
-import { getRequestOptions } from '../src/request-by-swagger';
-import { OperationObject } from '../src/types';
+import {
+  getRequestOptions,
+  RequestOptionsInput,
+} from '../src/request-by-swagger';
+import { EndpointParam } from '../src/types';
 
-import schema = require('./fixtures/petstore.json');
+let requestOptions: OptionsWithUrl;
 
-let requestOptions;
+const baseUrl = 'http://mock-baseurl';
 
-describe('build options by endpoint', () => {
+function createParameterDetails(
+  override: Partial<EndpointParam>,
+): EndpointParam {
+  return {
+    type: 'query',
+    name: 'mock name',
+    required: true,
+    swaggerName: 'mock swaggerName',
+    jsonSchema: {
+      type: 'string',
+    },
+    ...override,
+  };
+}
+
+describe('getRequestOptions', () => {
   it('should add request body to request options', () => {
     const url = '/pet';
-    const endpoint = schema.paths[url].post as OperationObject;
-    const options = {
+    const options: RequestOptionsInput = {
       method: 'post',
-      baseUrl: `http://${schema.host}${schema.basePath}`,
+      baseUrl,
       url,
-      request: {
+      parameterDetails: [
+        createParameterDetails({
+          type: 'body',
+          name: 'body',
+        }),
+      ],
+      parameterValues: {
         body: { name: 'test' },
       },
     };
-    requestOptions = getRequestOptions(endpoint, options);
-    assert.deepEqual(requestOptions, {
-      url: 'http://petstore.swagger.io/v2/pet',
+    requestOptions = getRequestOptions(options);
+
+    expect(requestOptions).to.deep.equal({
+      url: 'http://mock-baseurl/pet',
       method: 'post',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ name: 'test' }),
@@ -37,20 +61,31 @@ describe('build options by endpoint', () => {
 
   it('should add request headers to request options', () => {
     const url = '/pet/{petId}';
-    const endpoint = schema.paths[url].delete as OperationObject;
     const options = {
       method: 'delete',
-      baseUrl: `http://${schema.host}${schema.basePath}`,
+      baseUrl,
       url,
-      request: {
-        petId: 'mock-pet-id',
+      parameterDetails: [
+        createParameterDetails({
+          name: 'graphql name',
+          swaggerName: 'petId',
+          type: 'path',
+        }),
+        createParameterDetails({
+          name: 'api_key',
+          swaggerName: 'api_key',
+          type: 'header',
+        }),
+      ],
+      parameterValues: {
+        'graphql name': 'mock-pet-id',
         // eslint-disable-next-line @typescript-eslint/camelcase
         api_key: 'mock api key',
       },
     };
-    requestOptions = getRequestOptions(endpoint, options);
-    assert.deepEqual(requestOptions, {
-      url: 'http://petstore.swagger.io/v2/pet/mock-pet-id',
+    requestOptions = getRequestOptions(options);
+    expect(requestOptions).to.deep.equal({
+      url: 'http://mock-baseurl/pet/mock-pet-id',
       method: 'delete',
       headers: {
         'content-type': 'application/json',
@@ -62,26 +97,57 @@ describe('build options by endpoint', () => {
 
   it('should allow empty strings', () => {
     const url = '/pet/{petId}';
-    const endpoint = schema.paths[url].delete as OperationObject;
     const options = {
       method: 'delete',
-      baseUrl: `http://${schema.host}${schema.basePath}`,
+      baseUrl,
       url,
-      request: {
+      parameterDetails: [
+        createParameterDetails({
+          name: 'petId',
+          swaggerName: 'petId',
+          type: 'path',
+        }),
+      ],
+      parameterValues: {
         petId: '',
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        api_key: 'mock api key',
       },
     };
-    requestOptions = getRequestOptions(endpoint, options);
-    assert.deepEqual(requestOptions, {
-      url: 'http://petstore.swagger.io/v2/pet/',
+    requestOptions = getRequestOptions(options);
+    expect(requestOptions).to.deep.equal({
+      url: 'http://mock-baseurl/pet/',
       method: 'delete',
       headers: {
         'content-type': 'application/json',
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        api_key: 'mock api key',
       },
+    });
+  });
+
+  it('should send formdata', () => {
+    const url = '/pet';
+    const options: RequestOptionsInput = {
+      method: 'post',
+      baseUrl,
+      url,
+      formData: true,
+      parameterDetails: [
+        createParameterDetails({
+          type: 'body',
+          name: 'name',
+          swaggerName: 'name',
+        }),
+      ],
+      parameterValues: {
+        name: 'mock name',
+      },
+    };
+    requestOptions = getRequestOptions(options);
+
+    expect(requestOptions).to.deep.equal({
+      url: 'http://mock-baseurl/pet',
+      method: 'post',
+      json: false,
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body: 'name=mock name',
     });
   });
 });

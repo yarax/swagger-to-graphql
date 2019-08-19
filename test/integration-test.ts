@@ -5,9 +5,9 @@ import express from 'express';
 import graphqlHTTP from 'express-graphql';
 import graphQLSchema from '../src';
 
-const createServer = async (path, ...schemaArgs) => {
+const createServer = async (...args: Parameters<typeof graphQLSchema>) => {
   const app = express();
-  const schema = await graphQLSchema(path, ...schemaArgs);
+  const schema = await graphQLSchema(...args);
   app.use(
     '/graphql',
     graphqlHTTP(() => ({
@@ -27,6 +27,40 @@ describe('swagger-to-graphql', () => {
   afterEach(() => {
     nock.cleanAll();
     nock.enableNetConnect();
+  });
+
+  describe('openapi 3', () => {
+    it('should work with formdata', async () => {
+      const nockScope = nock('http://mock-backend')
+        .post('/pet/1111', 'name=new name&status=new status')
+        .reply(200, 'mock result');
+
+      await request(
+        await createServer(
+          require.resolve('./fixtures/petstore-openapi3.yaml'),
+          'http://mock-backend',
+        ),
+      )
+        .post('/graphql')
+        .send({
+          query: `
+            mutation {
+              updatePetWithForm(
+                petId: "1111"
+                name: "new name"
+                status: "new status" 
+              )
+            }
+          `,
+        })
+        .expect({
+          data: {
+            updatePetWithForm: 'mock result',
+          },
+        });
+
+      nockScope.done();
+    });
   });
 
   describe('special parameter names', () => {
@@ -166,9 +200,10 @@ describe('swagger-to-graphql', () => {
 
       await request(
         await createServer(require.resolve('./fixtures/simple.json'), opts => {
-          return `http://${opts
-            .get('host')
-            .replace('graphql', 'api')}/override-basepath`;
+          return `http://${opts.headers.host.replace(
+            'graphql',
+            'api',
+          )}/override-basepath`;
         }),
       )
         .post('/graphql')

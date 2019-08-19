@@ -3,23 +3,59 @@ import {
   GraphQLInputType,
   GraphQLObjectType,
 } from 'graphql';
-import { CoreOptions, OptionsWithUrl, Request } from 'request';
+import { OptionsWithUrl, Request } from 'request';
 
 export interface SwaggerToGraphQLOptions extends Request {
   GQLProxyBaseUrl: string;
   BearerToken?: string;
 }
 
-export interface Param {
-  type?: string;
+export interface BodyParam {
   name: string;
-  required: boolean;
-  in: 'header' | 'query' | 'body' | 'formData' | 'path';
+  required?: boolean;
+  schema: JSONSchemaType;
+  in: 'body';
 }
 
-export interface EndpointParam {
-  type: string;
+export interface Oa2NonBodyParam {
   name: string;
+  type: JSONSchemaTypes;
+  in: 'header' | 'query' | 'formData' | 'path';
+  required?: boolean;
+}
+
+export interface Oa3Param {
+  name: string;
+  in: 'header' | 'query' | 'formData' | 'path';
+  required?: boolean;
+  schema: JSONSchemaType;
+}
+
+export type NonBodyParam = Oa2NonBodyParam | Oa3Param;
+
+export type Param = BodyParam | NonBodyParam;
+
+export interface OA3BodyParam {
+  content: {
+    'application/json'?: {
+      schema: JSONSchemaType;
+    };
+    'application/x-www-form-urlencoded'?: {
+      schema: JSONSchemaType;
+    };
+  };
+  description?: string;
+  required: boolean;
+}
+
+export const isOa3Param = (param: Param): param is Oa3Param => {
+  return !!(param as Oa3Param).schema;
+};
+export interface EndpointParam {
+  required: boolean;
+  type: 'header' | 'query' | 'formData' | 'path' | 'body';
+  name: string;
+  swaggerName: string;
   jsonSchema: JSONSchemaType;
 }
 
@@ -30,10 +66,6 @@ export interface RootGraphQLSchema {
 
 export interface GraphQLParameters {
   [key: string]: any;
-}
-
-export interface RequestOptions extends CoreOptions {
-  url: string;
 }
 
 export interface Endpoint {
@@ -56,11 +88,10 @@ export interface GraphQLTypeMap {
 
 export interface Responses {
   [key: string]: {
-    schema?: Record<string, any>;
-    type?: 'file';
-  };
-  [key: number]: {
-    schema?: Record<string, any>;
+    schema?: JSONSchemaType;
+    content?: {
+      'application/json': { schema: JSONSchemaType };
+    };
     type?: 'file';
   };
 }
@@ -78,10 +109,10 @@ export interface BodySchema extends CommonSchema {
 
 export interface ObjectSchema extends CommonSchema {
   type: 'object';
-  properties?: {
+  properties: {
     [propertyName: string]: JSONSchemaType;
   };
-  required: string[];
+  required?: string[];
   xml?: {
     name?: string;
   };
@@ -93,8 +124,16 @@ export interface ArraySchema extends CommonSchema {
   required?: boolean;
 }
 
+type JSONSchemaTypes =
+  | 'string'
+  | 'date'
+  | 'integer'
+  | 'number'
+  | 'boolean'
+  | 'file';
+
 export interface ScalarSchema extends CommonSchema {
-  type: string;
+  type: JSONSchemaTypes;
   format?: string;
   required?: boolean;
 }
@@ -117,6 +156,7 @@ export interface ServerObject {
 }
 
 export interface OperationObject {
+  requestBody?: OA3BodyParam;
   description?: string;
   operationId?: string;
   parameters?: Param[];
@@ -124,10 +164,11 @@ export interface OperationObject {
   consumes?: string[];
 }
 
-export interface PathObject {
+export type PathObject = {
   parameters?: Param[];
-  [operation: string]: OperationObject | Param[];
-}
+} & {
+  [operation: string]: OperationObject;
+};
 
 export interface SwaggerSchema {
   host?: string;
