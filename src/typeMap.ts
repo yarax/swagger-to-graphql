@@ -65,7 +65,11 @@ function getPrimitiveType(
   type: keyof typeof primitiveTypes,
 ): GraphQLScalarType {
   const jsonType = format === 'int64' ? 'string' : type;
-  return primitiveTypes[jsonType];
+  const primitiveType = primitiveTypes[jsonType];
+  if (!primitiveType) {
+    return primitiveTypes.string;
+  }
+  return primitiveType;
 }
 
 export const jsonSchemaTypeToGraphQL = <IsInputType extends boolean>(
@@ -245,9 +249,11 @@ export const createGraphQLType = (
         ),
       );
     }
-    return new GraphQLList(
-      GraphQLNonNull(getPrimitiveType(itemsSchema.format, itemsSchema.type)),
+    const primitiveType = getPrimitiveType(
+      itemsSchema.format,
+      itemsSchema.type,
     );
+    return new GraphQLList(GraphQLNonNull(primitiveType));
   }
 
   const { description } = jsonSchema;
