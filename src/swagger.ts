@@ -16,15 +16,6 @@ import {
 import { getRequestOptions } from './request-by-swagger';
 import { isObjectType } from './json-schema';
 
-let globalSchema: SwaggerSchema | undefined;
-
-export const getSchema = () => {
-  if (!globalSchema || !Object.keys(globalSchema).length) {
-    throw new Error('Schema was not loaded');
-  }
-  return globalSchema;
-};
-
 const replaceOddChars = (str: string) => str.replace(/[^_a-zA-Z0-9]/g, '_');
 
 const getGQLTypeNameFromURL = (method: string, url: string) => {
@@ -62,8 +53,7 @@ export const loadSchema = async (
   pathToSchema: string,
 ): Promise<SwaggerSchema> => {
   const result = await refParser.dereference(pathToSchema);
-  globalSchema = result as SwaggerSchema;
-  return globalSchema;
+  return result as SwaggerSchema;
 };
 
 export const getServerPath = (schema: SwaggerSchema) => {
