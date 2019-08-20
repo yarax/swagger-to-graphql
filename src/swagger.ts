@@ -56,6 +56,36 @@ export const loadSchema = async (
   return result as SwaggerSchema;
 };
 
+export function addTitlesToJsonSchemas(schema: SwaggerSchema) {
+  const requestBodies = (schema.components || {}).requestBodies || {};
+  Object.keys(requestBodies).forEach(requestBodyName => {
+    const { content } = requestBodies[requestBodyName];
+    (Object.keys(content) as (keyof OA3BodyParam['content'])[]).forEach(
+      contentKey => {
+        const contentValue = content[contentKey];
+        if (contentValue) {
+          contentValue.schema.title =
+            contentValue.schema.title || requestBodyName;
+        }
+      },
+    );
+  });
+
+  const jsonSchemas = (schema.components || {}).schemas || {};
+  Object.keys(jsonSchemas).forEach(schemaName => {
+    const jsonSchema = jsonSchemas[schemaName];
+    jsonSchema.title = jsonSchema.title || schemaName;
+  });
+
+  const definitions = schema.definitions || {};
+  Object.keys(definitions).forEach(definitionName => {
+    const jsonSchema = definitions[definitionName];
+    jsonSchema.title = jsonSchema.title || definitionName;
+  });
+
+  return schema;
+}
+
 export const getServerPath = (schema: SwaggerSchema) => {
   const server =
     schema.servers && Array.isArray(schema.servers)

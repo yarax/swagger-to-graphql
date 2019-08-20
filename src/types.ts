@@ -113,9 +113,6 @@ export interface ObjectSchema extends CommonSchema {
     [propertyName: string]: JSONSchemaType;
   };
   required?: string[];
-  xml?: {
-    name?: string;
-  };
 }
 
 export interface ArraySchema extends CommonSchema {
@@ -177,5 +174,16 @@ export interface SwaggerSchema {
   servers?: ServerObject[];
   paths: {
     [pathUrl: string]: PathObject;
+  };
+  components?: {
+    requestBodies?: {
+      [name: string]: OA3BodyParam;
+    };
+    schemas?: {
+      [name: string]: JSONSchemaType;
+    };
+  };
+  definitions?: {
+    [name: string]: JSONSchemaType;
   };
 }

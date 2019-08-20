@@ -14,7 +14,7 @@ import {
   SwaggerToGraphQLOptions,
   GraphQLTypeMap,
 } from './types';
-import { getAllEndPoints, loadSchema } from './swagger';
+import { addTitlesToJsonSchemas, getAllEndPoints, loadSchema } from './swagger';
 import {
   jsonSchemaTypeToGraphQL,
   mapParametersToFields,
@@ -126,7 +126,7 @@ const build = async (
   proxyUrl?: ProxyUrl,
   headers?: { [key: string]: string } | undefined,
 ) => {
-  const swaggerSchema = await loadSchema(swaggerPath);
+  const swaggerSchema = addTitlesToJsonSchemas(await loadSchema(swaggerPath));
   const endpoints = getAllEndPoints(swaggerSchema);
   const schema = schemaFromEndpoints(endpoints, proxyUrl, headers);
   return schema;
