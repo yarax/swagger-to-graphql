@@ -1,5 +1,4 @@
-import { OptionsWithUrl } from 'request';
-import { EndpointParam } from './types';
+import { EndpointParam, RequestOptions } from './types';
 
 export interface RequestOptionsInput {
   url?: string;
@@ -19,16 +18,14 @@ export function getRequestOptions({
   method,
   parameterDetails,
   parameterValues,
-}: RequestOptionsInput) {
-  const contentType = formData
-    ? 'application/x-www-form-urlencoded'
-    : 'application/json';
-  const result: OptionsWithUrl = {
+}: RequestOptionsInput): RequestOptions {
+  const result: RequestOptions = {
+    bodyType: formData ? 'formData' : 'json',
     url: `${baseUrl}${url}`,
     method,
-    headers: {
-      'content-type': contentType,
-    },
+    headers: {},
+    query: {},
+    body: {},
   };
 
   parameterDetails.forEach(({ name, swaggerName, type, required }) => {
@@ -42,22 +39,10 @@ export function getRequestOptions({
 
     switch (type) {
       case 'body':
-        if (formData) {
-          result.body = result.body
-            ? `${result.body}&${swaggerName}=${value}`
-            : `${swaggerName}=${value}`;
-          result.json = false;
-        } else {
-          result.body = JSON.stringify(value);
-        }
+        result.body = value;
         break;
       case 'formData':
-        if (!result.formData)
-          result.formData = {
-            attachments: [],
-          };
-        result.formData.attachments.push(value);
-        result.json = false;
+        result.body[swaggerName] = value;
         break;
       case 'path':
         result.url =
@@ -65,19 +50,10 @@ export function getRequestOptions({
             ? result.url.replace(`{${swaggerName}}`, value)
             : result.url;
         break;
-      case 'query': {
-        if (!result.qs) result.qs = {};
-        const newValue = Array.isArray(value) ? value[0] : value;
-        if (typeof newValue !== 'string' && typeof newValue !== 'number') {
-          throw new Error(
-            'GET query string for non string/number values is not supported',
-          );
-        }
-        result.qs[swaggerName] = newValue;
+      case 'query':
+        result.query[swaggerName] = value;
         break;
-      }
       case 'header':
-        if (!result.headers) result.headers = {};
         result.headers[swaggerName] = value;
         break;
       default:

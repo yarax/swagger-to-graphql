@@ -170,7 +170,7 @@ export const getParamDetailsFromRequestBody = (
       ([name, schema]) => ({
         name: replaceOddChars(name),
         swaggerName: name,
-        type: 'body',
+        type: 'formData',
         required: formdataSchema.required
           ? formdataSchema.required.includes(name)
           : false,

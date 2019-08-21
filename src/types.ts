@@ -3,9 +3,9 @@ import {
   GraphQLInputType,
   GraphQLObjectType,
 } from 'graphql';
-import { OptionsWithUrl, Request } from 'request';
+import { IncomingMessage } from 'http';
 
-export interface SwaggerToGraphQLOptions extends Request {
+export interface SwaggerToGraphQLOptions extends IncomingMessage {
   GQLProxyBaseUrl: string;
   BearerToken?: string;
 }
@@ -68,11 +68,26 @@ export interface GraphQLParameters {
   [key: string]: any;
 }
 
+export interface RequestOptions {
+  url: string;
+  method: string;
+  headers: {
+    [key: string]: string;
+  };
+  query: {
+    [key: string]: string;
+  };
+  body: {
+    [key: string]: string;
+  };
+  bodyType: 'json' | 'formData';
+}
+
 export interface Endpoint {
   parameters: EndpointParam[];
   description?: string;
   response: JSONSchemaType | undefined;
-  request: (args: GraphQLParameters, url: string) => OptionsWithUrl;
+  request: (args: GraphQLParameters, url: string) => RequestOptions;
   mutation: boolean;
 }
 

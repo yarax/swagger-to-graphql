@@ -1,9 +1,8 @@
-import rp from 'request-promise';
+import requestPromise from 'request-promise';
 import {
   GraphQLFieldConfig,
   GraphQLFieldConfigMap,
   GraphQLObjectType,
-  GraphQLResolveInfo,
   GraphQLSchema,
 } from 'graphql';
 import {
@@ -15,11 +14,7 @@ import {
   GraphQLTypeMap,
 } from './types';
 import { addTitlesToJsonSchemas, getAllEndPoints, loadSchema } from './swagger';
-import {
-  jsonSchemaTypeToGraphQL,
-  mapParametersToFields,
-  parseResponse,
-} from './typeMap';
+import { jsonSchemaTypeToGraphQL, mapParametersToFields } from './typeMap';
 
 type ProxyUrl =
   | ((opts: SwaggerToGraphQLOptions) => string)
@@ -35,7 +30,6 @@ const resolver = (
   _source: any,
   args: GraphQLParameters,
   opts: SwaggerToGraphQLOptions,
-  info: GraphQLResolveInfo,
 ) => {
   const proxy =
     (!proxyUrl
@@ -50,8 +44,21 @@ const resolver = (
   } else {
     req.headers = Object.assign(req.headers, customHeaders);
   }
-  const res = await rp(req);
-  return parseResponse(res, info.returnType);
+  const { method, body, url, query, headers, bodyType } = req;
+  const res = await requestPromise({
+    ...(bodyType === 'json' && {
+      json: true,
+      body,
+    }),
+    ...(bodyType === 'formData' && {
+      form: body,
+    }),
+    qs: query,
+    method,
+    headers,
+    url,
+  });
+  return res;
 };
 
 const getFields = (

@@ -1,4 +1,3 @@
-import request, { OptionsWithUrl } from 'request';
 import { expect } from 'chai';
 
 import {
@@ -6,8 +5,6 @@ import {
   RequestOptionsInput,
 } from '../src/request-by-swagger';
 import { EndpointParam } from '../src/types';
-
-let requestOptions: OptionsWithUrl;
 
 const baseUrl = 'http://mock-baseurl';
 
@@ -43,19 +40,15 @@ describe('getRequestOptions', () => {
         body: { name: 'test' },
       },
     };
-    requestOptions = getRequestOptions(options);
+    const requestOptions = getRequestOptions(options);
 
     expect(requestOptions).to.deep.equal({
       url: 'http://mock-baseurl/pet',
       method: 'post',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ name: 'test' }),
-    });
-  });
-
-  it('should generate valid request options', done => {
-    request(requestOptions, () => {
-      done();
+      bodyType: 'json',
+      headers: {},
+      body: { name: 'test' },
+      query: {},
     });
   });
 
@@ -83,15 +76,17 @@ describe('getRequestOptions', () => {
         api_key: 'mock api key',
       },
     };
-    requestOptions = getRequestOptions(options);
+    const requestOptions = getRequestOptions(options);
     expect(requestOptions).to.deep.equal({
       url: 'http://mock-baseurl/pet/mock-pet-id',
       method: 'delete',
+      body: {},
+      bodyType: 'json',
       headers: {
-        'content-type': 'application/json',
         // eslint-disable-next-line @typescript-eslint/camelcase
         api_key: 'mock api key',
       },
+      query: {},
     });
   });
 
@@ -112,13 +107,14 @@ describe('getRequestOptions', () => {
         petId: '',
       },
     };
-    requestOptions = getRequestOptions(options);
+    const requestOptions = getRequestOptions(options);
     expect(requestOptions).to.deep.equal({
       url: 'http://mock-baseurl/pet/',
       method: 'delete',
-      headers: {
-        'content-type': 'application/json',
-      },
+      body: {},
+      bodyType: 'json',
+      headers: {},
+      query: {},
     });
   });
 
@@ -131,7 +127,7 @@ describe('getRequestOptions', () => {
       formData: true,
       parameterDetails: [
         createParameterDetails({
-          type: 'body',
+          type: 'formData',
           name: 'name',
           swaggerName: 'name',
         }),
@@ -140,14 +136,42 @@ describe('getRequestOptions', () => {
         name: 'mock name',
       },
     };
-    requestOptions = getRequestOptions(options);
+    const requestOptions = getRequestOptions(options);
 
     expect(requestOptions).to.deep.equal({
-      url: 'http://mock-baseurl/pet',
       method: 'post',
-      json: false,
-      headers: { 'content-type': 'application/x-www-form-urlencoded' },
-      body: 'name=mock name',
+      url: 'http://mock-baseurl/pet',
+      query: {},
+      headers: {},
+      body: { name: 'mock name' },
+      bodyType: 'formData',
+    });
+  });
+
+  it('should set path parameters', () => {
+    const options: RequestOptionsInput = {
+      method: 'get',
+      baseUrl,
+      url: '/{mock swaggerName}/',
+      formData: false,
+      parameterDetails: [
+        createParameterDetails({
+          type: 'path',
+        }),
+      ],
+      parameterValues: {
+        'mock name': 'mock-path',
+      },
+    };
+    const requestOptions = getRequestOptions(options);
+
+    expect(requestOptions).to.deep.equal({
+      method: 'get',
+      url: 'http://mock-baseurl/mock-path/',
+      query: {},
+      headers: {},
+      body: {},
+      bodyType: 'json',
     });
   });
 });

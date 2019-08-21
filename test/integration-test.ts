@@ -32,7 +32,7 @@ describe('swagger-to-graphql', () => {
   describe('openapi 3', () => {
     it('should work with formdata', async () => {
       const nockScope = nock('http://mock-backend')
-        .post('/pet/1111', 'name=new name&status=new status')
+        .post('/pet/1111', 'name=new%20name&status=new%20status')
         .reply(200, 'mock result');
 
       await request(
@@ -139,34 +139,6 @@ describe('swagger-to-graphql', () => {
       nockScope.done();
     });
 
-    it('should pass request headers to the backend', async () => {
-      const nockScope = nock('http://mock-host', {
-        reqheaders: {
-          MockRequestHeader: 'mock header value',
-        },
-      })
-        .get('/mock-basepath/mock-path')
-        .reply(200, { result: 'mock result' });
-
-      await request(
-        await createServer(require.resolve('./fixtures/simple.json')),
-      )
-        .post('/graphql')
-        .send({
-          query: getMockPathQuery,
-        })
-        .set('MockRequestHeader', 'mock header value')
-        .expect({
-          data: {
-            get_mock_path: {
-              result: 'mock result',
-            },
-          },
-        });
-
-      nockScope.done();
-    });
-
     it('should allow overriding the base path with a string', async () => {
       const nockScope = nock('http://override-host')
         .get('/override-basepath/mock-path')
@@ -200,7 +172,7 @@ describe('swagger-to-graphql', () => {
 
       await request(
         await createServer(require.resolve('./fixtures/simple.json'), opts => {
-          return `http://${opts.headers.host.replace(
+          return `http://${((opts.headers || {}).host || '').replace(
             'graphql',
             'api',
           )}/override-basepath`;
