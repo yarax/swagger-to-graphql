@@ -1,9 +1,8 @@
-/* eslint-disable no-console, @typescript-eslint/no-var-requires */
-const express = require('express');
+import express from 'express';
+import graphqlHTTP from 'express-graphql';
+import graphQLSchema from '../src';
 
 const app = express();
-const graphqlHTTP = require('express-graphql');
-const graphQLSchema = require('../lib');
 
 const proxyUrl = 'http://petstore.swagger.io/v2';
 const pathToSwaggerSchema = `${__dirname}/../test/fixtures/petstore.yaml`;

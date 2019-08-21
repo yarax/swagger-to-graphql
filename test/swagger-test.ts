@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { expect } from 'chai';
 import { assertType } from 'typescript-is';
 import { ArraySchema, EndpointParam, Param } from '../src/types';
@@ -87,7 +88,7 @@ describe('swagger', () => {
 
   describe('getParameterDetails', () => {
     it('should get details for openapi 2 and 3', async () => {
-      function testParameter(parameter: Param) {
+      function testParameter(parameter: Param): void {
         try {
           assertType<Param>(parameter);
         } catch (e) {

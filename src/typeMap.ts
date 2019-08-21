@@ -25,33 +25,6 @@ import {
 } from './types';
 import { isArrayType, isBodyType, isObjectType } from './json-schema';
 
-export function parseResponse(response: string, returnType: GraphQLOutputType) {
-  const nullableType =
-    returnType instanceof GraphQLNonNull ? returnType.ofType : returnType;
-  if (
-    nullableType instanceof GraphQLObjectType ||
-    nullableType instanceof GraphQLList
-  ) {
-    return JSON.parse(response);
-  }
-  if (nullableType instanceof GraphQLScalarType) {
-    if (nullableType.name === 'String') {
-      return response;
-    }
-    if (nullableType.name === 'Int') {
-      return parseInt(response, 10);
-    }
-    if (nullableType.name === 'Float') {
-      return parseFloat(response);
-    }
-    if (nullableType.name === 'Boolean') {
-      return Boolean(response);
-    }
-  }
-
-  throw new Error(`Unexpected returnType ${nullableType}`);
-}
-
 const primitiveTypes = {
   string: GraphQLString,
   date: GraphQLString,
@@ -65,7 +38,11 @@ function getPrimitiveType(
   type: keyof typeof primitiveTypes,
 ): GraphQLScalarType {
   const jsonType = format === 'int64' ? 'string' : type;
-  return primitiveTypes[jsonType];
+  const primitiveType = primitiveTypes[jsonType];
+  if (!primitiveType) {
+    return primitiveTypes.string;
+  }
+  return primitiveType;
 }
 
 export const jsonSchemaTypeToGraphQL = <IsInputType extends boolean>(
@@ -76,7 +53,7 @@ export const jsonSchemaTypeToGraphQL = <IsInputType extends boolean>(
   gqlTypes: GraphQLTypeMap,
   required: boolean,
 ): IsInputType extends true ? GraphQLInputType : GraphQLOutputType => {
-  const baseType = (() => {
+  const baseType = ((): GraphQLType => {
     if (isBodyType(jsonSchema)) {
       return jsonSchemaTypeToGraphQL(
         title,
@@ -127,7 +104,8 @@ export const jsonSchemaTypeToGraphQL = <IsInputType extends boolean>(
     : GraphQLOutputType;
 };
 
-const makeValidName = (name: string) => name.replace(/[^_0-9A-Za-z]/g, '_');
+const makeValidName = (name: string): string =>
+  name.replace(/[^_0-9A-Za-z]/g, '_');
 
 export const getTypeFields = (
   jsonSchema: JSONSchemaType,
@@ -183,12 +161,7 @@ export const createGraphQLType = (
   isInputType: boolean,
   gqlTypes: GraphQLTypeMap,
 ): GraphQLType => {
-  title =
-    (jsonSchema &&
-      ((isObjectType(jsonSchema) && jsonSchema.xml && jsonSchema.xml.name) ||
-        jsonSchema.title)) ||
-    title ||
-    '';
+  title = (jsonSchema && jsonSchema.title) || title;
   title = makeValidName(title);
 
   if (isInputType && !title.endsWith('Input')) {
@@ -245,9 +218,11 @@ export const createGraphQLType = (
         ),
       );
     }
-    return new GraphQLList(
-      GraphQLNonNull(getPrimitiveType(itemsSchema.format, itemsSchema.type)),
+    const primitiveType = getPrimitiveType(
+      itemsSchema.format,
+      itemsSchema.type,
     );
+    return new GraphQLList(GraphQLNonNull(primitiveType));
   }
 
   const { description } = jsonSchema;

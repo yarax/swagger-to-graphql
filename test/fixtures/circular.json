@@ -70,9 +70,6 @@
                 "reference": {
                     "$ref": "#/definitions/Circular"
                 }
-            },
-            "xml": {
-                "name": "Circular"
             }
         }
     }

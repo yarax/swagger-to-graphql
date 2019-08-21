@@ -5,6 +5,4 @@ node_js:
   - 12
 script:
   - npm run lint
-  # Ensure there are no file changes due to the build
-  - npm run libchanged
   - npm run test

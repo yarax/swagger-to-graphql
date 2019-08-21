@@ -3,9 +3,9 @@ import {
   GraphQLInputType,
   GraphQLObjectType,
 } from 'graphql';
-import { OptionsWithUrl, Request } from 'request';
+import { IncomingMessage } from 'http';
 
-export interface SwaggerToGraphQLOptions extends Request {
+export interface SwaggerToGraphQLOptions extends IncomingMessage {
   GQLProxyBaseUrl: string;
   BearerToken?: string;
 }
@@ -68,11 +68,27 @@ export interface GraphQLParameters {
   [key: string]: any;
 }
 
+export interface RequestOptions {
+  baseUrl: string;
+  path: string;
+  method: string;
+  headers: {
+    [key: string]: string;
+  };
+  query: {
+    [key: string]: string;
+  };
+  body: {
+    [key: string]: string;
+  };
+  bodyType: 'json' | 'formData';
+}
+
 export interface Endpoint {
   parameters: EndpointParam[];
   description?: string;
   response: JSONSchemaType | undefined;
-  request: (args: GraphQLParameters, url: string) => OptionsWithUrl;
+  request: (args: GraphQLParameters, url: string) => RequestOptions;
   mutation: boolean;
 }
 
@@ -113,9 +129,6 @@ export interface ObjectSchema extends CommonSchema {
     [propertyName: string]: JSONSchemaType;
   };
   required?: string[];
-  xml?: {
-    name?: string;
-  };
 }
 
 export interface ArraySchema extends CommonSchema {
@@ -177,5 +190,16 @@ export interface SwaggerSchema {
   servers?: ServerObject[];
   paths: {
     [pathUrl: string]: PathObject;
+  };
+  components?: {
+    requestBodies?: {
+      [name: string]: OA3BodyParam;
+    };
+    schemas?: {
+      [name: string]: JSONSchemaType;
+    };
+  };
+  definitions?: {
+    [name: string]: JSONSchemaType;
   };
 }

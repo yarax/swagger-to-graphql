@@ -4,9 +4,14 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
     'prettier/@typescript-eslint',
-    'plugin:import/typescript'
+    'plugin:import/typescript',
   ],
   rules: {
     'no-nested-ternary': 'off',
+    'import/no-extraneous-dependencies': [
+      'error',
+      { devDependencies: ['example/**/*.ts', '**/*test.ts'] },
+    ],
+    'import/prefer-default-export': 'off',
   },
 };

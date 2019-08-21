@@ -13,20 +13,14 @@ import {
   Responses,
   SwaggerSchema,
 } from './types';
-import { getRequestOptions } from './request-by-swagger';
+import { getRequestOptions } from './getRequestOptions';
 import { isObjectType } from './json-schema';
 
-let globalSchema: SwaggerSchema | undefined;
+const replaceOddChars = (str: string): string =>
+  str.replace(/[^_a-zA-Z0-9]/g, '_');
 
-export const getSchema = () => {
-  if (!globalSchema || !Object.keys(globalSchema).length) {
-    throw new Error('Schema was not loaded');
-  }
-  return globalSchema;
-};
-
-const getGQLTypeNameFromURL = (method: string, url: string) => {
-  const fromUrl = url.replace(/[{}]+/g, '').replace(/[^a-zA-Z0-9_]+/g, '_');
+const getGQLTypeNameFromURL = (method: string, url: string): string => {
+  const fromUrl = replaceOddChars(url.replace(/[{}]+/g, ''));
   return `${method}${fromUrl}`;
 };
 
@@ -52,24 +46,48 @@ export const getSuccessResponse = (
   if (successResponse.content) {
     return successResponse.content['application/json'].schema;
   }
-  throw new Error(
-    `Expected response to have either schema or content, got: ${Object.keys(
-      successResponse,
-    ).join(', ')}`,
-  );
+
+  return undefined;
 };
 
 export const loadSchema = async (
   pathToSchema: string,
 ): Promise<SwaggerSchema> => {
   const result = await refParser.dereference(pathToSchema);
-  globalSchema = result as SwaggerSchema;
-  return globalSchema;
+  return result as SwaggerSchema;
 };
 
-const replaceOddChars = (str: string) => str.replace(/[^_a-zA-Z0-9]/g, '_');
+export function addTitlesToJsonSchemas(schema: SwaggerSchema): SwaggerSchema {
+  const requestBodies = (schema.components || {}).requestBodies || {};
+  Object.keys(requestBodies).forEach(requestBodyName => {
+    const { content } = requestBodies[requestBodyName];
+    (Object.keys(content) as (keyof OA3BodyParam['content'])[]).forEach(
+      contentKey => {
+        const contentValue = content[contentKey];
+        if (contentValue) {
+          contentValue.schema.title =
+            contentValue.schema.title || requestBodyName;
+        }
+      },
+    );
+  });
 
-export const getServerPath = (schema: SwaggerSchema) => {
+  const jsonSchemas = (schema.components || {}).schemas || {};
+  Object.keys(jsonSchemas).forEach(schemaName => {
+    const jsonSchema = jsonSchemas[schemaName];
+    jsonSchema.title = jsonSchema.title || schemaName;
+  });
+
+  const definitions = schema.definitions || {};
+  Object.keys(definitions).forEach(definitionName => {
+    const jsonSchema = definitions[definitionName];
+    jsonSchema.title = jsonSchema.title || definitionName;
+  });
+
+  return schema;
+}
+
+export const getServerPath = (schema: SwaggerSchema): string | undefined => {
   const server =
     schema.servers && Array.isArray(schema.servers)
       ? schema.servers[0]
@@ -153,7 +171,7 @@ export const getParamDetailsFromRequestBody = (
       ([name, schema]) => ({
         name: replaceOddChars(name),
         swaggerName: name,
-        type: 'body',
+        type: 'formData',
         required: formdataSchema.required
           ? formdataSchema.required.includes(name)
           : false,
@@ -191,8 +209,9 @@ export const getAllEndPoints = (schema: SwaggerSchema): Endpoints => {
       const operationObject: OperationObject = route[method] as OperationObject;
       const isMutation =
         ['post', 'put', 'patch', 'delete'].indexOf(method) !== -1;
-      const operationId =
-        operationObject.operationId || getGQLTypeNameFromURL(method, path);
+      const operationId = operationObject.operationId
+        ? replaceOddChars(operationObject.operationId)
+        : getGQLTypeNameFromURL(method, path);
 
       // [FIX] for when parameters is a child of route and not route[method]
       if (route.parameters) {
@@ -227,11 +246,11 @@ export const getAllEndPoints = (schema: SwaggerSchema): Endpoints => {
               'Could not get the base url for endpoints. Check that either your schema has baseUrl or you provided it to constructor',
             );
           }
-          const url = `${baseUrl}${path}`;
           return getRequestOptions({
             parameterDetails,
             parameterValues,
-            url,
+            baseUrl,
+            path,
             method,
             formData: operationObject.consumes
               ? !operationObject.consumes.includes('application/json')
