@@ -245,11 +245,11 @@ export const getAllEndPoints = (schema: SwaggerSchema): Endpoints => {
               'Could not get the base url for endpoints. Check that either your schema has baseUrl or you provided it to constructor',
             );
           }
-          const url = `${baseUrl}${path}`;
           return getRequestOptions({
             parameterDetails,
             parameterValues,
-            url,
+            baseUrl,
+            path,
             method,
             formData: operationObject.consumes
               ? !operationObject.consumes.includes('application/json')

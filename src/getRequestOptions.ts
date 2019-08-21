@@ -1,28 +1,29 @@
 import { EndpointParam, RequestOptions } from './types';
 
 export interface RequestOptionsInput {
-  url?: string;
+  method: string;
+  baseUrl: string;
+  path: string;
   parameterDetails: EndpointParam[];
   parameterValues: {
     [key: string]: any;
   };
-  method: string;
-  baseUrl?: string;
   formData?: boolean;
 }
 
 export function getRequestOptions({
-  baseUrl = '',
-  formData = false,
-  url,
   method,
+  baseUrl,
+  path,
   parameterDetails,
   parameterValues,
+  formData = false,
 }: RequestOptionsInput): RequestOptions {
   const result: RequestOptions = {
-    bodyType: formData ? 'formData' : 'json',
-    url: `${baseUrl}${url}`,
     method,
+    baseUrl,
+    path,
+    bodyType: formData ? 'formData' : 'json',
     headers: {},
     query: {},
     body: {},
@@ -33,7 +34,7 @@ export function getRequestOptions({
 
     if (required && !value && value !== '')
       throw new Error(
-        `No required request field ${name} for ${method.toUpperCase()} ${url}`,
+        `No required request field ${name} for ${method.toUpperCase()} ${path}`,
       );
     if (!value && value !== '') return;
 
@@ -45,10 +46,10 @@ export function getRequestOptions({
         result.body[swaggerName] = value;
         break;
       case 'path':
-        result.url =
-          typeof result.url === 'string'
-            ? result.url.replace(`{${swaggerName}}`, value)
-            : result.url;
+        result.path =
+          typeof result.path === 'string'
+            ? result.path.replace(`{${swaggerName}}`, value)
+            : result.path;
         break;
       case 'query':
         result.query[swaggerName] = value;

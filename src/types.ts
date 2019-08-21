@@ -69,7 +69,8 @@ export interface GraphQLParameters {
 }
 
 export interface RequestOptions {
-  url: string;
+  baseUrl: string;
+  path: string;
   method: string;
   headers: {
     [key: string]: string;

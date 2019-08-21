@@ -44,7 +44,7 @@ const resolver = (
   } else {
     req.headers = Object.assign(req.headers, customHeaders);
   }
-  const { method, body, url, query, headers, bodyType } = req;
+  const { method, body, baseUrl, path, query, headers, bodyType } = req;
   const res = await requestPromise({
     ...(bodyType === 'json' && {
       json: true,
@@ -56,7 +56,8 @@ const resolver = (
     qs: query,
     method,
     headers,
-    url,
+    baseUrl,
+    uri: path,
   });
   return res;
 };

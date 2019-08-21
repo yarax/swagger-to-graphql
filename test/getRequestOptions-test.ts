@@ -25,11 +25,10 @@ function createParameterDetails(
 
 describe('getRequestOptions', () => {
   it('should add request body to request options', () => {
-    const url = '/pet';
     const options: RequestOptionsInput = {
       method: 'post',
       baseUrl,
-      url,
+      path: '/pet',
       parameterDetails: [
         createParameterDetails({
           type: 'body',
@@ -43,7 +42,8 @@ describe('getRequestOptions', () => {
     const requestOptions = getRequestOptions(options);
 
     expect(requestOptions).to.deep.equal({
-      url: 'http://mock-baseurl/pet',
+      baseUrl,
+      path: '/pet',
       method: 'post',
       bodyType: 'json',
       headers: {},
@@ -53,11 +53,10 @@ describe('getRequestOptions', () => {
   });
 
   it('should add request headers to request options', () => {
-    const url = '/pet/{petId}';
     const options = {
       method: 'delete',
       baseUrl,
-      url,
+      path: '/pet/{petId}',
       parameterDetails: [
         createParameterDetails({
           name: 'graphql name',
@@ -78,7 +77,8 @@ describe('getRequestOptions', () => {
     };
     const requestOptions = getRequestOptions(options);
     expect(requestOptions).to.deep.equal({
-      url: 'http://mock-baseurl/pet/mock-pet-id',
+      baseUrl,
+      path: '/pet/mock-pet-id',
       method: 'delete',
       body: {},
       bodyType: 'json',
@@ -91,11 +91,11 @@ describe('getRequestOptions', () => {
   });
 
   it('should allow empty strings', () => {
-    const url = '/pet/{petId}';
+    const path = '/pet/{petId}';
     const options = {
       method: 'delete',
       baseUrl,
-      url,
+      path,
       parameterDetails: [
         createParameterDetails({
           name: 'petId',
@@ -109,7 +109,8 @@ describe('getRequestOptions', () => {
     };
     const requestOptions = getRequestOptions(options);
     expect(requestOptions).to.deep.equal({
-      url: 'http://mock-baseurl/pet/',
+      baseUrl,
+      path: '/pet/',
       method: 'delete',
       body: {},
       bodyType: 'json',
@@ -119,11 +120,11 @@ describe('getRequestOptions', () => {
   });
 
   it('should send formdata', () => {
-    const url = '/pet';
+    const path = '/pet';
     const options: RequestOptionsInput = {
       method: 'post',
       baseUrl,
-      url,
+      path,
       formData: true,
       parameterDetails: [
         createParameterDetails({
@@ -139,8 +140,9 @@ describe('getRequestOptions', () => {
     const requestOptions = getRequestOptions(options);
 
     expect(requestOptions).to.deep.equal({
+      baseUrl,
       method: 'post',
-      url: 'http://mock-baseurl/pet',
+      path: '/pet',
       query: {},
       headers: {},
       body: { name: 'mock name' },
@@ -152,7 +154,7 @@ describe('getRequestOptions', () => {
     const options: RequestOptionsInput = {
       method: 'get',
       baseUrl,
-      url: '/{mock swaggerName}/',
+      path: '/{mock swaggerName}/',
       formData: false,
       parameterDetails: [
         createParameterDetails({
@@ -166,8 +168,9 @@ describe('getRequestOptions', () => {
     const requestOptions = getRequestOptions(options);
 
     expect(requestOptions).to.deep.equal({
+      baseUrl,
       method: 'get',
-      url: 'http://mock-baseurl/mock-path/',
+      path: '/mock-path/',
       query: {},
       headers: {},
       body: {},
