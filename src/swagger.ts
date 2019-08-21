@@ -13,7 +13,7 @@ import {
   Responses,
   SwaggerSchema,
 } from './types';
-import { getRequestOptions } from './request-by-swagger';
+import { getRequestOptions } from './getRequestOptions';
 import { isObjectType } from './json-schema';
 
 const replaceOddChars = (str: string) => str.replace(/[^_a-zA-Z0-9]/g, '_');

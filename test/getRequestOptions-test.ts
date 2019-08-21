@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import {
   getRequestOptions,
   RequestOptionsInput,
-} from '../src/request-by-swagger';
+} from '../src/getRequestOptions';
 import { EndpointParam } from '../src/types';
 
 const baseUrl = 'http://mock-baseurl';
