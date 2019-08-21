@@ -1,4 +1,3 @@
-import requestPromise from 'request-promise';
 import {
   GraphQLFieldConfig,
   GraphQLFieldConfigMap,
@@ -10,64 +9,17 @@ import {
   Endpoints,
   GraphQLParameters,
   GraphQLTypeMap,
+  Options,
   RootGraphQLSchema,
-  SwaggerToGraphQLOptions,
 } from './types';
 import { addTitlesToJsonSchemas, getAllEndPoints, loadSchema } from './swagger';
 import { jsonSchemaTypeToGraphQL, mapParametersToFields } from './typeMap';
 
-type ProxyUrl =
-  | ((opts: SwaggerToGraphQLOptions) => string)
-  | string
-  | null
-  | undefined;
-
-const resolver = (
-  endpoint: Endpoint,
-  proxyUrl: ProxyUrl,
-  customHeaders = {},
-) => async (
-  _source: any,
-  args: GraphQLParameters,
-  opts: SwaggerToGraphQLOptions,
-): Promise<any> => {
-  const proxy =
-    (!proxyUrl
-      ? opts.GQLProxyBaseUrl
-      : typeof proxyUrl === 'function'
-      ? proxyUrl(opts)
-      : proxyUrl) || '';
-  const req = endpoint.request(args, proxy);
-  if (opts.headers) {
-    const { host: _host, ...otherHeaders } = opts.headers;
-    req.headers = Object.assign(req.headers, otherHeaders, customHeaders);
-  } else {
-    req.headers = Object.assign(req.headers, customHeaders);
-  }
-  const { method, body, baseUrl, path, query, headers, bodyType } = req;
-  const res = await requestPromise({
-    ...(bodyType === 'json' && {
-      json: true,
-      body,
-    }),
-    ...(bodyType === 'formData' && {
-      form: body,
-    }),
-    qs: query,
-    method,
-    headers,
-    baseUrl,
-    uri: path,
-  });
-  return res;
-};
-
-const getFields = (
+const getFields = <TContext>(
   endpoints: Endpoints,
   isMutation: boolean,
   gqlTypes: GraphQLTypeMap,
-  proxyUrl: ProxyUrl,
-  headers: { [key: string]: string } | undefined,
+  { callBackend }: Options<TContext>,
 ): GraphQLFieldConfigMap<any, any> => {
   return Object.keys(endpoints)
     .filter((operationId: string) => {
@@ -87,19 +39,27 @@ const getFields = (
         type,
         description: endpoint.description,
         args: mapParametersToFields(endpoint.parameters, operationId, gqlTypes),
-        resolve: resolver(endpoint, proxyUrl, headers),
+        resolve: async (
+          _source: any,
+          args: GraphQLParameters,
+          context: TContext,
+        ): Promise<any> => {
+          return callBackend({
+            context,
+            requestOptions: endpoint.getRequestOptions(args),
+          });
+        },
       };
       return { ...result, [operationId]: gType };
     }, {});
 };
 
-const schemaFromEndpoints = (
+const schemaFromEndpoints = <TContext>(
   endpoints: Endpoints,
-  proxyUrl: ProxyUrl,
-  headers: { [key: string]: string } | undefined,
+  options: Options<TContext>,
 ): GraphQLSchema => {
   const gqlTypes = {};
-  const queryFields = getFields(endpoints, false, gqlTypes, proxyUrl, headers);
+  const queryFields = getFields(endpoints, false, gqlTypes, options);
   if (!Object.keys(queryFields).length) {
     throw new Error('Did not find any GET endpoints');
   }
@@ -112,13 +72,7 @@ const schemaFromEndpoints = (
     query: rootType,
   };
 
-  const mutationFields = getFields(
-    endpoints,
-    true,
-    gqlTypes,
-    proxyUrl,
-    headers,
-  );
+  const mutationFields = getFields(endpoints, true, gqlTypes, options);
   if (Object.keys(mutationFields).length) {
     graphQLSchema.mutation = new GraphQLObjectType({
       name: 'Mutation',
@@ -129,15 +83,13 @@ const schemaFromEndpoints = (
   return new GraphQLSchema(graphQLSchema);
 };
 
-const build = async (
+const build = async <TContext>(
   swaggerPath: string,
-  proxyUrl?: ProxyUrl,
-  headers?: { [key: string]: string } | undefined,
+  options: Options<TContext>,
 ): Promise<GraphQLSchema> => {
   const swaggerSchema = addTitlesToJsonSchemas(await loadSchema(swaggerPath));
   const endpoints = getAllEndPoints(swaggerSchema);
-  return schemaFromEndpoints(endpoints, proxyUrl, headers);
+  return schemaFromEndpoints(endpoints, options);
 };
 
-module.exports = build;
 export default build;

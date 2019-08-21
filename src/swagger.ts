@@ -239,17 +239,11 @@ export const getAllEndPoints = (schema: SwaggerSchema): Endpoints => {
         parameters: parameterDetails,
         description: operationObject.description,
         response: getSuccessResponse(operationObject.responses),
-        request: (parameterValues: GraphQLParameters, optBaseUrl: string) => {
-          const baseUrl = optBaseUrl || serverPath; // eslint-disable-line no-param-reassign
-          if (!baseUrl) {
-            throw new Error(
-              'Could not get the base url for endpoints. Check that either your schema has baseUrl or you provided it to constructor',
-            );
-          }
+        getRequestOptions: (parameterValues: GraphQLParameters) => {
           return getRequestOptions({
             parameterDetails,
             parameterValues,
-            baseUrl,
+            baseUrl: serverPath,
             path,
             method,
             formData: operationObject.consumes

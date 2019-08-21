@@ -3,12 +3,6 @@ import {
   GraphQLInputType,
   GraphQLObjectType,
 } from 'graphql';
-import { IncomingMessage } from 'http';
-
-export interface SwaggerToGraphQLOptions extends IncomingMessage {
-  GQLProxyBaseUrl: string;
-  BearerToken?: string;
-}
 
 export interface BodyParam {
   name: string;
@@ -69,7 +63,7 @@ export interface GraphQLParameters {
 }
 
 export interface RequestOptions {
-  baseUrl: string;
+  baseUrl: string | undefined;
   path: string;
   method: string;
   headers: {
@@ -88,7 +82,7 @@ export interface Endpoint {
   parameters: EndpointParam[];
   description?: string;
   response: JSONSchemaType | undefined;
-  request: (args: GraphQLParameters, url: string) => RequestOptions;
+  getRequestOptions: (args: GraphQLParameters) => RequestOptions;
   mutation: boolean;
 }
 
@@ -202,4 +196,13 @@ export interface SwaggerSchema {
   definitions?: {
     [name: string]: JSONSchemaType;
   };
+}
+
+export interface CallBackendArguments<TContext> {
+  context: TContext;
+  requestOptions: RequestOptions;
+}
+
+export interface Options<TContext> {
+  callBackend: (args: CallBackendArguments<TContext>) => Promise<any>;
 }

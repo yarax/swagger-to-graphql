@@ -97,7 +97,6 @@ describe('getRequestOptions', () => {
         }),
       ],
       parameterValues: {
-        // eslint-disable-next-line @typescript-eslint/camelcase
         id: 'mock id',
       },
     };

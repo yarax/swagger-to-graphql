@@ -2,7 +2,7 @@ import { EndpointParam, RequestOptions } from './types';
 
 export interface RequestOptionsInput {
   method: string;
-  baseUrl: string;
+  baseUrl: string | undefined;
   path: string;
   parameterDetails: EndpointParam[];
   parameterValues: {

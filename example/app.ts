@@ -1,16 +1,38 @@
 import express from 'express';
 import graphqlHTTP from 'express-graphql';
+import requestPromise from 'request-promise';
+import { IncomingMessage } from 'http';
 import graphQLSchema from '../src';
+import { CallBackendArguments } from '../src/types';
 
 const app = express();
 
-const proxyUrl = 'http://petstore.swagger.io/v2';
 const pathToSwaggerSchema = `${__dirname}/../test/fixtures/petstore.yaml`;
-const customHeaders = {
-  Authorization: 'Basic YWRkOmJhc2ljQXV0aA==',
-};
 
-graphQLSchema(pathToSwaggerSchema, proxyUrl, customHeaders)
+graphQLSchema(pathToSwaggerSchema, {
+  async callBackend({
+    requestOptions: { method, body, baseUrl, path, query, headers, bodyType },
+    context,
+  }: CallBackendArguments<IncomingMessage>) {
+    return requestPromise({
+      ...(bodyType === 'json' && {
+        json: true,
+        body,
+      }),
+      ...(bodyType === 'formData' && {
+        form: body,
+      }),
+      qs: query,
+      method,
+      headers: {
+        ...headers,
+        ...{ authorization: context.headers.authorization },
+      },
+      baseUrl,
+      uri: path,
+    });
+  },
+})
   .then(schema => {
     app.use(
       '/graphql',
