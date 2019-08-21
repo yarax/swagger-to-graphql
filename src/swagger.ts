@@ -16,9 +16,10 @@ import {
 import { getRequestOptions } from './getRequestOptions';
 import { isObjectType } from './json-schema';
 
-const replaceOddChars = (str: string) => str.replace(/[^_a-zA-Z0-9]/g, '_');
+const replaceOddChars = (str: string): string =>
+  str.replace(/[^_a-zA-Z0-9]/g, '_');
 
-const getGQLTypeNameFromURL = (method: string, url: string) => {
+const getGQLTypeNameFromURL = (method: string, url: string): string => {
   const fromUrl = replaceOddChars(url.replace(/[{}]+/g, ''));
   return `${method}${fromUrl}`;
 };
@@ -56,7 +57,7 @@ export const loadSchema = async (
   return result as SwaggerSchema;
 };
 
-export function addTitlesToJsonSchemas(schema: SwaggerSchema) {
+export function addTitlesToJsonSchemas(schema: SwaggerSchema): SwaggerSchema {
   const requestBodies = (schema.components || {}).requestBodies || {};
   Object.keys(requestBodies).forEach(requestBodyName => {
     const { content } = requestBodies[requestBodyName];
@@ -86,7 +87,7 @@ export function addTitlesToJsonSchemas(schema: SwaggerSchema) {
   return schema;
 }
 
-export const getServerPath = (schema: SwaggerSchema) => {
+export const getServerPath = (schema: SwaggerSchema): string | undefined => {
   const server =
     schema.servers && Array.isArray(schema.servers)
       ? schema.servers[0]

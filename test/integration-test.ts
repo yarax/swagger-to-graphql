@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import nock from 'nock';
 import request from 'supertest';
-import express from 'express';
+import express, { Express } from 'express';
 import graphqlHTTP from 'express-graphql';
 import graphQLSchema from '../src';
 
-const createServer = async (...args: Parameters<typeof graphQLSchema>) => {
+const createServer = async (
+  ...args: Parameters<typeof graphQLSchema>
+): Promise<Express> => {
   const app = express();
   const schema = await graphQLSchema(...args);
   app.use(
