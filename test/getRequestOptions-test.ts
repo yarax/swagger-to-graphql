@@ -24,7 +24,7 @@ function createParameterDetails(
 }
 
 describe('getRequestOptions', () => {
-  it('should add request body to request options', () => {
+  it('should add request body', () => {
     const options: RequestOptionsInput = {
       method: 'post',
       baseUrl,
@@ -52,17 +52,12 @@ describe('getRequestOptions', () => {
     });
   });
 
-  it('should add request headers to request options', () => {
+  it('should add request headers', () => {
     const options = {
       method: 'delete',
       baseUrl,
-      path: '/pet/{petId}',
+      path: '/pet',
       parameterDetails: [
-        createParameterDetails({
-          name: 'graphql name',
-          swaggerName: 'petId',
-          type: 'path',
-        }),
         createParameterDetails({
           name: 'api_key',
           swaggerName: 'api_key',
@@ -70,7 +65,6 @@ describe('getRequestOptions', () => {
         }),
       ],
       parameterValues: {
-        'graphql name': 'mock-pet-id',
         // eslint-disable-next-line @typescript-eslint/camelcase
         api_key: 'mock api key',
       },
@@ -78,7 +72,7 @@ describe('getRequestOptions', () => {
     const requestOptions = getRequestOptions(options);
     expect(requestOptions).to.deep.equal({
       baseUrl,
-      path: '/pet/mock-pet-id',
+      path: '/pet',
       method: 'delete',
       body: {},
       bodyType: 'json',
@@ -87,6 +81,63 @@ describe('getRequestOptions', () => {
         api_key: 'mock api key',
       },
       query: {},
+    });
+  });
+
+  it('should add query parameters', () => {
+    const options = {
+      method: 'delete',
+      baseUrl,
+      path: '/pet',
+      parameterDetails: [
+        createParameterDetails({
+          name: 'id',
+          swaggerName: 'swaggerId',
+          type: 'query',
+        }),
+      ],
+      parameterValues: {
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        id: 'mock id',
+      },
+    };
+    const requestOptions = getRequestOptions(options);
+    expect(requestOptions).to.deep.equal({
+      baseUrl,
+      path: '/pet',
+      method: 'delete',
+      body: {},
+      bodyType: 'json',
+      headers: {},
+      query: { swaggerId: 'mock id' },
+    });
+  });
+
+  it('should set path parameters', () => {
+    const options: RequestOptionsInput = {
+      method: 'get',
+      baseUrl,
+      path: '/{mock swaggerName}/',
+      formData: false,
+      parameterDetails: [
+        createParameterDetails({
+          type: 'path',
+        }),
+      ],
+      parameterValues: {
+        'mock name': 'mock-path',
+      },
+    };
+    const requestOptions = getRequestOptions(options);
+
+    expect(requestOptions).to.deep.equal({
+      baseUrl,
+      method: 'get',
+      path: '/mock-path/',
+      query: {},
+      headers: {},
+      body: {},
+      bodyType: 'json',
     });
   });
 
@@ -147,34 +198,6 @@ describe('getRequestOptions', () => {
       headers: {},
       body: { name: 'mock name' },
       bodyType: 'formData',
-    });
-  });
-
-  it('should set path parameters', () => {
-    const options: RequestOptionsInput = {
-      method: 'get',
-      baseUrl,
-      path: '/{mock swaggerName}/',
-      formData: false,
-      parameterDetails: [
-        createParameterDetails({
-          type: 'path',
-        }),
-      ],
-      parameterValues: {
-        'mock name': 'mock-path',
-      },
-    };
-    const requestOptions = getRequestOptions(options);
-
-    expect(requestOptions).to.deep.equal({
-      baseUrl,
-      method: 'get',
-      path: '/mock-path/',
-      query: {},
-      headers: {},
-      body: {},
-      bodyType: 'json',
     });
   });
 });
