@@ -1,6 +1,6 @@
 {
   "name": "swagger-to-graphql",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "author": "Roman Krivtsov",
   "repository": {
     "type": "git",
