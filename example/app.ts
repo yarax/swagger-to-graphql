@@ -2,14 +2,14 @@ import express from 'express';
 import graphqlHTTP from 'express-graphql';
 import requestPromise from 'request-promise';
 import { IncomingMessage } from 'http';
-import graphQLSchema from '../src';
-import { CallBackendArguments } from '../src/types';
+import { createSchema, CallBackendArguments } from '../src';
 
 const app = express();
 
 const pathToSwaggerSchema = `${__dirname}/../test/fixtures/petstore.yaml`;
 
-graphQLSchema(pathToSwaggerSchema, {
+createSchema({
+  swaggerSchema: pathToSwaggerSchema,
   async callBackend({
     requestOptions: { method, body, baseUrl, path, query, headers, bodyType },
     context,

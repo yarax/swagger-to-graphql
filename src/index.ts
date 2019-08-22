@@ -9,11 +9,13 @@ import {
   Endpoints,
   GraphQLParameters,
   GraphQLTypeMap,
-  Options,
-  RootGraphQLSchema,
+  RequestOptions,
+  RootGraphQLSchema, SwaggerSchema,
 } from './types';
-import { addTitlesToJsonSchemas, getAllEndPoints, loadSchema } from './swagger';
+import { addTitlesToJsonSchemas, getAllEndPoints } from './swagger';
 import { jsonSchemaTypeToGraphQL, mapParametersToFields } from './typeMap';
+import refParser from "json-schema-ref-parser";
+import $RefParser = require("json-schema-ref-parser");
 
 const getFields = <TContext>(
   endpoints: Endpoints,
@@ -83,13 +85,25 @@ const schemaFromEndpoints = <TContext>(
   return new GraphQLSchema(graphQLSchema);
 };
 
-const build = async <TContext>(
-  swaggerPath: string,
+export interface CallBackendArguments<TContext> {
+  context: TContext;
+  requestOptions: RequestOptions;
+}
+
+export interface Options<TContext> {
+  swaggerSchema: string | $RefParser.JSONSchema,
+  callBackend: (args: CallBackendArguments<TContext>) => Promise<any>;
+}
+
+export const createSchema = async <TContext>(
   options: Options<TContext>,
 ): Promise<GraphQLSchema> => {
-  const swaggerSchema = addTitlesToJsonSchemas(await loadSchema(swaggerPath));
+  const schemaWithoutReferences = (await refParser.dereference(
+    options.swaggerSchema,
+  )) as SwaggerSchema;
+  const swaggerSchema = addTitlesToJsonSchemas(schemaWithoutReferences);
   const endpoints = getAllEndPoints(swaggerSchema);
   return schemaFromEndpoints(endpoints, options);
 };
 
-export default build;
+export default createSchema;

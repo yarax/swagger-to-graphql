@@ -1,4 +1,3 @@
-import refParser from 'json-schema-ref-parser';
 import {
   Endpoint,
   EndpointParam,
@@ -50,12 +49,6 @@ export const getSuccessResponse = (
   return undefined;
 };
 
-export const loadSchema = async (
-  pathToSchema: string,
-): Promise<SwaggerSchema> => {
-  const result = await refParser.dereference(pathToSchema);
-  return result as SwaggerSchema;
-};
 
 export function addTitlesToJsonSchemas(schema: SwaggerSchema): SwaggerSchema {
   const requestBodies = (schema.components || {}).requestBodies || {};

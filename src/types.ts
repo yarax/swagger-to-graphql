@@ -197,12 +197,3 @@ export interface SwaggerSchema {
     [name: string]: JSONSchemaType;
   };
 }
-
-export interface CallBackendArguments<TContext> {
-  context: TContext;
-  requestOptions: RequestOptions;
-}
-
-export interface Options<TContext> {
-  callBackend: (args: CallBackendArguments<TContext>) => Promise<any>;
-}
