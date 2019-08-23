@@ -1,4 +1,12 @@
-import { EndpointParam, RequestOptions } from './types';
+import { JSONSchemaType } from './json-schema';
+
+export interface EndpointParam {
+  required: boolean;
+  type: 'header' | 'query' | 'formData' | 'path' | 'body';
+  name: string;
+  swaggerName: string;
+  jsonSchema: JSONSchemaType;
+}
 
 export interface RequestOptionsInput {
   method: string;
@@ -9,6 +17,22 @@ export interface RequestOptionsInput {
     [key: string]: any;
   };
   formData?: boolean;
+}
+
+export interface RequestOptions {
+  baseUrl: string | undefined;
+  path: string;
+  method: string;
+  headers?: {
+    [key: string]: string;
+  };
+  query?: {
+    [key: string]: string;
+  };
+  body?: {
+    [key: string]: string;
+  };
+  bodyType: 'json' | 'formData';
 }
 
 export function getRequestOptions({
@@ -24,9 +48,6 @@ export function getRequestOptions({
     baseUrl,
     path,
     bodyType: formData ? 'formData' : 'json',
-    headers: {},
-    query: {},
-    body: {},
   };
 
   parameterDetails.forEach(({ name, swaggerName, type, required }) => {
@@ -43,6 +64,7 @@ export function getRequestOptions({
         result.body = value;
         break;
       case 'formData':
+        result.body = result.body || {};
         result.body[swaggerName] = value;
         break;
       case 'path':
@@ -52,9 +74,11 @@ export function getRequestOptions({
             : result.path;
         break;
       case 'query':
+        result.query = result.query || {};
         result.query[swaggerName] = value;
         break;
       case 'header':
+        result.headers = result.headers || {};
         result.headers[swaggerName] = value;
         break;
       default:

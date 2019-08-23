@@ -1,10 +1,10 @@
 import { expect } from 'chai';
 
 import {
+  EndpointParam,
   getRequestOptions,
   RequestOptionsInput,
 } from '../src/getRequestOptions';
-import { EndpointParam } from '../src/types';
 
 const baseUrl = 'http://mock-baseurl';
 
@@ -46,9 +46,7 @@ describe('getRequestOptions', () => {
       path: '/pet',
       method: 'post',
       bodyType: 'json',
-      headers: {},
       body: { name: 'test' },
-      query: {},
     });
   });
 
@@ -74,13 +72,11 @@ describe('getRequestOptions', () => {
       baseUrl,
       path: '/pet',
       method: 'delete',
-      body: {},
       bodyType: 'json',
       headers: {
         // eslint-disable-next-line @typescript-eslint/camelcase
         api_key: 'mock api key',
       },
-      query: {},
     });
   });
 
@@ -105,9 +101,7 @@ describe('getRequestOptions', () => {
       baseUrl,
       path: '/pet',
       method: 'delete',
-      body: {},
       bodyType: 'json',
-      headers: {},
       query: { swaggerId: 'mock id' },
     });
   });
@@ -133,9 +127,6 @@ describe('getRequestOptions', () => {
       baseUrl,
       method: 'get',
       path: '/mock-path/',
-      query: {},
-      headers: {},
-      body: {},
       bodyType: 'json',
     });
   });
@@ -162,10 +153,7 @@ describe('getRequestOptions', () => {
       baseUrl,
       path: '/pet/',
       method: 'delete',
-      body: {},
       bodyType: 'json',
-      headers: {},
-      query: {},
     });
   });
 
@@ -193,8 +181,6 @@ describe('getRequestOptions', () => {
       baseUrl,
       method: 'post',
       path: '/pet',
-      query: {},
-      headers: {},
       body: { name: 'mock name' },
       bodyType: 'formData',
     });

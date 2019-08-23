@@ -1,9 +1,12 @@
 import requestPromise from 'request-promise';
+import { JSONSchema } from 'json-schema-ref-parser';
+import { Options } from '../src';
 
-import { Options } from '../src/types';
-
-export function createTestOptions(): Options<any> {
+export function createTestOptions(
+  swaggerSchema: string | JSONSchema,
+): Options<any> {
   return {
+    swaggerSchema,
     async callBackend({
       requestOptions: { method, body, baseUrl, path, query, headers, bodyType },
     }) {

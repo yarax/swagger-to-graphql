@@ -40,8 +40,9 @@ describe('swagger-to-graphql', () => {
 
       await request(
         await createServer(
-          require.resolve('./fixtures/petstore-openapi3.yaml'),
-          createTestOptions(),
+          createTestOptions(
+            require.resolve('./fixtures/petstore-openapi3.yaml'),
+          ),
         ),
       )
         .post('/graphql')
@@ -82,8 +83,9 @@ describe('swagger-to-graphql', () => {
 
       await request(
         await createServer(
-          require.resolve('./fixtures/special-parameters.json'),
-          createTestOptions(),
+          createTestOptions(
+            require.resolve('./fixtures/special-parameters.json'),
+          ),
         ),
       )
         .post('/graphql')
@@ -127,8 +129,7 @@ describe('swagger-to-graphql', () => {
 
       await request(
         await createServer(
-          require.resolve('./fixtures/simple.json'),
-          createTestOptions(),
+          createTestOptions(require.resolve('./fixtures/simple.json')),
         ),
       )
         .post('/graphql')
@@ -160,8 +161,7 @@ describe('swagger-to-graphql', () => {
 
       await request(
         await createServer(
-          require.resolve('./fixtures/return-scalar.json'),
-          createTestOptions(),
+          createTestOptions(require.resolve('./fixtures/return-scalar.json')),
         ),
       )
         .post('/graphql')

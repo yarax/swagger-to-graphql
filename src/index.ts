@@ -4,18 +4,22 @@ import {
   GraphQLObjectType,
   GraphQLSchema,
 } from 'graphql';
+import refParser, { JSONSchema } from 'json-schema-ref-parser';
 import {
+  addTitlesToJsonSchemas,
   Endpoint,
   Endpoints,
+  getAllEndPoints,
   GraphQLParameters,
+  SwaggerSchema,
+} from './swagger';
+import {
   GraphQLTypeMap,
-  RequestOptions,
-  RootGraphQLSchema, SwaggerSchema,
-} from './types';
-import { addTitlesToJsonSchemas, getAllEndPoints } from './swagger';
-import { jsonSchemaTypeToGraphQL, mapParametersToFields } from './typeMap';
-import refParser from "json-schema-ref-parser";
-import $RefParser = require("json-schema-ref-parser");
+  jsonSchemaTypeToGraphQL,
+  mapParametersToFields,
+} from './typeMap';
+import { RequestOptions } from './getRequestOptions';
+import { RootGraphQLSchema } from './json-schema';
 
 const getFields = <TContext>(
   endpoints: Endpoints,
@@ -85,13 +89,15 @@ const schemaFromEndpoints = <TContext>(
   return new GraphQLSchema(graphQLSchema);
 };
 
+export { RequestOptions, JSONSchema };
+
 export interface CallBackendArguments<TContext> {
   context: TContext;
   requestOptions: RequestOptions;
 }
 
 export interface Options<TContext> {
-  swaggerSchema: string | $RefParser.JSONSchema,
+  swaggerSchema: string | JSONSchema;
   callBackend: (args: CallBackendArguments<TContext>) => Promise<any>;
 }
 
