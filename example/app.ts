@@ -1,6 +1,6 @@
 import express from 'express';
 import graphqlHTTP from 'express-graphql';
-import { callBackend } from './request-promise';
+import { callBackend } from './node-fetch';
 import { createSchema } from '../src';
 
 const app = express();

@@ -74,7 +74,6 @@ describe('swagger-to-graphql', () => {
           'dashed-request-header': 'mock request header',
         },
       })
-        .log(console.log)
         .get('/path/mock%20path')
         .query({
           'dashed-query-param': 'mock query param',

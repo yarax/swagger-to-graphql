@@ -1,72 +1,99 @@
 import nock from 'nock';
 import { expect } from 'chai';
-import { callBackend } from '../example/request-promise';
+import * as requestPromise from '../example/request-promise';
+import * as nodeFetch from '../example/node-fetch';
 
-describe('request-promise', () => {
-  beforeEach(() => {
-    nock.disableNetConnect();
-    nock.enableNetConnect('127.0.0.1');
-  });
+type AdapterConfig = {
+  name: string;
+  callBackend: typeof requestPromise.callBackend;
+}[];
 
-  afterEach(() => {
-    nock.cleanAll();
-    nock.enableNetConnect();
-  });
+const adapterConfig: AdapterConfig = [
+  {
+    name: 'request-promise',
+    callBackend: requestPromise.callBackend,
+  },
+  {
+    name: 'node-fetch',
+    callBackend: nodeFetch.callBackend,
+  },
+];
 
-  it('should make json http calls', async () => {
-    const nockScope = nock('http://mock-host')
-      .post('/mock-uri?query-params=a&query-params=b', {
-        mockBodyKey: 'mock body value',
-      })
-      .matchHeader('mock-header', 'mock header value')
-      .matchHeader('content-type', 'application/json')
-      .reply(200, 'mock result');
-
-    const result = await callBackend({
-      requestOptions: {
-        method: 'post',
-        baseUrl: 'http://mock-host',
-        path: '/mock-uri',
-        headers: {
-          'mock-header': 'mock header value',
-        },
-        query: {
-          'query-params': ['a', 'b'],
-        },
-        body: {
-          mockBodyKey: 'mock body value',
-        },
-        bodyType: 'json',
-      },
-      context: {},
+adapterConfig.forEach(({ name, callBackend }) => {
+  describe(name, () => {
+    beforeEach(() => {
+      nock.disableNetConnect();
+      nock.enableNetConnect('127.0.0.1');
     });
 
-    expect(result).to.equal('mock result');
-
-    nockScope.done();
-  });
-
-  it('should post formData', async () => {
-    const nockScope = nock('http://mock-host')
-      .post('/mock-uri', 'mockBodyKey=mock%20body%20value')
-      .matchHeader('content-type', 'application/x-www-form-urlencoded')
-      .reply(200, 'mock result');
-
-    const result = await callBackend({
-      requestOptions: {
-        method: 'post',
-        baseUrl: 'http://mock-host',
-        path: '/mock-uri',
-        body: {
-          mockBodyKey: 'mock body value',
-        },
-        bodyType: 'formData',
-      },
-      context: {},
+    afterEach(() => {
+      nock.cleanAll();
+      nock.enableNetConnect();
     });
 
-    expect(result).to.equal('mock result');
+    it('should make json http calls', async () => {
+      const nockScope = nock('http://mock-host')
+        .post('/mock-uri', {
+          mockBodyKey: 'mock body value',
+        })
+        .query({
+          'query-params': 'a,b',
+        })
+        .matchHeader('mock-header', 'mock header value')
+        .matchHeader('content-type', 'application/json')
+        .reply(200, 'mock result');
 
-    nockScope.done();
+      const result = await callBackend({
+        requestOptions: {
+          method: 'post',
+          baseUrl: 'http://mock-host',
+          path: '/mock-uri',
+          headers: {
+            'mock-header': 'mock header value',
+          },
+          query: {
+            'query-params': ['a', 'b'],
+          },
+          body: {
+            mockBodyKey: 'mock body value',
+          },
+          bodyType: 'json',
+        },
+        context: {},
+      });
+
+      expect(result).to.equal('mock result');
+
+      nockScope.done();
+    });
+
+    it('should post formData', async () => {
+      const nockScope = nock('http://mock-host')
+        .post('/mock-uri', body => {
+          expect(body).to.deep.equal({
+            mockBodyKey: 'mock body value',
+          });
+          return true;
+        })
+        .matchHeader('content-type', /application\/x-www-form-urlencoded/)
+        .reply(200, 'mock result');
+
+      const result = await callBackend({
+        requestOptions: {
+          method: 'post',
+          baseUrl: 'http://mock-host',
+          path: '/mock-uri',
+          body: {
+            mockBodyKey: 'mock body value',
+          },
+          bodyType: 'formData',
+        },
+        context: {},
+      });
+
+      expect(result).to.equal('mock result');
+
+      nockScope.done();
+    });
   });
 });
