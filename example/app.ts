@@ -1,8 +1,7 @@
 import express from 'express';
 import graphqlHTTP from 'express-graphql';
-import requestPromise from 'request-promise';
-import { IncomingMessage } from 'http';
-import { createSchema, CallBackendArguments } from '../src';
+import { callBackend } from './request-promise';
+import { createSchema } from '../src';
 
 const app = express();
 
@@ -10,28 +9,7 @@ const pathToSwaggerSchema = `${__dirname}/../test/fixtures/petstore.yaml`;
 
 createSchema({
   swaggerSchema: pathToSwaggerSchema,
-  async callBackend({
-    requestOptions: { method, body, baseUrl, path, query, headers, bodyType },
-    context,
-  }: CallBackendArguments<IncomingMessage>) {
-    return requestPromise({
-      ...(bodyType === 'json' && {
-        json: true,
-        body,
-      }),
-      ...(bodyType === 'formData' && {
-        form: body,
-      }),
-      qs: query,
-      method,
-      headers: {
-        ...headers,
-        ...{ authorization: context.headers.authorization },
-      },
-      baseUrl,
-      uri: path,
-    });
-  },
+  callBackend,
 })
   .then(schema => {
     app.use(

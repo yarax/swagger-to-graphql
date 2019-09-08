@@ -27,7 +27,7 @@ export interface RequestOptions {
     [key: string]: string;
   };
   query?: {
-    [key: string]: string;
+    [key: string]: string | string[];
   };
   body?: {
     [key: string]: string;
