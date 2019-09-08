@@ -1,21 +1,29 @@
 #!/usr/bin/env node
-var argv = require('yargs').argv;
-var build = require('../lib');
+var swagger2Graphql = require('../lib');
 var graphql = require('graphql');
 
-if (argv.help) {
-  console.log('\nUsage: swagger2graphql --swagger=/path/to/schema.json');
-}
-
-if (!argv.swagger) {
-  console.log('\nPlease provide path to swagger schema. \n--help for usage example');
-  process.exit(1);
-} else {
-  build(argv.swagger).then(schema => {
-    console.log(graphql.printSchema(schema));
-  }).catch(err => {
-    console.log(err);
-    process.exit(1);
-  });
-}
-
+require('yargs')
+  .scriptName('swagger2graphql')
+  .command(
+    '$0',
+    'Convert swagger schema to graphql schema',
+    yargs => {
+      yargs.options('swagger-schema', {
+        describe: 'Path or url to a swagger schema, can be json or yaml',
+        type: 'string',
+        demandOption: true,
+      });
+    },
+    async ({ swaggerSchema }) => {
+      try {
+        const schema = await swagger2Graphql.createSchema({
+          swaggerSchema,
+        });
+        console.log(graphql.printSchema(schema));
+      } catch (err) {
+        console.error(err);
+        process.exit(1);
+      }
+    },
+  )
+  .help().argv;
