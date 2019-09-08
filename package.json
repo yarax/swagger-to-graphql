@@ -8,11 +8,8 @@
   },
   "bin": "./bin/swagger2graphql",
   "dependencies": {
-    "isomorphic-fetch": "^2.2.1",
-    "js-yaml": "^3.13.1",
     "json-schema-ref-parser": "^7.1.0",
     "lodash": "^4.17.15",
-    "request": "^2.88.0",
     "yargs": "^14.0.0"
   },
   "peerDependencies": {
@@ -44,6 +41,7 @@
     "mocha": "^6.2.0",
     "nock": "^10.0.6",
     "prettier": "^1.18.2",
+    "request": "^2.88.0",
     "request-promise": "^4.2.4",
     "rimraf": "^3.0.0",
     "supertest": "^4.0.2",
