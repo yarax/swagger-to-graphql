@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-var swagger2Graphql = require('../lib');
+var swaggerToGraphql = require('../lib');
 var graphql = require('graphql');
 
 require('yargs')
-  .scriptName('swagger2graphql')
+  .scriptName('swagger-to-graphql')
   .command(
     '$0',
     'Convert swagger schema to graphql schema',
@@ -16,7 +16,7 @@ require('yargs')
     },
     async ({ swaggerSchema }) => {
       try {
-        const schema = await swagger2Graphql.createSchema({
+        const schema = await swaggerToGraphql.createSchema({
           swaggerSchema,
         });
         console.log(graphql.printSchema(schema));
