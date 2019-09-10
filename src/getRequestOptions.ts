@@ -29,9 +29,7 @@ export interface RequestOptions {
   query?: {
     [key: string]: string | string[];
   };
-  body?: {
-    [key: string]: string;
-  };
+  body?: any;
   bodyType: 'json' | 'formData';
 }
 
