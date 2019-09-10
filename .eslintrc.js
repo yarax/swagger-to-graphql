@@ -10,7 +10,7 @@ module.exports = {
     'no-nested-ternary': 'off',
     'import/no-extraneous-dependencies': [
       'error',
-      { devDependencies: ['example/**/*.ts', '**/*test.ts'] },
+      { devDependencies: ['example/**/*.ts', 'test/**/*'] },
     ],
     'import/prefer-default-export': 'off',
   },

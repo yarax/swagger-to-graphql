@@ -8,12 +8,8 @@
   },
   "bin": "./bin/swagger2graphql",
   "dependencies": {
-    "isomorphic-fetch": "^2.2.1",
-    "js-yaml": "^3.13.1",
     "json-schema-ref-parser": "^7.1.0",
     "lodash": "^4.17.15",
-    "request": "^2.88.0",
-    "request-promise": "^4.2.4",
     "yargs": "^14.0.0"
   },
   "peerDependencies": {
@@ -28,6 +24,7 @@
     "@types/lodash": "^4.14.137",
     "@types/mocha": "^5.2.7",
     "@types/nock": "^10.0.3",
+    "@types/node-fetch": "^2.5.0",
     "@types/request": "^2.48.2",
     "@types/request-promise": "^4.1.44",
     "@types/supertest": "^2.0.8",
@@ -44,7 +41,10 @@
     "graphql": "^14.4.2",
     "mocha": "^6.2.0",
     "nock": "^10.0.6",
+    "node-fetch": "^2.6.0",
     "prettier": "^1.18.2",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.4",
     "rimraf": "^3.0.0",
     "supertest": "^4.0.2",
     "ts-node": "^8.3.0",

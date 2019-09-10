@@ -1,16 +1,16 @@
 import express from 'express';
 import graphqlHTTP from 'express-graphql';
-import graphQLSchema from '../src';
+import { callBackend } from './node-fetch';
+import { createSchema } from '../src';
 
 const app = express();
 
-const proxyUrl = 'http://petstore.swagger.io/v2';
 const pathToSwaggerSchema = `${__dirname}/../test/fixtures/petstore.yaml`;
-const customHeaders = {
-  Authorization: 'Basic YWRkOmJhc2ljQXV0aA==',
-};
 
-graphQLSchema(pathToSwaggerSchema, proxyUrl, customHeaders)
+createSchema({
+  swaggerSchema: pathToSwaggerSchema,
+  callBackend,
+})
   .then(schema => {
     app.use(
       '/graphql',

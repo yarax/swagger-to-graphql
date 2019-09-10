@@ -4,6 +4,7 @@ import request from 'supertest';
 import express, { Express } from 'express';
 import graphqlHTTP from 'express-graphql';
 import graphQLSchema from '../src';
+import { createTestOptions } from './createTestOptions';
 
 const createServer = async (
   ...args: Parameters<typeof graphQLSchema>
@@ -33,14 +34,15 @@ describe('swagger-to-graphql', () => {
 
   describe('openapi 3', () => {
     it('should work with formdata', async () => {
-      const nockScope = nock('http://mock-backend')
+      const nockScope = nock('http://petstore.swagger.io/v2')
         .post('/pet/1111', 'name=new%20name&status=new%20status')
         .reply(200, 'mock result');
 
       await request(
         await createServer(
-          require.resolve('./fixtures/petstore-openapi3.yaml'),
-          'http://mock-backend',
+          createTestOptions(
+            require.resolve('./fixtures/petstore-openapi3.yaml'),
+          ),
         ),
       )
         .post('/graphql')
@@ -67,7 +69,7 @@ describe('swagger-to-graphql', () => {
 
   describe('special parameter names', () => {
     it('should convert graphql parameter names back to swagger parameter names', async () => {
-      const nockScope = nock('http://mock-backend', {
+      const nockScope = nock('http://mock.api.com/v2', {
         reqheaders: {
           'dashed-request-header': 'mock request header',
         },
@@ -80,8 +82,9 @@ describe('swagger-to-graphql', () => {
 
       await request(
         await createServer(
-          require.resolve('./fixtures/special-parameters.json'),
-          'http://mock-backend',
+          createTestOptions(
+            require.resolve('./fixtures/special-parameters.json'),
+          ),
         ),
       )
         .post('/graphql')
@@ -124,94 +127,8 @@ describe('swagger-to-graphql', () => {
         .reply(200, { result: 'mock result' });
 
       await request(
-        await createServer(require.resolve('./fixtures/simple.json')),
-      )
-        .post('/graphql')
-        .send({
-          query: getMockPathQuery,
-        })
-        .expect({
-          data: {
-            get_mock_path: {
-              result: 'mock result',
-            },
-          },
-        });
-
-      nockScope.done();
-    });
-
-    it('should allow overriding the base path with a string', async () => {
-      const nockScope = nock('http://override-host')
-        .get('/override-basepath/mock-path')
-        .reply(200, { result: 'mock result' });
-
-      await request(
         await createServer(
-          require.resolve('./fixtures/simple.json'),
-          'http://override-host/override-basepath',
-        ),
-      )
-        .post('/graphql')
-        .send({
-          query: getMockPathQuery,
-        })
-        .expect({
-          data: {
-            get_mock_path: {
-              result: 'mock result',
-            },
-          },
-        });
-
-      nockScope.done();
-    });
-
-    it('should allow overriding the base path with a function', async () => {
-      const nockScope = nock('http://api.override-host')
-        .get('/override-basepath/mock-path')
-        .reply(200, { result: 'mock result' });
-
-      await request(
-        await createServer(require.resolve('./fixtures/simple.json'), opts => {
-          return `http://${((opts.headers || {}).host || '').replace(
-            'graphql',
-            'api',
-          )}/override-basepath`;
-        }),
-      )
-        .post('/graphql')
-        .send({
-          query: getMockPathQuery,
-        })
-        .set('host', 'graphql.override-host')
-        .expect({
-          data: {
-            get_mock_path: {
-              result: 'mock result',
-            },
-          },
-        });
-
-      nockScope.done();
-    });
-
-    it('should allow overriding headers', async () => {
-      const nockScope = nock('http://mock-host', {
-        reqheaders: {
-          OverrideHeader: 'mock header value',
-        },
-      })
-        .get('/mock-basepath/mock-path')
-        .reply(200, { result: 'mock result' });
-
-      await request(
-        await createServer(
-          require.resolve('./fixtures/simple.json'),
-          undefined,
-          {
-            OverrideHeader: 'mock header value',
-          },
+          createTestOptions(require.resolve('./fixtures/simple.json')),
         ),
       )
         .post('/graphql')
@@ -242,7 +159,9 @@ describe('swagger-to-graphql', () => {
         .reply(200, 'mock result');
 
       await request(
-        await createServer(require.resolve('./fixtures/return-scalar.json')),
+        await createServer(
+          createTestOptions(require.resolve('./fixtures/return-scalar.json')),
+        ),
       )
         .post('/graphql')
         .send({

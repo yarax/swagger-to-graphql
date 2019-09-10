@@ -1,13 +1,16 @@
 /* eslint-disable no-console */
 import { expect } from 'chai';
 import { assertType } from 'typescript-is';
-import { ArraySchema, EndpointParam, Param } from '../src/types';
+import refParser from 'json-schema-ref-parser';
 import {
   getServerPath,
-  loadSchema,
   getParamDetails,
   getSuccessResponse,
+  SwaggerSchema,
+  Param,
 } from '../src/swagger';
+import { EndpointParam } from '../src/getRequestOptions';
+import { ArraySchema } from '../src/json-schema';
 
 describe('swagger', () => {
   describe('getServerPath', () => {
@@ -105,13 +108,15 @@ describe('swagger', () => {
           throw e;
         }
       }
-      const openapi2Schema = await loadSchema(`test/fixtures/petstore.yaml`);
+      const openapi2Schema = (await refParser.dereference(
+        `test/fixtures/petstore.yaml`,
+      )) as SwaggerSchema;
       (openapi2Schema.paths['/pet'].post.parameters as Param[]).forEach(
         testParameter,
       );
-      const openapi3Schema = await loadSchema(
+      const openapi3Schema = (await refParser.dereference(
         `test/fixtures/petstore-openapi3.yaml`,
-      );
+      )) as SwaggerSchema;
       (openapi3Schema.paths['/pet/findByStatus'].get
         .parameters as Param[]).forEach(testParameter);
     });
@@ -120,9 +125,9 @@ describe('swagger', () => {
 
 describe('getSuccessResponse ', () => {
   it('should return responses for openapi 3', async () => {
-    const openapi3Schema = await loadSchema(
+    const openapi3Schema = (await refParser.dereference(
       `test/fixtures/petstore-openapi3.yaml`,
-    );
+    )) as SwaggerSchema;
     const {
       get: { responses },
     } = openapi3Schema.paths['/pet/findByStatus'];
@@ -135,7 +140,9 @@ describe('getSuccessResponse ', () => {
   });
 
   it('should return responses for openapi 2', async () => {
-    const openapi3Schema = await loadSchema(`test/fixtures/petstore.json`);
+    const openapi3Schema = (await refParser.dereference(
+      `test/fixtures/petstore.json`,
+    )) as SwaggerSchema;
     const {
       get: { responses },
     } = openapi3Schema.paths['/pet/findByStatus'];

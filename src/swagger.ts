@@ -1,20 +1,13 @@
-import refParser from 'json-schema-ref-parser';
+import { JSONSchemaType, JSONSchemaTypes, isObjectType } from './json-schema';
 import {
-  Endpoint,
   EndpointParam,
-  Endpoints,
-  GraphQLParameters,
-  isOa3Param,
-  JSONSchemaType,
-  OA3BodyParam,
-  Oa3Param,
-  OperationObject,
-  Param,
-  Responses,
-  SwaggerSchema,
-} from './types';
-import { getRequestOptions } from './getRequestOptions';
-import { isObjectType } from './json-schema';
+  getRequestOptions,
+  RequestOptions,
+} from './getRequestOptions';
+
+export interface GraphQLParameters {
+  [key: string]: any;
+}
 
 const replaceOddChars = (str: string): string =>
   str.replace(/[^_a-zA-Z0-9]/g, '_');
@@ -23,6 +16,16 @@ const getGQLTypeNameFromURL = (method: string, url: string): string => {
   const fromUrl = replaceOddChars(url.replace(/[{}]+/g, ''));
   return `${method}${fromUrl}`;
 };
+
+export interface Responses {
+  [key: string]: {
+    schema?: JSONSchemaType;
+    content?: {
+      'application/json': { schema: JSONSchemaType };
+    };
+    type?: 'file';
+  };
+}
 
 export const getSuccessResponse = (
   responses: Responses,
@@ -50,11 +53,46 @@ export const getSuccessResponse = (
   return undefined;
 };
 
-export const loadSchema = async (
-  pathToSchema: string,
-): Promise<SwaggerSchema> => {
-  const result = await refParser.dereference(pathToSchema);
-  return result as SwaggerSchema;
+export interface BodyParam {
+  name: string;
+  required?: boolean;
+  schema: JSONSchemaType;
+  in: 'body';
+}
+
+export interface Oa2NonBodyParam {
+  name: string;
+  type: JSONSchemaTypes;
+  in: 'header' | 'query' | 'formData' | 'path';
+  required?: boolean;
+}
+
+export interface Oa3Param {
+  name: string;
+  in: 'header' | 'query' | 'formData' | 'path';
+  required?: boolean;
+  schema: JSONSchemaType;
+}
+
+export type NonBodyParam = Oa2NonBodyParam | Oa3Param;
+
+export type Param = BodyParam | NonBodyParam;
+
+export interface OA3BodyParam {
+  content: {
+    'application/json'?: {
+      schema: JSONSchemaType;
+    };
+    'application/x-www-form-urlencoded'?: {
+      schema: JSONSchemaType;
+    };
+  };
+  description?: string;
+  required: boolean;
+}
+
+export const isOa3Param = (param: Param): param is Oa3Param => {
+  return !!(param as Oa3Param).schema;
 };
 
 export function addTitlesToJsonSchemas(schema: SwaggerSchema): SwaggerSchema {
@@ -194,6 +232,67 @@ function isFormdataRequest(requestBody: OA3BodyParam): boolean {
   return !!requestBody.content[contentTypeFormData];
 }
 
+export interface Endpoint {
+  parameters: EndpointParam[];
+  description?: string;
+  response: JSONSchemaType | undefined;
+  getRequestOptions: (args: GraphQLParameters) => RequestOptions;
+  mutation: boolean;
+}
+
+export interface Endpoints {
+  [operationId: string]: Endpoint;
+}
+
+export interface OperationObject {
+  requestBody?: OA3BodyParam;
+  description?: string;
+  operationId?: string;
+  parameters?: Param[];
+  responses: Responses;
+  consumes?: string[];
+}
+
+export type PathObject = {
+  parameters?: Param[];
+} & {
+  [operation: string]: OperationObject;
+};
+
+export interface Variable {
+  default?: string;
+  enum: string[];
+}
+
+export interface ServerObject {
+  url: string;
+  description?: string;
+  variables: {
+    [key: string]: string | Variable;
+  };
+}
+
+export interface SwaggerSchema {
+  host?: string;
+  basePath?: string;
+  schemes?: [string];
+  servers?: ServerObject[];
+  paths: {
+    [pathUrl: string]: PathObject;
+  };
+  components?: {
+    requestBodies?: {
+      [name: string]: OA3BodyParam;
+    };
+    schemas?: {
+      [name: string]: JSONSchemaType;
+    };
+  };
+  definitions?: {
+    [name: string]: JSONSchemaType;
+  };
+}
+
 /**
  * Go through schema and grab routes
  */
@@ -239,17 +338,11 @@ export const getAllEndPoints = (schema: SwaggerSchema): Endpoints => {
         parameters: parameterDetails,
         description: operationObject.description,
         response: getSuccessResponse(operationObject.responses),
-        request: (parameterValues: GraphQLParameters, optBaseUrl: string) => {
-          const baseUrl = optBaseUrl || serverPath; // eslint-disable-line no-param-reassign
-          if (!baseUrl) {
-            throw new Error(
-              'Could not get the base url for endpoints. Check that either your schema has baseUrl or you provided it to constructor',
-            );
-          }
+        getRequestOptions: (parameterValues: GraphQLParameters) => {
           return getRequestOptions({
             parameterDetails,
             parameterValues,
-            baseUrl,
+            baseUrl: serverPath,
             path,
             method,
             formData: operationObject.consumes

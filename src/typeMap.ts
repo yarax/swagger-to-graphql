@@ -18,13 +18,18 @@ import {
 } from 'graphql';
 import mapValues from 'lodash/mapValues';
 import {
-  EndpointParam,
-  GraphQLType,
-  GraphQLTypeMap,
+  isArrayType,
+  isBodyType,
+  isObjectType,
   JSONSchemaType,
-} from './types';
-import { isArrayType, isBodyType, isObjectType } from './json-schema';
+} from './json-schema';
+import { EndpointParam } from './getRequestOptions';
 
+export type GraphQLType = GraphQLOutputType | GraphQLInputType;
+
+export interface GraphQLTypeMap {
+  [typeName: string]: GraphQLType;
+}
 const primitiveTypes = {
   string: GraphQLString,
   date: GraphQLString,

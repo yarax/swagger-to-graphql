@@ -1,0 +1,29 @@
+#!/usr/bin/env node
+var swaggerToGraphql = require('../lib');
+var graphql = require('graphql');
+
+require('yargs')
+  .scriptName('swagger-to-graphql')
+  .command(
+    '$0',
+    'Convert swagger schema to graphql schema',
+    yargs => {
+      yargs.options('swagger-schema', {
+        describe: 'Path or url to a swagger schema, can be json or yaml',
+        type: 'string',
+        demandOption: true,
+      });
+    },
+    async ({ swaggerSchema }) => {
+      try {
+        const schema = await swaggerToGraphql.createSchema({
+          swaggerSchema,
+        });
+        console.log(graphql.printSchema(schema));
+      } catch (err) {
+        console.error(err);
+        process.exit(1);
+      }
+    },
+  )
+  .help().argv;
