@@ -1,7 +1,11 @@
 import {
   GraphQLFieldConfig,
   GraphQLFieldConfigMap,
+  GraphQLList,
+  GraphQLNonNull,
   GraphQLObjectType,
+  GraphQLOutputType,
+  GraphQLResolveInfo,
   GraphQLSchema,
 } from 'graphql';
 import refParser, { JSONSchema } from 'json-schema-ref-parser';
@@ -20,6 +24,23 @@ import {
 } from './typeMap';
 import { RequestOptions } from './getRequestOptions';
 import { RootGraphQLSchema } from './json-schema';
+
+export function parseResponse(response: any, returnType: GraphQLOutputType) {
+  const nullableType =
+    returnType instanceof GraphQLNonNull ? returnType.ofType : returnType;
+  if (
+    nullableType instanceof GraphQLObjectType ||
+    nullableType instanceof GraphQLList
+  ) {
+    return response;
+  }
+
+  if (nullableType.name === 'String' && typeof response !== 'string') {
+    return JSON.stringify(response);
+  }
+
+  return response;
+}
 
 const getFields = <TContext>(
   endpoints: Endpoints,
@@ -49,11 +70,15 @@ const getFields = <TContext>(
           _source: any,
           args: GraphQLParameters,
           context: TContext,
+          info: GraphQLResolveInfo,
         ): Promise<any> => {
-          return callBackend({
-            context,
-            requestOptions: endpoint.getRequestOptions(args),
-          });
+          return parseResponse(
+            await callBackend({
+              context,
+              requestOptions: endpoint.getRequestOptions(args),
+            }),
+            info.returnType,
+          );
         },
       };
       return { ...result, [operationId]: gType };
