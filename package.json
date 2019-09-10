@@ -9,7 +9,6 @@
   "bin": "./bin/swagger2graphql",
   "dependencies": {
     "json-schema-ref-parser": "^7.1.0",
-    "lodash": "^4.17.15",
     "yargs": "^14.0.0"
   },
   "peerDependencies": {

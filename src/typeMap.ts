@@ -16,7 +16,6 @@ import {
   GraphQLInputFieldConfigMap,
   GraphQLFieldConfigMap,
 } from 'graphql';
-import mapValues from 'lodash/mapValues';
 import {
   isArrayType,
   isBodyType,
@@ -136,27 +135,26 @@ export const getTypeFields = (
         properties[makeValidName(key)] = jsonSchema.properties[key];
       });
     }
-    return mapValues(
-      properties,
-      (propertySchema: JSONSchemaType, propertyName) => {
-        const type = jsonSchemaTypeToGraphQL(
-          title,
-          propertySchema,
-          propertyName,
-          isInputType,
-          gqlTypes,
-          !!(
-            isObjectType(jsonSchema) &&
-            jsonSchema.required &&
-            jsonSchema.required.includes(propertyName)
-          ),
-        );
-        return {
-          description: propertySchema.description,
-          type,
-        };
-      },
-    );
+    return Object.keys(properties).reduce((prev: { [name: string]: Object }, propertyName) => {
+      const propertySchema = properties[propertyName];
+      const type = jsonSchemaTypeToGraphQL(
+        title,
+        propertySchema,
+        propertyName,
+        isInputType,
+        gqlTypes,
+        !!(
+          isObjectType(jsonSchema) &&
+          jsonSchema.required &&
+          jsonSchema.required.includes(propertyName)
+        ),
+      );
+      prev[propertyName] = {
+        description: propertySchema.description,
+        type,
+      };
+      return prev;
+    }, {});
   };
 };
 
