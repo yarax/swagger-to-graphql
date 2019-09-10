@@ -6,7 +6,7 @@
     "type": "git",
     "url": "https://github.com/yarax/swagger-to-graphql.git"
   },
-  "bin": "./bin/swagger2graphql",
+  "bin": "./bin/swagger-to-graphql",
   "dependencies": {
     "json-schema-ref-parser": "^7.1.0",
     "yargs": "^14.0.0"
