@@ -20,7 +20,7 @@ export interface RequestOptionsInput {
 }
 
 export interface RequestOptions {
-  baseUrl: string | undefined;
+  baseUrl?: string;
   path: string;
   method: string;
   headers?: {
