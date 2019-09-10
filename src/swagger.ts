@@ -203,7 +203,7 @@ export const getAllEndPoints = (schema: SwaggerSchema): Endpoints => {
   Object.keys(schema.paths).forEach(path => {
     const route = schema.paths[path];
     Object.keys(route).forEach(method => {
-      if (method === 'parameters') {
+      if (method === 'parameters' || method === 'servers') {
         return;
       }
       const operationObject: OperationObject = route[method] as OperationObject;
