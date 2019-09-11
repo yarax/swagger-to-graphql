@@ -7,25 +7,20 @@ export async function callBackend({
 }: CallBackendArguments<{}>) {
   const searchPath = query ? `?${new URLSearchParams(query)}` : '';
   const url = `${baseUrl}${path}${searchPath}`;
+  switch (bodyType) {
+    case 'json':
+      headers['content-type'] = 'application/json';
+      body = JSON.stringify(body);
+      break;
+    case 'formData':
+      body = new URLSearchParams(body);
+      break;
+  }
   const response = await fetch(url, {
-    method,
-    ...(body
-      ? {
-          ...(bodyType === 'json' && {
-            headers: {
-              'Content-Type': 'application/json',
-              ...headers,
-            },
-            body: JSON.stringify(body),
-          }),
-          ...(bodyType === 'formData' && {
-            headers,
-            body: new URLSearchParams(body),
-          }),
-        }
-      : { headers }),
+      method,
+      body,
+      headers,
   });
-
   const text = await response.text();
   if (response.ok) {
     try {
