@@ -27,7 +27,7 @@ export async function callBackend({
   });
 
   const text = await response.text();
-  if (response.status >= 200 && response.status < 300) {
+  if (response.ok) {
     try {
       return JSON.parse(text);
     } catch (e) {
