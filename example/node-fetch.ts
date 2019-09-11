@@ -9,7 +9,7 @@ export async function callBackend({
   const url = `${baseUrl}${path}${searchPath}`;
   switch (bodyType) {
     case 'json':
-      headers['content-type'] = 'application/json';
+      headers = {...headers, 'content-type': 'application/json'};
       body = JSON.stringify(body);
       break;
     case 'formData':
