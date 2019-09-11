@@ -136,7 +136,10 @@ export const getTypeFields = (
       });
     }
     return Object.keys(properties).reduce(
-      (prev: {[propertyName: string]: {description: string, type: string}}, propertyName) => {
+      (
+        prev: { [propertyName: string]: { description: string; type: string } },
+        propertyName,
+      ) => {
         const propertySchema = properties[propertyName];
         const type = jsonSchemaTypeToGraphQL(
           title,
@@ -154,7 +157,7 @@ export const getTypeFields = (
           [propertyName]: {
             description: propertySchema.description,
             type,
-          }
+          },
         });
       },
       {},
