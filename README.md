@@ -149,6 +149,6 @@ export interface RequestOptions {
   form data. Ensure your HTTP client sends the right `Content-Type` headers.
 
 # Resources
-
+- Blogpost v3: [Start with GraphQL today by converting your Swagger schema](https://xebia.com/blog/start-with-graphql-today-by-converting-your-swagger-schema/)
 - Blogpost: [Moving existing API from REST to GraphQL](https://medium.com/@raxwunter/moving-existing-api-from-rest-to-graphql-205bab22c184)
 - Video: [O.J. Sousa Rodrigues at Vienna.JS](https://www.youtube.com/watch?v=551gKWJEsK0&feature=youtu.be&t=1269")
