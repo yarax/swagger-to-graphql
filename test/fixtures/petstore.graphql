@@ -8,10 +8,7 @@ input CategoryInput {
   name: String
 }
 
-type getInventory_response {
-  """default field"""
-  empty: String
-}
+scalar JSON
 
 type Mutation {
   addPet(body: PetInput!): String!
@@ -94,7 +91,7 @@ type Query {
   getPetById(petId: String!): Pet!
 
   """Returns a map of status codes to quantities"""
-  getInventory: getInventory_response!
+  getInventory: JSON!
 
   """
   For valid response try integer IDs with value >= 1 and <= 10. Other values will generated exceptions

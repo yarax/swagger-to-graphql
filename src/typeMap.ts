@@ -2,8 +2,12 @@
 /* eslint-disable no-param-reassign */
 import {
   GraphQLBoolean,
+  GraphQLFieldConfigArgumentMap,
+  GraphQLFieldConfigMap,
   GraphQLFloat,
+  GraphQLInputFieldConfigMap,
   GraphQLInputObjectType,
+  GraphQLInputType,
   GraphQLInt,
   GraphQLList,
   GraphQLNonNull,
@@ -11,10 +15,7 @@ import {
   GraphQLOutputType,
   GraphQLScalarType,
   GraphQLString,
-  GraphQLFieldConfigArgumentMap,
-  GraphQLInputType,
-  GraphQLInputFieldConfigMap,
-  GraphQLFieldConfigMap,
+  Thunk,
 } from 'graphql';
 import {
   isArrayType,
@@ -37,12 +38,19 @@ const primitiveTypes = {
   boolean: GraphQLBoolean,
 };
 
+const jsonType = new GraphQLScalarType({
+  name: 'JSON',
+  serialize(value) {
+    return value;
+  },
+});
+
 function getPrimitiveType(
   format: string | undefined,
   type: keyof typeof primitiveTypes,
 ): GraphQLScalarType {
-  const jsonType = format === 'int64' ? 'string' : type;
-  const primitiveType = primitiveTypes[jsonType];
+  const primitiveTypeName = format === 'int64' ? 'string' : type;
+  const primitiveType = primitiveTypes[primitiveTypeName];
   if (!primitiveType) {
     return primitiveTypes.string;
   }
@@ -116,18 +124,9 @@ export const getTypeFields = (
   title: string,
   isInputType: boolean,
   gqlTypes: GraphQLTypeMap,
-) => {
-  if (
-    isObjectType(jsonSchema) &&
-    !Object.keys(jsonSchema.properties || {}).length
-  ) {
-    return {
-      empty: {
-        description: 'default field',
-        type: GraphQLString,
-      },
-    };
-  }
+):
+  | Thunk<GraphQLInputFieldConfigMap>
+  | Thunk<GraphQLFieldConfigMap<any, any>> => {
   return () => {
     const properties: { [name: string]: JSONSchemaType } = {};
     if (isObjectType(jsonSchema)) {
@@ -153,12 +152,13 @@ export const getTypeFields = (
             jsonSchema.required.includes(propertyName)
           ),
         );
-        return Object.assign(prev, {
+        return {
+          ...prev,
           [propertyName]: {
             description: propertySchema.description,
             type,
           },
-        });
+        };
       },
       {},
     );
@@ -233,6 +233,13 @@ export const createGraphQLType = (
       itemsSchema.type,
     );
     return new GraphQLList(GraphQLNonNull(primitiveType));
+  }
+
+  if (
+    isObjectType(jsonSchema) &&
+    !Object.keys(jsonSchema.properties || {}).length
+  ) {
+    return jsonType;
   }
 
   const { description } = jsonSchema;
