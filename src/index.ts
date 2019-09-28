@@ -56,7 +56,7 @@ const getFields = <TContext>(
       const endpoint: Endpoint = endpoints[operationId];
       const type = jsonSchemaTypeToGraphQL(
         operationId,
-        endpoint.response || { type: 'string' },
+        endpoint.response || { type: 'object', properties: {} },
         'response',
         false,
         gqlTypes,

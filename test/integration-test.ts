@@ -174,4 +174,85 @@ describe('swagger-to-graphql', () => {
       nockScope.done();
     });
   });
+
+  describe('unsupported types', () => {
+    it('should return the raw json when response object has no properties', async () => {
+      const nockScope = nock('http://mock-host')
+        .get('/mock-basepath/mock-path')
+        .reply(200, { some: 'json' });
+      await request(
+        await createServer(
+          createTestOptions({
+            host: 'mock-host',
+            basePath: '/mock-basepath',
+            paths: {
+              '/mock-path': {
+                get: {
+                  operationId: 'getInventory',
+                  responses: {
+                    '200': {
+                      description: 'successful operation',
+                      schema: {
+                        type: 'object',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          }),
+        ),
+      )
+        .post('/graphql')
+        .send({
+          query: `query {
+            getInventory
+          }`,
+        })
+        .expect({
+          data: {
+            getInventory: {
+              some: 'json',
+            },
+          },
+        });
+      nockScope.done();
+    });
+
+    it('should return the raw json when there is no reponse type', async () => {
+      const nockScope = nock('http://mock-host')
+        .get('/mock-basepath/mock-path')
+        .reply(200, { some: 'json' });
+      await request(
+        await createServer(
+          createTestOptions({
+            host: 'mock-host',
+            basePath: '/mock-basepath',
+            paths: {
+              '/mock-path': {
+                get: {
+                  operationId: 'getInventory',
+                  responses: {},
+                },
+              },
+            },
+          }),
+        ),
+      )
+        .post('/graphql')
+        .send({
+          query: `query {
+            getInventory
+          }`,
+        })
+        .expect({
+          data: {
+            getInventory: {
+              some: 'json',
+            },
+          },
+        });
+      nockScope.done();
+    });
+  });
 });
