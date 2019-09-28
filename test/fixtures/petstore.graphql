@@ -11,27 +11,27 @@ input CategoryInput {
 scalar JSON
 
 type Mutation {
-  addPet(body: PetInput!): String!
-  updatePet(body: PetInput!): String!
-  updatePetWithForm(petId: String!, name: String, status: String): String!
-  deletePet(api_key: String, petId: String!): String!
+  addPet(body: PetInput!): JSON!
+  updatePet(body: PetInput!): JSON!
+  updatePetWithForm(petId: String!, name: String, status: String): JSON!
+  deletePet(api_key: String, petId: String!): JSON!
   placeOrder(body: OrderInput!): Order!
 
   """
   For valid response try integer IDs with positive integer value. Negative or non-integer values will generate API errors
   """
-  deleteOrder(orderId: String!): String!
+  deleteOrder(orderId: String!): JSON!
 
   """This can only be done by the logged in user."""
-  createUser(body: UserInput!): String!
-  createUsersWithArrayInput(body: [UserInput!]!): String!
-  createUsersWithListInput(body: [UserInput!]!): String!
+  createUser(body: UserInput!): JSON!
+  createUsersWithArrayInput(body: [UserInput!]!): JSON!
+  createUsersWithListInput(body: [UserInput!]!): JSON!
 
   """This can only be done by the logged in user."""
-  updateUser(username: String!, body: UserInput!): String!
+  updateUser(username: String!, body: UserInput!): JSON!
 
   """This can only be done by the logged in user."""
-  deleteUser(username: String!): String!
+  deleteUser(username: String!): JSON!
 }
 
 type Order {
@@ -98,7 +98,7 @@ type Query {
   """
   getOrderById(orderId: String!): Order!
   loginUser(username: String!, password: String!): String!
-  logoutUser: String!
+  logoutUser: JSON!
   getUserByName(username: String!): User!
 }
 
