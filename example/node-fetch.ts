@@ -3,17 +3,19 @@ import { URLSearchParams } from 'url';
 import { CallBackendArguments } from '../src';
 
 export async function callBackend({
-  requestOptions: { method, body, baseUrl, path, query, headers, bodyType },
+  requestOptions: { method, body: userBody, baseUrl, path, query, headers: userHeaders, bodyType },
 }: CallBackendArguments<{}>) {
   const searchPath = query ? `?${new URLSearchParams(query)}` : '';
   const url = `${baseUrl}${path}${searchPath}`;
+  let body = userBody;
+  let headers = userHeaders;
   switch (bodyType) {
     case 'json':
-      headers = {...headers, 'content-type': 'application/json'};
-      body = JSON.stringify(body);
+      headers = {...userHeaders, 'content-type': 'application/json'};
+      body = JSON.stringify(userBody);
       break;
     case 'formData':
-      body = new URLSearchParams(body);
+      body = new URLSearchParams(userBody);
       break;
   }
   const response = await fetch(url, {
