@@ -61,6 +61,7 @@
   ],
   "license": "MIT",
   "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "prebuild": "rimraf lib",
     "build": "ttsc",
