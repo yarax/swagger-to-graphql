@@ -7,7 +7,7 @@ to certain real endpoints. It allows you to move your API to GraphQL with nearly
 GraphQL APIs. Our CLI tool also allows you get the GraphQL schema in Schema Definition Language.
 
 [Try it](https://0xr.github.io/swagger-to-graphql-web/) online! You can paste in the url to your own Swagger schema. There are
-also public OpenAPI schemas available in the [APIs.guru OpenAPI directory](https://apis.guru/browse-apis/). Use the JSON version.
+also public OpenAPI schemas available in the [APIs.guru OpenAPI directory](https://apis.guru/browse-apis/).
 
 ## Features
 
