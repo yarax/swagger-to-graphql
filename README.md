@@ -2,12 +2,15 @@
 
 # Swagger-to-GraphQL
 
-Swagger-to-GraphQL converts your existing Swagger schema to an executable GraphQL schema where resolvers perform HTTP calls
-to certain real endpoints. It allows you to move your API to GraphQL with nearly zero effort and maintain both REST and
-GraphQL APIs. Our CLI tool also allows you get the GraphQL schema in Schema Definition Language.
+Swagger-to-GraphQL converts your existing Swagger schema to an executable
+GraphQL schema where resolvers perform HTTP calls to certain real endpoints. It
+allows you to move your API to GraphQL with nearly zero effort and maintain both
+REST and GraphQL APIs. Our CLI tool also allows you get the GraphQL schema in
+Schema Definition Language.
 
-[Try it](https://0xr.github.io/swagger-to-graphql-web/) online! You can paste in the url to your own Swagger schema. There are
-also public OpenAPI schemas available in the [APIs.guru OpenAPI directory](https://apis.guru/browse-apis/).
+[Try it](https://0xr.github.io/swagger-to-graphql-web/) online! You can paste in
+the url to your own Swagger schema. There are also public OpenAPI schemas
+available in the [APIs.guru OpenAPI directory](https://apis.guru/browse-apis/).
 
 ## Features
 
@@ -22,10 +25,12 @@ also public OpenAPI schemas available in the [APIs.guru OpenAPI directory](https
 
 ## Basic server
 
-This library will fetch your swagger schema, convert it to a GraphQL schema and convert GraphQL parameters to REST
-parameters. From there you are control of making the actual REST call. This means you can reuse your existing HTTP
-client, use existing authentication schemes and override any part of the REST call. You can override the REST host,
-proxy incoming request headers along to your REST backend, add caching etc.
+This library will fetch your swagger schema, convert it to a GraphQL schema and
+convert GraphQL parameters to REST parameters. From there you are control of
+making the actual REST call. This means you can reuse your existing HTTP client,
+use existing authentication schemes and override any part of the REST call. You
+can override the REST host, proxy incoming request headers along to your REST
+backend, add caching etc.
 
 ```typescript
 import express, { Request } from 'express';
@@ -76,8 +81,8 @@ export interface Options<TContext> {
 ```
 
 - `swaggerUrl` (string) is a path or URL to your swagger schema file. _required_
-- `callBackend` (async function) is called with all parameters needed to make a REST call as well as the GraphQL
-  context.
+- `callBackend` (async function) is called with all parameters needed to make a
+  REST call as well as the GraphQL context.
 
 ## CLI usage
 
@@ -87,14 +92,26 @@ You can use the library just to convert schemas without actually running server
 npx swagger-to-graphql --swagger-schema=/path/to/swagger_schema.json > ./types.graphql
 ```
 
+## [Apollo Federation](https://www.apollographql.com/docs/apollo-server/federation/introduction/)
+
+Apollo federation support can be added by using
+[graphql-transform-federation](https://github.com/0xR/graphql-transform-federation).
+You can extend your swagger-to-graphql schema with other federated schemas or
+the other way around. See the
+[demo with a transformed schema](https://github.com/0xR/graphql-transform-federation-blog)
+for a working example.
+
 ## Defining your HTTP client
 
 This repository has:
 
-- [node-fetch example](./example/node-fetch.ts). Read more about [node-fetch](https://github.com/bitinn/node-fetch).
-- [request-promise example](./example/request-promise.ts). Read more about [request](https://github.com/request/request).
+- [node-fetch example](./example/node-fetch.ts). Read more about
+  [node-fetch](https://github.com/bitinn/node-fetch).
+- [request-promise example](./example/request-promise.ts). Read more about
+  [request](https://github.com/request/request).
 
-To get started install `node-fetch` and copy the [node-fetch example](./example/node-fetch.ts) into your server.
+To get started install `node-fetch` and copy the
+[node-fetch example](./example/node-fetch.ts) into your server.
 
 ```sh
 npm install node-fetch --save
@@ -102,14 +119,16 @@ npm install node-fetch --save
 
 ### Implementing your own HTTP client
 
-There a [unit test](./test/http-adapters-test.ts) for our HTTP client example, it might be useful when implementing your
-own client as well.
+There a [unit test](./test/http-adapters-test.ts) for our HTTP client example,
+it might be useful when implementing your own client as well.
 
 The function `callBackend` is called with 2 parameters:
 
-- `context` is your GraphQL context. For `express-graphql` this is the incoming `request` object by default.
-  [Read more](https://github.com/graphql/express-graphql#options). Use this if you want to proxy headers like
-  `authorization`. For example `const authorizationHeader = context.get('authorization')`.
+- `context` is your GraphQL context. For `express-graphql` this is the incoming
+  `request` object by default.
+  [Read more](https://github.com/graphql/express-graphql#options). Use this if
+  you want to proxy headers like `authorization`. For example
+  `const authorizationHeader = context.get('authorization')`.
 - `requestOptions` includes everything you need to make a REST call.
 
 ```typescript
@@ -140,15 +159,23 @@ export interface RequestOptions {
 - `baseUrl` like defined in your swagger schema: `http://my-backend/v2`
 - `path` the next part of the url: `/widgets`
 - `method` HTTP verb: `get`
-- `headers` HTTP headers which are filled using GraphQL parameters: `{ api_key: 'xxxx-xxxx' }`. Note these are not the
-  http headers sent to the GraphQL server itself. Those will be on the `context` parameter
-- `query` Query parameters for this calls: `{ id: 123 }`. Note this can be an array. You can find some examples on how
-  to deal with arrays in query parameters in the [qs documentation](https://github.com/ljharb/qs#stringifying).
+- `headers` HTTP headers which are filled using GraphQL parameters:
+  `{ api_key: 'xxxx-xxxx' }`. Note these are not the http headers sent to the
+  GraphQL server itself. Those will be on the `context` parameter
+- `query` Query parameters for this calls: `{ id: 123 }`. Note this can be an
+  array. You can find some examples on how to deal with arrays in query
+  parameters in the
+  [qs documentation](https://github.com/ljharb/qs#stringifying).
 - `body` the request payload to send with this REST call.
-- `bodyType` how to encode your request payload. When the `bodyType` is `formData` the request should be URL encoded
-  form data. Ensure your HTTP client sends the right `Content-Type` headers.
+- `bodyType` how to encode your request payload. When the `bodyType` is
+  `formData` the request should be URL encoded form data. Ensure your HTTP
+  client sends the right `Content-Type` headers.
 
 # Resources
-- Blogpost v3: [Start with GraphQL today by converting your Swagger schema](https://xebia.com/blog/start-with-graphql-today-by-converting-your-swagger-schema/)
-- Blogpost: [Moving existing API from REST to GraphQL](https://medium.com/@raxwunter/moving-existing-api-from-rest-to-graphql-205bab22c184)
-- Video: [O.J. Sousa Rodrigues at Vienna.JS](https://www.youtube.com/watch?v=551gKWJEsK0&feature=youtu.be&t=1269")
+
+- Blogpost v3:
+  [Start with GraphQL today by converting your Swagger schema](https://xebia.com/blog/start-with-graphql-today-by-converting-your-swagger-schema/)
+- Blogpost:
+  [Moving existing API from REST to GraphQL](https://medium.com/@raxwunter/moving-existing-api-from-rest-to-graphql-205bab22c184)
+- Video:
+  [O.J. Sousa Rodrigues at Vienna.JS](https://www.youtube.com/watch?v=551gKWJEsK0&feature=youtu.be&t=1269")
