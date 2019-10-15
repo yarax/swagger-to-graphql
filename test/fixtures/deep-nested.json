@@ -5,9 +5,7 @@
     "description": "For testing required nested object types",
     "version": "1.0.0"
   },
-  "schemes": [
-    "http"
-  ],
+  "schemes": ["http"],
   "paths": {
     "/test": {
       "get": {
@@ -57,17 +55,10 @@
               "type": "string"
             }
           },
-          "required": [
-            "url",
-            "images",
-            "version"
-          ]
+          "required": ["url", "images", "version"]
         }
       },
-      "required": [
-        "id",
-        "body"
-      ]
+      "required": ["id", "body"]
     }
   }
 }
