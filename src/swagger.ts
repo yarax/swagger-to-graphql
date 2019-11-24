@@ -30,6 +30,10 @@ export interface Responses {
 export const getSuccessResponse = (
   responses: Responses,
 ): JSONSchemaType | undefined => {
+  if (!responses) {
+    return undefined;
+  }
+  
   const successCode = Object.keys(responses).find(code => {
     return code[0] === '2';
   });
