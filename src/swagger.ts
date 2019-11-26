@@ -33,7 +33,7 @@ export const getSuccessResponse = (
   if (!responses) {
     return undefined;
   }
-  
+
   const successCode = Object.keys(responses).find(code => {
     return code[0] === '2';
   });
