@@ -46,7 +46,7 @@ export const getSuccessResponse = (
     return successResponse.schema;
   }
 
-  if (successResponse.content) {
+  if (successResponse.content && successResponse.content['application/json']) {
     return successResponse.content['application/json'].schema;
   }
 
@@ -130,7 +130,7 @@ export const getServerPath = (schema: SwaggerSchema): string | undefined => {
     schema.servers && Array.isArray(schema.servers)
       ? schema.servers[0]
       : schema.host
-      ? [
+        ? [
           (schema.schemes && schema.schemes[0]) || 'http',
           '://',
           schema.host,
@@ -138,7 +138,7 @@ export const getServerPath = (schema: SwaggerSchema): string | undefined => {
         ]
           .filter(Boolean)
           .join('')
-      : undefined;
+        : undefined;
   if (!server) {
     return undefined;
   }
@@ -148,13 +148,13 @@ export const getServerPath = (schema: SwaggerSchema): string | undefined => {
   const { url, variables } = server;
   return variables
     ? Object.keys(server.variables).reduce((acc, variableName) => {
-        const variable = server.variables[variableName];
-        const value =
-          typeof variable === 'string'
-            ? variable
-            : variable.default || variable.enum[0];
-        return acc.replace(`{${variableName}}`, value);
-      }, url)
+      const variable = server.variables[variableName];
+      const value =
+        typeof variable === 'string'
+          ? variable
+          : variable.default || variable.enum[0];
+      return acc.replace(`{${variableName}}`, value);
+    }, url)
     : url;
 };
 
@@ -348,8 +348,8 @@ export const getAllEndPoints = (schema: SwaggerSchema): Endpoints => {
             formData: operationObject.consumes
               ? !operationObject.consumes.includes('application/json')
               : operationObject.requestBody
-              ? isFormdataRequest(operationObject.requestBody)
-              : false,
+                ? isFormdataRequest(operationObject.requestBody)
+                : false,
           });
         },
         mutation: isMutation,
