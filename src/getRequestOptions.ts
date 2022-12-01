@@ -51,11 +51,15 @@ export function getRequestOptions({
   parameterDetails.forEach(({ name, swaggerName, type, required }) => {
     const value = parameterValues[name];
 
-    if (required && !value && value !== '')
-      throw new Error(
-        `No required request field ${name} for ${method.toUpperCase()} ${path}`,
-      );
-    if (!value && value !== '') return;
+    if (typeof value === 'undefined') {
+      if (required) {
+        throw new Error(
+          `No required request field ${name} for ${method.toUpperCase()} ${path}`,
+        );
+      }
+
+      return;
+    }
 
     switch (type) {
       case 'body':
