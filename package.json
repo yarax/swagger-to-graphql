@@ -13,7 +13,7 @@
     "yargs": "^14.0.0"
   },
   "peerDependencies": {
-    "graphql": "^0.12.0 || ^0.13.0 || ^14.0.0"
+    "graphql": "^16.0.0"
   },
   "devDependencies": {
     "@types/chai": "^4.2.0",
@@ -37,7 +37,7 @@
     "eslint-plugin-prettier": "^3.1.0",
     "express": "^4.17.1",
     "express-graphql": "^0.9.0",
-    "graphql": "^14.4.2",
+    "graphql": "^16.0.0",
     "mocha": "^6.2.0",
     "nock": "^10.0.6",
     "node-fetch": "^2.6.0",
@@ -48,7 +48,7 @@
     "supertest": "^4.0.2",
     "ts-node": "^8.3.0",
     "ttypescript": "^1.5.7",
-    "typescript": "^3.5.3",
+    "typescript": "^4.1.0pd",
     "typescript-is": "^0.12.2"
   },
   "keywords": [

@@ -14,8 +14,7 @@ import {
   GraphQLObjectType,
   GraphQLOutputType,
   GraphQLScalarType,
-  GraphQLString,
-  Thunk,
+  GraphQLString
 } from 'graphql';
 import {
   isArrayType,
@@ -25,7 +24,7 @@ import {
 } from './json-schema';
 import { EndpointParam } from './getRequestOptions';
 
-export type GraphQLType = GraphQLOutputType | GraphQLInputType;
+export type GraphQLType = GraphQLOutputType | GraphQLInputType | GraphQLList<GraphQLNonNull<GraphQLType>>;;
 
 export interface GraphQLTypeMap {
   [typeName: string]: GraphQLType;
@@ -110,7 +109,7 @@ export const jsonSchemaTypeToGraphQL = <IsInputType extends boolean>(
     );
   })();
   return (required
-    ? GraphQLNonNull(baseType)
+    ? new GraphQLNonNull(baseType)
     : baseType) as IsInputType extends true
     ? GraphQLInputType
     : GraphQLOutputType;
@@ -118,6 +117,8 @@ export const jsonSchemaTypeToGraphQL = <IsInputType extends boolean>(
 
 const makeValidName = (name: string): string =>
   name.replace(/[^_0-9A-Za-z]/g, '_');
+
+export type Thunk<T> = (() => T) | T;
 
 export const getTypeFields = (
   jsonSchema: JSONSchemaType,
@@ -127,6 +128,7 @@ export const getTypeFields = (
 ):
   | Thunk<GraphQLInputFieldConfigMap>
   | Thunk<GraphQLFieldConfigMap<any, any>> => {
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   return () => {
     const properties: { [name: string]: JSONSchemaType } = {};
     if (isObjectType(jsonSchema)) {
@@ -135,10 +137,8 @@ export const getTypeFields = (
       });
     }
     return Object.keys(properties).reduce(
-      (
-        prev: { [propertyName: string]: { description: string; type: string } },
-        propertyName,
-      ) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (previousValue: any, propertyName) => {
         const propertySchema = properties[propertyName];
         const type = jsonSchemaTypeToGraphQL(
           title,
@@ -153,7 +153,7 @@ export const getTypeFields = (
           ),
         );
         return {
-          ...prev,
+          ...previousValue,
           [propertyName]: {
             description: propertySchema.description,
             type,
@@ -161,7 +161,7 @@ export const getTypeFields = (
         };
       },
       {},
-    );
+    ) as any;
   };
 };
 
@@ -200,7 +200,7 @@ export const createGraphQLType = (
       : jsonSchema.items;
     if (isObjectType(itemsSchema) || isArrayType(itemsSchema)) {
       return new GraphQLList(
-        GraphQLNonNull(
+        new GraphQLNonNull(
           createGraphQLType(
             itemsSchema,
             `${title}_items`,
@@ -214,7 +214,7 @@ export const createGraphQLType = (
     if (itemsSchema.type === 'file') {
       // eslint-disable-next-line no-use-before-define,@typescript-eslint/no-use-before-define
       return new GraphQLList(
-        GraphQLNonNull(
+        new GraphQLNonNull(
           createGraphQLType(
             {
               type: 'object',
@@ -232,7 +232,7 @@ export const createGraphQLType = (
       itemsSchema.format,
       itemsSchema.type,
     );
-    return new GraphQLList(GraphQLNonNull(primitiveType));
+    return new GraphQLList(new GraphQLNonNull(primitiveType));
   }
 
   if (
