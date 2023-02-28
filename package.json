@@ -2,6 +2,9 @@
   "name": "swagger-to-graphql",
   "version": "4.0.2",
   "author": "Roman Krivtsov",
+  "engines": {
+    "node": "18.14.2"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/yarax/swagger-to-graphql.git"
