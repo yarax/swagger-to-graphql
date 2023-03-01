@@ -8,7 +8,7 @@ import {
   GraphQLResolveInfo,
   GraphQLSchema,
 } from 'graphql';
-import refParser, { JSONSchema } from 'json-schema-ref-parser';
+import refParser, { JSONSchema } from '@apidevtools/json-schema-ref-parser';
 import {
   addTitlesToJsonSchemas,
   Endpoint,

@@ -11,10 +11,10 @@
   },
   "bin": "./bin/swagger-to-graphql",
   "dependencies": {
-    "@types/json-schema": "^7.0.3",
     "@apidevtools/json-schema-ref-parser": "^7.1.0",
-    "yargs": "^14.0.0",
-    "graphql": "^16.0.0"
+    "@types/json-schema": "^7.0.3",
+    "graphql": "^16.0.0",
+    "yargs": "^14.0.0"
   },
   "devDependencies": {
     "@types/chai": "^4.2.0",
@@ -48,7 +48,6 @@
     "rimraf": "^3.0.0",
     "supertest": "^4.0.2",
     "ts-node": "^8.3.0",
-    "ttypescript": "^1.5.7",
     "typescript": "^4.7.3",
     "typescript-is": "^0.12.2"
   },
@@ -65,12 +64,11 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "prebuild": "rimraf lib",
-    "build": "ttsc",
+    "build": "tsc",
     "lint": "eslint --ext .js,.ts .",
     "lint:fix": "npm run lint -- --fix",
     "prepare": "npm run build",
     "start": "npm run example",
-    "test": "TS_NODE_COMPILER=ttypescript mocha",
     "test:watch": "npm run test -- --watch",
     "example": "ts-node example/app"
   }
