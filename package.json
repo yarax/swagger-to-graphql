@@ -13,9 +13,7 @@
   "dependencies": {
     "@types/json-schema": "^7.0.3",
     "json-schema-ref-parser": "^7.1.0",
-    "yargs": "^14.0.0"
-  },
-  "peerDependencies": {
+    "yargs": "^14.0.0",
     "graphql": "^16.0.0"
   },
   "devDependencies": {
